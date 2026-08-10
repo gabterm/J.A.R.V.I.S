@@ -219,7 +219,6 @@
   .tl-actions button:hover { color: var(--cyan); border-color: var(--cyan-dim); }
   .tl-actions button.pin-btn.active { color: var(--cyan); border-color: var(--cyan-dim); }
 
-  /* ---------- log / conversa ---------- */
   .tabbar { display: flex; gap: 6px; }
   .tab-btn { font-family: var(--disp); font-size: 9.5px; letter-spacing: 2px; color: var(--text-dim); background: transparent; border: 1px solid var(--panel-border); padding: 7px 14px; cursor: pointer; clip-path: polygon(6px 0, 100% 0, 100% 100%, 0 100%, 0 6px); }
   .tab-btn.active { color: var(--cyan); border-color: var(--cyan-dim); background: rgba(var(--cyan-rgb),0.06); }
@@ -298,7 +297,6 @@
   .tactical-frame-counter { font-size: 10px; color: var(--text-faint); letter-spacing: 1px; margin-left: auto; }
   .tactical-controls button:disabled { opacity: 0.3; cursor: not-allowed; }
 
-  /* ---------- notificações ---------- */
   #notifications { position: fixed; top: 74px; right: 24px; z-index: 90; display: flex; flex-direction: column; gap: 8px; width: 280px; pointer-events: none; }
   .toast {
     pointer-events: auto; padding: 10px 14px; border: 1px solid var(--panel-border-strong); background: rgba(8,16,24,0.88); backdrop-filter: blur(6px);
@@ -350,7 +348,6 @@
   body.density-detailed .tl-item { padding: 9px 10px; }
   body.density-detailed .stat-row { margin-bottom: 14px; }
 
-  /* ---------- painel de ajustes ---------- */
   .settings-toggle { width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--panel-border); border-radius: 2px; color: var(--text-dim); cursor: pointer; transition: border-color 0.2s, color 0.2s; }
   .settings-toggle:hover, .settings-toggle.on { color: var(--cyan); border-color: var(--cyan-dim); background: rgba(var(--cyan-rgb),0.06); }
   .settings-drawer {
@@ -497,7 +494,6 @@
       </div>
     </div>
 
-    <!-- CENTRO -->
     <div class="conversation">
       <div class="tabbar">
         <button class="tab-btn active" id="tabRegistro">REGISTRO</button>
@@ -595,7 +591,7 @@
 </div>
 
 <script>
-  /* ================= BOOT SEQUENCE ================= */
+
   const bootLines = ['INICIALIZANDO NÚCLEO...', 'CARREGANDO PROTOCOLOS DE VOZ...', 'ESTABELECENDO CANAL SEGURO...', 'SINCRONIZANDO TELEMETRIA...', 'J.A.R.V.I.S PRONTO.'];
   const bootTextEl = document.getElementById('bootText');
   const bootBarFill = document.getElementById('bootBarFill');
@@ -617,10 +613,8 @@
   }
   runBoot();
 
-  /* multiplicador de velocidade das animações — controlado pelo painel de ajustes */
   let animSpeedMult = 1;
 
-  /* ================= FUNDO ================= */
   const canvas = document.getElementById('bgCanvas');
   const ctx2d = canvas.getContext('2d');
   let particles = [];
@@ -649,7 +643,6 @@
   }
   drawBg();
 
-  /* ================= partículas do núcleo ================= */
   const coreStage = document.getElementById('coreStage');
   const coreCanvas = document.getElementById('coreParticles');
   const coreCtx = coreCanvas.getContext('2d');
@@ -878,6 +871,10 @@
   let tacticalIndex = 0;
   let tacticalPlaying = false;
   let tacticalTimer = null;
+  let tacticalScale = null; // { minX, minY, sx, sy } — mapeia coordenadas recebidas para o viewBox do campo
+
+  const PITCH_W = 100, PITCH_H = 64;
+  const PITCH_PAD_X = 4, PITCH_PAD_Y = 4; // margem interna para não colar jogadores na borda
 
   const tacticalPlayersGroup = document.getElementById('tacticalPlayers');
   const tacticalArrowsGroup = document.getElementById('tacticalArrows');
@@ -887,6 +884,51 @@
   const tacticalPrevBtn = document.getElementById('tacticalPrevBtn');
   const tacticalPlayBtn = document.getElementById('tacticalPlayBtn');
   const tacticalNextBtn = document.getElementById('tacticalNextBtn');
+
+  // Calcula a escala necessária para mapear as coordenadas cruas recebidas (que podem
+  // vir em qualquer unidade: normalizadas 0–1, metros de campo real 0–105x0–68, etc.)
+  // para o espaço do viewBox do SVG (0–100 x 0–64). Sem isso, se os dados chegarem numa
+  // escala diferente da esperada, todos os jogadores acabam desenhados amontoados perto
+  // da origem (0,0) ou fora da área visível do campo.
+  function computeTacticalScale(frames) {
+    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    frames.forEach(frame => {
+      (frame.jogadores || []).forEach(j => {
+        if (typeof j.x === 'number' && typeof j.y === 'number') {
+          minX = Math.min(minX, j.x); maxX = Math.max(maxX, j.x);
+          minY = Math.min(minY, j.y); maxY = Math.max(maxY, j.y);
+        }
+      });
+      if (frame.bola && typeof frame.bola.x === 'number' && typeof frame.bola.y === 'number') {
+        minX = Math.min(minX, frame.bola.x); maxX = Math.max(maxX, frame.bola.x);
+        minY = Math.min(minY, frame.bola.y); maxY = Math.max(maxY, frame.bola.y);
+      }
+    });
+
+    if (!isFinite(minX) || !isFinite(minY)) return null;
+
+    const rangeX = maxX - minX || 1;
+    const rangeY = maxY - minY || 1;
+
+    // Se os dados já chegam dentro (ou muito perto) do espaço esperado do viewBox,
+    // não reescalamos — evita distorcer posições que já estão corretas.
+    const jaNoEspacoEsperado = minX >= -1 && maxX <= PITCH_W + 1 && minY >= -1 && maxY <= PITCH_H + 1 && (rangeX > PITCH_W * 0.3 || rangeY > PITCH_H * 0.3);
+    if (jaNoEspacoEsperado) return null;
+
+    return {
+      minX, minY,
+      sx: (PITCH_W - PITCH_PAD_X * 2) / rangeX,
+      sy: (PITCH_H - PITCH_PAD_Y * 2) / rangeY
+    };
+  }
+
+  function mapTacticalCoord(x, y) {
+    if (!tacticalScale) return { x, y };
+    return {
+      x: PITCH_PAD_X + (x - tacticalScale.minX) * tacticalScale.sx,
+      y: PITCH_PAD_Y + (y - tacticalScale.minY) * tacticalScale.sy
+    };
+  }
 
   function renderTacticalFrame(idx) {
     const frame = tacticalFrames[idx];
@@ -899,6 +941,7 @@
     (frame.jogadores || []).forEach(j => {
       const key = `${j.time}-${j.num}`;
       vistos.add(key);
+      const pos = mapTacticalCoord(j.x, j.y);
       let el = existentes[key];
       if (!el) {
         el = document.createElementNS('http://www.w3.org/2000/svg', 'g');
@@ -907,18 +950,23 @@
         el.innerHTML = `<circle></circle><text>${j.num}</text>`;
         tacticalPlayersGroup.appendChild(el);
       }
-      el.style.transform = `translate(${j.x}px, ${j.y}px)`;
+      el.style.transform = `translate(${pos.x}px, ${pos.y}px)`;
     });
 
     Object.entries(existentes).forEach(([key, el]) => { if (!vistos.has(key)) el.remove(); });
 
-    if (frame.bola) tacticalBallEl.style.transform = `translate(${frame.bola.x}px, ${frame.bola.y}px)`;
+    if (frame.bola) {
+      const bolaPos = mapTacticalCoord(frame.bola.x, frame.bola.y);
+      tacticalBallEl.style.transform = `translate(${bolaPos.x}px, ${bolaPos.y}px)`;
+    }
 
     tacticalArrowsGroup.innerHTML = '';
     (frame.setas || []).forEach(s => {
+      const de = mapTacticalCoord(s.de.x, s.de.y);
+      const para = mapTacticalCoord(s.para.x, s.para.y);
       const arrow = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-      arrow.setAttribute('x1', s.de.x); arrow.setAttribute('y1', s.de.y);
-      arrow.setAttribute('x2', s.para.x); arrow.setAttribute('y2', s.para.y);
+      arrow.setAttribute('x1', de.x); arrow.setAttribute('y1', de.y);
+      arrow.setAttribute('x2', para.x); arrow.setAttribute('y2', para.y);
       arrow.setAttribute('marker-end', 'url(#arrowHead)');
       arrow.classList.add('tp-arrow', 'arrow-' + (s.tipo || 'passe'));
       tacticalArrowsGroup.appendChild(arrow);
@@ -954,6 +1002,7 @@
   function abrirQuadroTatico(dados) {
     tacticalFrames = dados.quadros || [];
     tacticalIndex = 0;
+    tacticalScale = computeTacticalScale(tacticalFrames);
     document.getElementById('tacticalTitle').textContent = dados.titulo || '';
     document.getElementById('tacticalFormacoes').textContent =
       [dados.formacao_casa, dados.formacao_visitante].filter(Boolean).join(' vs ');

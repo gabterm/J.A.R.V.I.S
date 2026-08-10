@@ -12,8 +12,7 @@ from fish_audio_sdk import Session, TTSRequest
 from jarvis_sounds import sounds
 import ui_bridge
 
-client = OpenAI(api_key="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")
-fish_session = Session("sk-fish-zZnSQOUIUDTwDsjBT8X8RlcwiroQ2RwV-r5XIMxyEL4")
+
 
 FISH_AUDIO_VOICE_ID = os.environ.get(
     "FISH_AUDIO_VOICE_ID",
