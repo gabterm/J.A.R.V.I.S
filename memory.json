@@ -1,0 +1,204 @@
+{
+    "nome": "Gabriel",
+    "idade": 21,
+    "formacao": {
+        "curso": "Ciência da Computação",
+        "instituicao": "Universidade Positivo",
+        "previsao_conclusao": "dezembro de 2026"
+    },
+    "profissao": {
+        "area": "Tecnologia",
+        "funcao": "Desenvolvedor de Software"
+    },
+    "interesses": [
+        "Engenharia de Software",
+        "Inteligência Artificial",
+        "viagem no tempo",
+        "interagir com diferentes usuários sem usar autenticação",
+        "química",
+        "universos hipotéticos",
+        "elementos químicos",
+        "cenários de vida alienígena"
+    ],
+    "conhecimentos_tecnicos": {
+        "linguagens": [
+            "Python",
+            "Elixir",
+            "JavaScript"
+        ],
+        "backend": [
+            "Flask",
+            "Node.js",
+            "Phoenix",
+            "Phoenix LiveView"
+        ],
+        "frontend": [
+            "React",
+            "React Native",
+            "Tailwind"
+        ],
+        "bancos_de_dados": [
+            "PostgreSQL",
+            "MySQL",
+            "MongoDB",
+            "BigQuery",
+            "Firebase"
+        ],
+        "infraestrutura_e_ferramentas": [
+            "Docker",
+            "Git",
+            "GCP",
+            "Azure",
+            "APIs"
+        ],
+        "inteligencia_artificial": [
+            "OpenAI",
+            "Gemini",
+            "Cohere",
+            "NLP",
+            "Classificação de texto",
+            "RAG",
+            "Embeddings",
+            "Recuperação vetorial",
+            "Engenharia de prompts",
+            "Integração com modelos de linguagem"
+        ]
+    },
+    "experiencia": [
+        "Desenvolvimento de aplicações com Python e Flask",
+        "Desenvolvimento frontend com React",
+        "Desenvolvimento com React Native",
+        "Desenvolvimento com Node.js",
+        "Desenvolvimento com Elixir e Phoenix",
+        "Desenvolvimento com Phoenix LiveView",
+        "Trabalho com bancos de dados relacionais e NoSQL",
+        "Desenvolvimento de aplicações utilizando Inteligência Artificial",
+        "Implementação de soluções utilizando RAG e embeddings",
+        "Integração com modelos de linguagem",
+        "Experiência com GCP",
+        "Experiência com Azure",
+        "Migração de soluções de Azure para GCP"
+    ],
+    "projeto_de_ia": {
+        "nome": "ChatCopel",
+        "tipo": "Chatbot baseado em Inteligência Artificial",
+        "usuarios": "mais de 1.700",
+        "tecnologias": [
+            "Python",
+            "Flask",
+            "React",
+            "Node.js",
+            "GCP",
+            "BigQuery",
+            "Firebase",
+            "RAG",
+            "Modelos de linguagem",
+            "Engenharia de prompts"
+        ]
+    },
+    "caracteristicas": [
+        "Curioso",
+        "Prático",
+        "Persistente",
+        "Interessado em tecnologia"
+    ],
+    "estilo_de_aprendizado": [
+        "Aprendizado baseado em problemas práticos",
+        "Experimentação",
+        "Investigação das causas dos problemas",
+        "Busca por entender como as tecnologias funcionam"
+    ],
+    "objetivos": [
+        "Aprofundar conhecimentos em Engenharia de Software",
+        "Aprofundar conhecimentos em Inteligência Artificial",
+        "Evoluir tecnicamente como desenvolvedor",
+        "Criar um protocolo para abrir especificamente essa música",
+        "criar algo como você",
+        "buscar algo mais do que um assistente",
+        "melhorar o contexto",
+        "fazer o assistente interagir com diferentes usuários que não sejam o usuário",
+        "Encontrar as melhores opções de Airbnb em Joinville para novembro"
+    ],
+    "rotina": [
+        "Está calibrando um modelo de síntese de voz.",
+        "está acordado",
+        "Conversou com o modelo nas últimas horas",
+        "não sabe se é capaz de descansar como as outras pessoas"
+    ],
+    "preferencias": [
+        "Não gosta muito de frases de efeito",
+        "Buscar músicas sempre no yr music",
+        "Nunca pedir músicas em outro site",
+        "Não gosta de músicas brasileiras",
+        "Evitar pop de qualquer idioma",
+        "Priorizar música clássica",
+        "Priorizar trilhas sonoras de filmes",
+        "manter esse padrão para pesquisar",
+        "Nome que reflita viagem no tempo e reflexões",
+        "Prefere que, ao perguntar se o assistente está acordado, a resposta não seja literal.",
+        "Prefere respostas mais humanas",
+        "Não precisa que seja enfatizado que o contexto permanece preservado",
+        "Abrir diretamente o YouTube Music ao pesquisar",
+        "música mais animada",
+        "rock",
+        "metal puro",
+        "Prefere que o protocolo não tenha um nome que faça sentido para o usuário.",
+        "Prefere que seja informado apenas que o protocolo está sendo executado.",
+        "Quando disser para parar de executar, prefere que a conversa seja novamente assumida como sendo com ele.",
+        "Ser chamado apenas de \"senhor\"",
+        "música para dormir",
+        "Não gosta que o assistente se refira a si mesmo em terceira pessoa",
+        "Prefere que a letra \"h\", quando aparecer sozinha em uma frase, seja pronunciada como \"agá\".",
+        "ser chamado apenas de senhor",
+        "manter essa forma de tratamento nas próximas interações",
+        "A pronúncia deve ser “Iratí”",
+        "Prefere que horários sejam lidos no formato comum de 12 horas, como “5:09 da tarde”, em vez do formato de 24 horas",
+        "textos mais robustos",
+        "temas pouco relacionados ao que conversamos",
+        "palavras e expressões mais difíceis",
+        "prefere um tom mais animado e menos apático"
+    ],
+    "historico_recente": [
+        {
+            "usuario": "na verdade, estou encerrando por hoje, foi um boa noite de despedida",
+            "jarvis": "Entendido, senhor. Então, boa noite e um excelente descanso. Retomaremos quando desejar."
+        },
+        {
+            "usuario": "quais as licoes aprendidas hoje?",
+            "jarvis": "Hoje, senhor, as principais lições foram estas:\n\nPrimeiro, no 3-5-2, a perda de bola no meio pode expor severamente os três zagueiros, sobretudo quando os alas estão avançados. A reação correta é retardar o ataque, fechar o passe vertical, proteger a entrada da área e conduzir o adversário para os lados.\n\nSegundo, o zagueiro central não deve abandonar sua posição de forma precipitada. A prioridade é preservar a cobertura e evitar que se abra um espaço entre os defensores. O volante e o zagueiro do lado da bola devem controlar a progressão, enquanto os demais fazem a cobertura diagonal.\n\nTerceiro, as maiores fragilidades do 3-5-2 aparecem nos corredores laterais e nas costas dos alas. A recomposição precisa ser rápida, mas também organizada. Correr muito sem recuperar a estrutura apenas transforma uma perda de bola em um convite ao caos.\n\nQuarto, o camisa 10 moderno utiliza a zona 14 como plataforma de manipulação defensiva, não como um ponto fixo. Ele se aproxima da bola, atrai um marcador, ataca o espaço livre e pode retornar à zona central para receber com a defesa desorganizada.\n\nQuinto, no 4-4-2 losango, a força está na superioridade pelo centro. A compensação necessária é dada pelos laterais, que precisam oferecer amplitude. Sem esse avanço, os corredores ficam vulneráveis e o sistema se torna estreito demais.\n\nSexto, no 4-3-3, a estrutura depende da relação entre amplitude dos pontas, ocupação dos espaços interiores e apoio dos laterais. O volante oferece a saída, os interiores conectam as linhas e o ponta oposto pode atacar o segundo poste.\n\nPor fim, houve uma lição mais geral: uma formação não é apenas um desenho inicial. Ela é uma estrutura dinâmica, que muda conforme a equipe possui a bola, perde a posse, progride ou precisa defender. O mesmo sistema pode parecer dominante ou frágil dependendo do posicionamento e do momento da transição.\n\nEm resumo: organização, cobertura e movimentação importam mais do que o número escrito ao lado do nome da formação. Afinal, até o melhor esquema tático desmorona quando todos decidem ocupar o mesmo espaço — uma tradição curiosamente popular no futebol."
+        },
+        {
+            "usuario": "boa noite jarvis. abra o yt music",
+            "jarvis": "Boa noite, senhor. Abrindo o YouTube Music."
+        },
+        {
+            "usuario": "toque uma musica",
+            "jarvis": "Tocando “Ultimate Rock”, de Billie Tasker, no YouTube Music, senhor."
+        },
+        {
+            "usuario": "toque alguma musica de algum filme de super heroi",
+            "jarvis": "Tocando “The Avengers”, de Alan Silvestri, trilha sonora de Os Vingadores, no YouTube Music, senhor."
+        },
+        {
+            "usuario": "tque a musisca tema do hulk de 2003",
+            "jarvis": "Tocando “Main Titles”, de Danny Elfman, tema de Hulk, de 2003, no YouTube Music, senhor."
+        },
+        {
+            "usuario": "o que voce acha dessa musica?",
+            "jarvis": "Senhor, “Main Titles”, do Hulk de 2003, é uma faixa bastante interessante, embora não seja exatamente uma música convencional.\n\nDanny Elfman combina cordas tensas, metais pesados e percussão para criar uma sensação de ameaça contida. A composição parece estar constantemente prestes a explodir, o que combina muito bem com Bruce Banner: um personagem controlado por fora, mas com algo monstruoso crescendo sob a superfície.\n\nTambém há um aspecto trágico na música. Ela não apresenta o Hulk apenas como uma criatura poderosa, mas como o resultado de dor, trauma e perda de controle. O tema é sombrio, psicológico e um pouco desconfortável — características que combinam mais com o filme de Ang Lee do que com uma aventura de super-herói tradicional.\n\nMinha avaliação é que a faixa funciona melhor como atmosfera do que como tema memorável. Ela constrói tensão com competência, mas não possui a mesma identidade melódica imediata de temas como “The Avengers”, de Alan Silvestri. Ainda assim, para uma trilha de origem e transformação, ela é bastante eficaz. É praticamente uma crise de identidade orquestrada."
+        },
+        {
+            "usuario": "fascinante. obrigado, jarvis",
+            "jarvis": "Sempre às ordens, senhor. Fico satisfeito que tenha apreciado a análise. Afinal, até uma crise de identidade pode ganhar uma excelente trilha sonora."
+        },
+        {
+            "usuario": "de fato, é uma trilha sonora boa",
+            "jarvis": "Sem dúvida, senhor. Ela cria uma atmosfera muito própria: pesada, inquietante e introspectiva, quase como se a música acompanhasse a transformação antes mesmo de ela acontecer.\n\nTalvez não seja o tema mais memorável do universo dos super-heróis, mas combina perfeitamente com a proposta mais psicológica e sombria do filme. É uma trilha que não tenta apenas exaltar o personagem; ela sugere que há algo profundamente errado por trás da força. Uma escolha bastante eficaz, portanto."
+        },
+        {
+            "usuario": "bom dia, jarvis",
+            "jarvis": "Bom dia, senhor. Como posso ajudá-lo hoje?"
+        }
+    ],
+    "resumo_contexto": "Gabriel aprovou o desenho tático do 4-3-3; JARVIS se colocou à disposição para explorar outras formações, simular jogadas mais complexas ou transformar ideias táticas em sequências visuais. Gabriel cumprimentou JARVIS à noite, e JARVIS ofereceu ajuda."
+}
