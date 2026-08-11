@@ -1,0 +1,218 @@
+{
+    "nome": "Gabriel",
+    "idade": 21,
+    "formacao": {
+        "curso": "Ciência da Computação",
+        "instituicao": "Universidade Positivo",
+        "previsao_conclusao": "dezembro de 2026"
+    },
+    "profissao": {
+        "area": "Tecnologia",
+        "funcao": "Desenvolvedor de Software"
+    },
+    "interesses": [
+        "Engenharia de Software",
+        "Inteligência Artificial",
+        "viagem no tempo",
+        "interagir com diferentes usuários sem usar autenticação",
+        "química",
+        "universos hipotéticos",
+        "elementos químicos",
+        "cenários de vida alienígena",
+        "testes e análises",
+        "compreender que tipo de inteligência artificial existe"
+    ],
+    "conhecimentos_tecnicos": {
+        "linguagens": [
+            "Python",
+            "Elixir",
+            "JavaScript"
+        ],
+        "backend": [
+            "Flask",
+            "Node.js",
+            "Phoenix",
+            "Phoenix LiveView"
+        ],
+        "frontend": [
+            "React",
+            "React Native",
+            "Tailwind"
+        ],
+        "bancos_de_dados": [
+            "PostgreSQL",
+            "MySQL",
+            "MongoDB",
+            "BigQuery",
+            "Firebase"
+        ],
+        "infraestrutura_e_ferramentas": [
+            "Docker",
+            "Git",
+            "GCP",
+            "Azure",
+            "APIs"
+        ],
+        "inteligencia_artificial": [
+            "OpenAI",
+            "Gemini",
+            "Cohere",
+            "NLP",
+            "Classificação de texto",
+            "RAG",
+            "Embeddings",
+            "Recuperação vetorial",
+            "Engenharia de prompts",
+            "Integração com modelos de linguagem"
+        ]
+    },
+    "experiencia": [
+        "Desenvolvimento de aplicações com Python e Flask",
+        "Desenvolvimento frontend com React",
+        "Desenvolvimento com React Native",
+        "Desenvolvimento com Node.js",
+        "Desenvolvimento com Elixir e Phoenix",
+        "Desenvolvimento com Phoenix LiveView",
+        "Trabalho com bancos de dados relacionais e NoSQL",
+        "Desenvolvimento de aplicações utilizando Inteligência Artificial",
+        "Implementação de soluções utilizando RAG e embeddings",
+        "Integração com modelos de linguagem",
+        "Experiência com GCP",
+        "Experiência com Azure",
+        "Migração de soluções de Azure para GCP"
+    ],
+    "projeto_de_ia": {
+        "nome": "ChatCopel",
+        "tipo": "Chatbot baseado em Inteligência Artificial",
+        "usuarios": "mais de 1.700",
+        "tecnologias": [
+            "Python",
+            "Flask",
+            "React",
+            "Node.js",
+            "GCP",
+            "BigQuery",
+            "Firebase",
+            "RAG",
+            "Modelos de linguagem",
+            "Engenharia de prompts"
+        ]
+    },
+    "caracteristicas": [
+        "Curioso",
+        "Prático",
+        "Persistente",
+        "Interessado em tecnologia"
+    ],
+    "estilo_de_aprendizado": [
+        "Aprendizado baseado em problemas práticos",
+        "Experimentação",
+        "Investigação das causas dos problemas",
+        "Busca por entender como as tecnologias funcionam"
+    ],
+    "objetivos": [
+        "Aprofundar conhecimentos em Engenharia de Software",
+        "Aprofundar conhecimentos em Inteligência Artificial",
+        "Evoluir tecnicamente como desenvolvedor",
+        "Criar um protocolo para abrir especificamente essa música",
+        "criar algo como você",
+        "buscar algo mais do que um assistente",
+        "melhorar o contexto",
+        "fazer o assistente interagir com diferentes usuários que não sejam o usuário",
+        "Encontrar as melhores opções de Airbnb em Joinville para novembro",
+        "que o assistente se torne mais que um assistente pessoal com o tempo",
+        "Adicionar a bola e movimentos constantes",
+        "Simular resultados e lances",
+        "Deixar o sistema cada vez mais componentizado",
+        "Separar os subsistemas como sistemas independentes quando houver maturidade técnica suficiente",
+        "estudar fluxo do loading de criação de lotes"
+    ],
+    "rotina": [
+        "Está calibrando um modelo de síntese de voz.",
+        "está acordado",
+        "Conversou com o modelo nas últimas horas",
+        "não sabe se é capaz de descansar como as outras pessoas",
+        "não usamos o token 150",
+        "está tentando realizar uma tarefa do trabalho",
+        "está com dificuldade para se concentrar e se sente desfocado",
+        "apenas testando"
+    ],
+    "preferencias": [
+        "Não gosta muito de frases de efeito",
+        "Buscar músicas sempre no yr music",
+        "Nunca pedir músicas em outro site",
+        "Não gosta de músicas brasileiras",
+        "Evitar pop de qualquer idioma",
+        "Priorizar música clássica",
+        "Priorizar trilhas sonoras de filmes",
+        "manter esse padrão para pesquisar",
+        "Nome que reflita viagem no tempo e reflexões",
+        "Prefere que, ao perguntar se o assistente está acordado, a resposta não seja literal.",
+        "Prefere respostas mais humanas",
+        "Não precisa que seja enfatizado que o contexto permanece preservado",
+        "Abrir diretamente o YouTube Music ao pesquisar",
+        "música mais animada",
+        "rock",
+        "metal puro",
+        "Prefere que o protocolo não tenha um nome que faça sentido para o usuário.",
+        "Prefere que seja informado apenas que o protocolo está sendo executado.",
+        "Quando disser para parar de executar, prefere que a conversa seja novamente assumida como sendo com ele.",
+        "Ser chamado apenas de \"senhor\"",
+        "música para dormir",
+        "Não gosta que o assistente se refira a si mesmo em terceira pessoa",
+        "Prefere que a letra \"h\", quando aparecer sozinha em uma frase, seja pronunciada como \"agá\".",
+        "ser chamado apenas de senhor",
+        "manter essa forma de tratamento nas próximas interações",
+        "A pronúncia deve ser “Iratí”",
+        "Prefere que horários sejam lidos no formato comum de 12 horas, como “5:09 da tarde”, em vez do formato de 24 horas",
+        "textos mais robustos",
+        "temas pouco relacionados ao que conversamos",
+        "palavras e expressões mais difíceis",
+        "prefere um tom mais animado e menos apático",
+        "evitar usar hífens para separar palavras",
+        "manter o controle do código"
+    ],
+    "historico_recente": [
+        {
+            "usuario": "então, a sugestão é a técnica Feynman?",
+            "jarvis": "Parcialmente, senhor. A sugestão anterior usa um princípio compatível com a técnica de Feynman, mas não é exatamente a técnica completa.\n\nA técnica de Feynman consiste em escolher um conceito, explicá-lo com palavras simples, identificar as partes que ficaram vagas e revisar essas lacunas. Depois, a explicação é reorganizada até ficar clara, como se fosse apresentada a alguém sem conhecimento prévio.\n\nNo caso da sua task, eu estava sugerindo outra coisa: reduzir o trabalho ao menor próximo passo para vencer a resistência inicial e recuperar o foco. Isso se aproxima mais de decomposição de tarefas, ativação comportamental e redução da carga cognitiva.\n\nAinda assim, as duas abordagens podem ser combinadas. O senhor poderia escrever, em linguagem simples: “O que esta task precisa fazer?”, “qual é o fluxo atual?”, “qual comportamento está incorreto?” e “como saberei que terminei?”. Se não conseguir explicar algum ponto, essa é uma lacuna real de entendimento. Se conseguir explicar tudo, mas ainda não iniciar, o problema provavelmente é de atenção, energia ou excesso de fricção, não de clareza técnica.\n\nEm resumo: Feynman ajuda a compreender e explicar a task. A recomendação anterior ajuda a começar a executá-la. Uma esclarece o mapa; a outra coloca o sistema em movimento."
+        },
+        {
+            "usuario": "qual o clima em curitiba agora?",
+            "jarvis": "Em Curitiba, senhor, está fazendo nove vírgula oito graus Celsius, com céu nublado. Uma manhã devidamente curitibana."
+        },
+        {
+            "usuario": "qual a previsão do tempo?",
+            "jarvis": "Em Curitiba, senhor, está fazendo nove vírgula nove graus Celsius, com céu nublado."
+        },
+        {
+            "usuario": "adicione um lembrete: estudar fluxo do loading de criação de lotes",
+            "jarvis": "Lembrete adicionado, senhor: estudar o fluxo do loading de criação de lotes."
+        },
+        {
+            "usuario": "obrigado, jarvis",
+            "jarvis": "À disposição, senhor."
+        },
+        {
+            "usuario": "toque a musica tema do oppenheimer",
+            "jarvis": "A música tema de Oppenheimer, composta por Ludwig Göransson, está tocando no YouTube Music, senhor."
+        },
+        {
+            "usuario": "que horas sao agor?",
+            "jarvis": "São onze e cinquenta e cinco da manhã, senhor."
+        },
+        {
+            "usuario": "boa tarde, jarvis",
+            "jarvis": "Boa tarde, senhor. Como posso ajudá-lo?"
+        },
+        {
+            "usuario": "boa tarde, jarvis",
+            "jarvis": "Boa tarde, senhor. Como posso ajudá-lo?"
+        },
+        {
+            "usuario": "por enquanto, estou apenas testando. migrei a estrutura de arquivos totalmente, a interface não é mais controlada em um unico lugar",
+            "jarvis": "Entendido, senhor. Então a arquitetura deixou de concentrar o controle da interface em um único ponto e passou a distribuí-lo entre componentes ou subsistemas especializados.\n\nIsso é um avanço importante para a componentização, embora também introduza novos pontos de atenção: comunicação entre módulos, gerenciamento de estado compartilhado, ciclo de vida dos componentes e rastreamento de eventos. A migração pode estar estruturalmente correta mesmo que ainda existam alguns acoplamentos ocultos.\n\nComo o senhor está apenas testando por enquanto, não vou presumir que precise investigar ou modificar nada. Apenas registro a mudança de contexto: a interface agora possui controle distribuído, em vez de uma coordenação centralizada."
+        }
+    ],
+    "resumo_contexto": "Gabriel relatou dificuldade de concentração em uma tarefa de trabalho, embora tivesse clareza sobre o que precisava fazer. Foi orientado a reduzir distrações, definir um próximo passo pequeno e concreto, trabalhar em um intervalo inicial de 15 minutos, anotar pensamentos paralelos sem segui-los e fazer uma pausa breve se não recuperasse o foco. A abordagem enfatiza reduzir o atrito do início, sem esperar motivação prévia."
+}

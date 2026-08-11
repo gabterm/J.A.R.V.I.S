@@ -1,25 +1,4 @@
-"""
-Ferramenta de quadro tático de futebol para o JARVIS.
-
-Este módulo não sabe nada sobre chat/LLM: ele só define a tool (spec no
-formato OpenAI function-calling) e a função Python que ela executa, que
-manda o evento pronto para a UI via ui_bridge.
-
-Como você já tem um módulo de tools separado (com TOOLS e TOOL_FUNCTIONS),
-o jeito mais simples de integrar é:
-
-  1. Copiar TACTICAL_BOARD_TOOL e mostrar_quadro_tatico para dentro do seu
-     tools.py existente (junto com as outras tools), OU
-  2. Deixar este arquivo como está e, no seu tools.py, fazer:
-
-         from tactical_tools import TACTICAL_BOARD_TOOL, mostrar_quadro_tatico
-
-     e então incluir TACTICAL_BOARD_TOOL na lista TOOLS e registrar
-     "mostrar_quadro_tatico" em TOOL_FUNCTIONS (ver trecho para main.py).
-"""
-
-import ui_bridge
-
+import tools.ui_bridge as ui_bridge
 
 TACTICAL_BOARD_TOOL = {
     "type": "function",

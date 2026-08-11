@@ -1,3 +1,4 @@
+
   const bootLines = ['INICIALIZANDO NÚCLEO...', 'CARREGANDO PROTOCOLOS DE VOZ...', 'ESTABELECENDO CANAL SEGURO...', 'SINCRONIZANDO TELEMETRIA...', 'J.A.R.V.I.S PRONTO.'];
   const bootTextEl = document.getElementById('bootText');
   const bootBarFill = document.getElementById('bootBarFill');
@@ -104,10 +105,11 @@
   }
   drawCoreParticles();
 
-
+  /* ================= glitch periódico no wordmark ================= */
   const wordmark = document.getElementById('wordmark');
   setInterval(() => { wordmark.classList.add('glitch'); setTimeout(() => wordmark.classList.remove('glitch'), 400); }, 14000 + Math.random() * 6000);
 
+  /* ================= telemetria decorativa ================= */
   const telSync = document.getElementById('telSync');
   const telNode = document.getElementById('telNode');
   setInterval(() => {
@@ -115,7 +117,13 @@
     telNode.textContent = '0x' + Math.floor(Math.random() * 65535).toString(16).padStart(4, '0').toUpperCase();
   }, 1400);
 
-  function tick() { document.getElementById('clock').textContent = new Date().toLocaleTimeString('pt-BR'); }
+  /* ================= relógio / uptime ================= */
+  const minimalClockValue = document.getElementById('minimalClockValue');
+  function tick() {
+    const agora = new Date();
+    document.getElementById('clock').textContent = agora.toLocaleTimeString('pt-BR');
+    minimalClockValue.textContent = agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+  }
   tick(); setInterval(tick, 1000);
   const start = Date.now();
   function updateUptime() {
@@ -129,9 +137,12 @@
   let dotCount = 1;
   setInterval(() => { dotCount = (dotCount % 3) + 1; const dots = document.getElementById('dots'); if (dots) dots.textContent = '.'.repeat(dotCount); }, 600);
 
+  /* ================= personalização visual em tempo real ================= */
   const settingsToggle = document.getElementById('settingsToggle');
   const settingsDrawer = document.getElementById('settingsDrawer');
   const minimalSwitch = document.getElementById('minimalSwitch');
+  const minimalExitBtn = document.getElementById('minimalExitBtn');
+  const testModeSwitch = document.getElementById('testModeSwitch');
 
   settingsToggle.addEventListener('click', () => {
     settingsDrawer.classList.toggle('open');
@@ -157,6 +168,7 @@
     });
   });
 
+  // intensidade de animação — controla CSS (--dur-mult) e a velocidade das partículas em canvas
   document.getElementById('animSegmented').addEventListener('click', (e) => {
     const btn = e.target.closest('button'); if (!btn) return;
     document.querySelectorAll('#animSegmented button').forEach(b => b.classList.remove('active'));
@@ -168,6 +180,7 @@
     tocarSom('toggle');
   });
 
+  // densidade de informação
   document.getElementById('densitySegmented').addEventListener('click', (e) => {
     const btn = e.target.closest('button'); if (!btn) return;
     document.querySelectorAll('#densitySegmented button').forEach(b => b.classList.remove('active'));
@@ -178,20 +191,123 @@
     tocarSom('toggle');
   });
 
+  // modo minimalista
   let minimalOn = false;
-  minimalSwitch.addEventListener('click', () => {
-    minimalOn = !minimalOn;
+  function setMinimal(ativo) {
+    minimalOn = ativo;
     minimalSwitch.classList.toggle('on', minimalOn);
     document.body.classList.toggle('minimal', minimalOn);
+  }
+  minimalSwitch.addEventListener('click', () => {
+    setMinimal(!minimalOn);
     tocarSom('toggle');
     addEvent('sistema', minimalOn ? 'Modo minimalista ativado' : 'Modo minimalista desativado');
   });
+  // ícone de engrenagem dentro da barra de comando: sai do modo minimalista com um clique
+  minimalExitBtn.addEventListener('click', () => {
+    setMinimal(false);
+    tocarSom('toggle');
+    addEvent('sistema', 'Modo minimalista desativado');
+  });
 
+  /* ================= modo teste (simula eventos sem depender do servidor) ================= */
+  let testModeOn = false;
+  let testModeTimers = [];
+  const TEST_FALAS = [
+    { role: 'user', text: 'Jarvis, qual a previsão do tempo pra hoje?' },
+    { role: 'jarvis', text: 'Céu limpo em São Paulo, máxima de 26 graus. Recomendo levar um casaco leve pra noite.', confidence: 'alta' },
+    { role: 'user', text: 'Me lembra de revisar o parser CNAB 240 às 15h.' },
+    { role: 'jarvis', text: 'Lembrete criado para às 15h: revisar o parser CNAB 240.', confidence: 'alta' },
+    { role: 'system', text: 'ROTINA DE TESTE EM EXECUÇÃO' },
+  ];
+  const TEST_FERRAMENTAS = [
+    { name: 'get_weather', result: 'São Paulo, SP — 24°C, céu limpo' },
+    { name: 'ler_horas', result: '"14:30" → "quatorze e trinta"' },
+    { name: 'consultar_memoria', result: '3 registros relevantes encontrados' },
+  ];
+  function limparTimersTeste() { testModeTimers.forEach(t => clearInterval(t) || clearTimeout(t)); testModeTimers = []; }
+
+  function iniciarModoTeste() {
+    document.body.classList.add('test-mode');
+    addEvent('sistema', 'Modo teste ativado — simulando eventos');
+    notify('Modo teste ativado: os dados exibidos são simulados.', 'info');
+
+    // simula ciclo de estados do núcleo
+    const estadosCiclo = ['idle', 'listening', 'thinking', 'speaking'];
+    let passoEstado = 0;
+    testModeTimers.push(setInterval(() => {
+      setEstado(estadosCiclo[passoEstado % estadosCiclo.length]);
+      passoEstado++;
+    }, 3200));
+
+    // simula falas alternadas
+    let passoFala = 0;
+    testModeTimers.push(setInterval(() => {
+      const fala = TEST_FALAS[passoFala % TEST_FALAS.length];
+      addLogLine(fala.role, fala.text, fala.confidence);
+      passoFala++;
+    }, 4200));
+
+    // simula execução de ferramentas
+    let passoFerr = 0;
+    testModeTimers.push(setInterval(() => {
+      const f = TEST_FERRAMENTAS[passoFerr % TEST_FERRAMENTAS.length];
+      addToolExec({ name: f.name, status: 'running' });
+      setTimeout(() => addToolExec({ name: f.name, status: 'success', result: f.result }), 900);
+      passoFerr++;
+    }, 6000));
+
+    // dados simulados de clima
+    renderWeather({ temp: 24, sensacao: 25, umidade: 58, vento: 12, min: 18, max: 27, local: 'São Paulo, SP (teste)', icone: 'ceu_limpo', condicao: 'céu limpo' });
+
+    // lembretes simulados
+    renderReminders([
+      { texto: 'Revisar parser CNAB 240', quando: 'hoje às 15h', concluido: false },
+      { texto: 'Testar TTS com Fish Audio', quando: 'amanhã', concluido: false },
+      { texto: 'Atualizar memória persistente', quando: 'concluído', concluido: true },
+    ]);
+
+    // linha do tempo simulada
+    timelineItems = [
+      { id: 'tst-1', tipo: 'contexto', text: 'Gabriel está testando a interface do JARVIS.', pinned: true },
+      { id: 'tst-2', tipo: 'preferencia', text: 'Prefere respostas objetivas e diretas.', pinned: false },
+    ];
+    renderTimeline();
+
+    // subsistemas todos ativos durante o teste
+    ['voz', 'memoria', 'websocket', 'ferramentas', 'banco', 'processamento'].forEach(s => setSubsystem(s, true, false));
+
+    // recursos simulados oscilando
+    testModeTimers.push(setInterval(() => {
+      const cpu = Math.round(10 + Math.random() * 30);
+      const mem = Math.round(35 + Math.random() * 25);
+      const disk = 62;
+      document.getElementById('cpuVal').textContent = cpu + '%'; document.getElementById('cpuBar').style.width = cpu + '%';
+      document.getElementById('memVal').textContent = mem + '%'; document.getElementById('memBar').style.width = mem + '%';
+      document.getElementById('diskVal').textContent = disk + '%'; document.getElementById('diskBar').style.width = disk + '%';
+    }, 2500));
+  }
+
+  function pararModoTeste() {
+    document.body.classList.remove('test-mode');
+    limparTimersTeste();
+    setEstado('idle');
+    ['voz', 'memoria', 'ferramentas', 'banco', 'processamento'].forEach(s => setSubsystem(s, false, false));
+    addEvent('sistema', 'Modo teste desativado');
+    notify('Modo teste desativado.', 'info');
+  }
+
+  testModeSwitch.addEventListener('click', () => {
+    testModeOn = !testModeOn;
+    testModeSwitch.classList.toggle('on', testModeOn);
+    tocarSom('toggle');
+    if (testModeOn) iniciarModoTeste(); else pararModoTeste();
+  });
+
+  /* ================= elementos gerais ================= */
   const micBtn = document.getElementById('micBtn');
   const coreStatus = document.getElementById('coreStatus');
   const log = document.getElementById('log');
-  const voiceToggle = document.getElementById('voiceToggle');
-  const voiceValue = document.getElementById('voiceValue');
   const soundToggle = document.getElementById('soundToggle');
   const soundValue = document.getElementById('soundValue');
   const exportBtn = document.getElementById('exportBtn');
@@ -224,6 +340,7 @@
     }
   }
 
+  /* ================= abas: registro / investigação / tática ================= */
   const tabRegistro = document.getElementById('tabRegistro');
   const tabInvestigacao = document.getElementById('tabInvestigacao');
   const tabTatica = document.getElementById('tabTatica');
@@ -282,7 +399,13 @@
   const tacticalPrevBtn = document.getElementById('tacticalPrevBtn');
   const tacticalPlayBtn = document.getElementById('tacticalPlayBtn');
   const tacticalNextBtn = document.getElementById('tacticalNextBtn');
+  const tacticalCommentaryEl = document.getElementById('tacticalCommentary');
+  const tacticalCommentaryTextEl = tacticalCommentaryEl.querySelector('.tc-text');
 
+  // Calcula a escala necessária para mapear as coordenadas cruas recebidas (que podem
+  // vir em qualquer unidade: normalizadas 0–1, metros de campo real 0–105x0–68, etc.)
+  // para o espaço do viewBox do SVG (0–100 x 0–64). Sem isso, se os dados chegarem numa
+  // escala diferente da esperada, jogadores acabam desenhados fora da área visível do campo.
   function computeTacticalScale(frames) {
     let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
     frames.forEach(frame => {
@@ -302,7 +425,10 @@
 
     const rangeX = maxX - minX || 1;
     const rangeY = maxY - minY || 1;
-    const jaNoEspacoEsperado = minX >= -1 && maxX <= PITCH_W + 1 && minY >= -1 && maxY <= PITCH_H + 1 && (rangeX > PITCH_W * 0.3 || rangeY > PITCH_H * 0.3);
+
+    // Se os dados já cabem dentro do espaço esperado do viewBox, não reescalamos —
+    // evita distorcer posições que já estão corretas.
+    const jaNoEspacoEsperado = minX >= -1 && maxX <= PITCH_W + 1 && minY >= -1 && maxY <= PITCH_H + 1;
     if (jaNoEspacoEsperado) return null;
 
     return {
@@ -374,15 +500,18 @@
     tacticalPlayBtn.textContent = '▶';
   }
 
+  // Autoplay manual (botão ▶) — usado só pra revisar a jogada depois que a
+  // narração já terminou. Enquanto o servidor está narrando quadro a quadro
+  // (evento 'tactical_frame'), é ele quem comanda o avanço, não este timer.
   function playTactical() {
     if (tacticalFrames.length <= 1) return;
     tacticalPlaying = true;
     tacticalPlayBtn.textContent = '⏸';
     tacticalTimer = setInterval(() => {
       tacticalIndex++;
-      if (tacticalIndex >= tacticalFrames.length) { pauseTactical(); tacticalIndex = tacticalFrames.length - 1; return; }
+      if (tacticalIndex >= tacticalFrames.length) tacticalIndex = 0;
       renderTacticalFrame(tacticalIndex);
-    }, 1500);
+    }, 2000);
   }
 
   tacticalPlayBtn.addEventListener('click', () => { tacticalPlaying ? pauseTactical() : playTactical(); tocarSom('toggle'); });
@@ -399,10 +528,27 @@
     document.getElementById('tacticalEmpty').style.display = 'none';
     document.getElementById('tacticalBoard').style.display = 'flex';
     tacticalPlayersGroup.innerHTML = '';
+    tacticalCommentaryEl.style.display = 'none';
     renderTacticalFrame(0);
-    pauseTactical();
+    // Não inicia autoplay aqui — o servidor vai empurrar 'tactical_frame'
+    // em sincronia com a narração de cada instante.
     if (!tacticalPanel.classList.contains('visible')) tacticalAlertDot.style.display = 'inline-block';
     addEvent('tatica', `Novo quadro tático: ${dados.titulo}`);
+  }
+
+  // Chamado quando o servidor avança para um quadro específico, em sincronia
+  // com o áudio daquele instante (evento 'tactical_frame').
+  function avancarQuadroTatico(evento) {
+    if (!tacticalFrames.length) return;
+    pauseTactical();
+    tacticalIndex = Math.max(0, Math.min(tacticalFrames.length - 1, evento.index));
+    renderTacticalFrame(tacticalIndex);
+    if (evento.anotacao) {
+      tacticalCommentaryEl.style.display = 'flex';
+      typewriter(tacticalCommentaryTextEl, evento.anotacao);
+    } else {
+      tacticalCommentaryEl.style.display = 'none';
+    }
   }
 
   function typewriter(el, textoHtml) {
@@ -418,7 +564,7 @@
     })();
   }
 
-  function addLogLine(role, text, speech, confidence) {
+  function addLogLine(role, text, confidence) {
     const empty = document.getElementById('logEmpty');
     if (empty) empty.remove();
 
@@ -441,26 +587,70 @@
     log.scrollTop = log.scrollHeight;
     while (log.children.length > 40) log.removeChild(log.firstChild);
 
+    // A voz agora é 100% responsabilidade do servidor (Fish Audio). O
+    // navegador só exibe o texto — nada de speechSynthesis aqui, senão
+    // as duas vozes ficam disputando ao mesmo tempo.
     if (role === 'user') {
       tocarSom('envio'); addEvent('comando', 'Comando recebido');
     } else if (role !== 'system') {
       tocarSom('recebido'); addEvent('resposta', 'Resposta gerada');
-      falar(speech || text);
     }
   }
 
-  const eventsList = document.getElementById('eventsList');
-  const eventsCount = document.getElementById('eventsCount');
-  let totalEventos = 0;
+  /* ================= clima ================= */
+  const weatherEmpty = document.getElementById('weatherEmpty');
+  const weatherBody = document.getElementById('weatherBody');
+  const weatherIcon = document.getElementById('weatherIcon');
+  const minimalWeatherIcon = document.getElementById('minimalWeatherIcon');
+  const minimalWeatherValue = document.getElementById('minimalWeatherValue');
+  const WEATHER_ICONS = {
+    ceu_limpo: '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.2" y1="4.2" x2="5.6" y2="5.6"/><line x1="18.4" y1="18.4" x2="19.8" y2="19.8"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.2" y1="19.8" x2="5.6" y2="18.4"/><line x1="18.4" y1="5.6" x2="19.8" y2="4.2"/>',
+    nublado: '<path d="M17.5 19H9a5 5 0 1 1 1.6-9.7A6 6 0 0 1 22 12.5 4.5 4.5 0 0 1 17.5 19z"/>',
+    chuva: '<path d="M16 13H8a5 5 0 1 1 1.6-9.7A6 6 0 0 1 20.5 6.5 4.5 4.5 0 0 1 16 13z"/><line x1="8" y1="16" x2="8" y2="21"/><line x1="12" y1="16" x2="12" y2="21"/><line x1="16" y1="16" x2="16" y2="21"/>',
+    tempestade: '<path d="M16 13H8a5 5 0 1 1 1.6-9.7A6 6 0 0 1 20.5 6.5 4.5 4.5 0 0 1 16 13z"/><polyline points="11 16 8 21 12 21 10 24"/>',
+    neve: '<path d="M16 13H8a5 5 0 1 1 1.6-9.7A6 6 0 0 1 20.5 6.5 4.5 4.5 0 0 1 16 13z"/><line x1="8" y1="17" x2="8" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/><line x1="16" y1="17" x2="16" y2="21"/>',
+    neblina: '<line x1="3" y1="8" x2="21" y2="8"/><line x1="5" y1="12" x2="19" y2="12"/><line x1="3" y1="16" x2="21" y2="16"/>'
+  };
+  function renderWeather(dados) {
+    weatherEmpty.style.display = 'none';
+    weatherBody.style.display = 'block';
+    document.getElementById('weatherTemp').innerHTML = `${Math.round(dados.temp)}<span>°C</span>`;
+    document.getElementById('weatherCond').textContent = dados.condicao || '—';
+    document.getElementById('weatherFeels').textContent = (dados.sensacao !== undefined ? Math.round(dados.sensacao) : '--') + '°';
+    document.getElementById('weatherHumidity').textContent = (dados.umidade !== undefined ? dados.umidade : '--') + '%';
+    document.getElementById('weatherWind').textContent = (dados.vento !== undefined ? dados.vento : '--') + ' km/h';
+    document.getElementById('weatherMinMax').textContent = `${dados.min !== undefined ? Math.round(dados.min) : '--'}/${dados.max !== undefined ? Math.round(dados.max) : '--'}°`;
+    document.getElementById('weatherLoc').textContent = dados.local || '—';
+    const hora = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    document.getElementById('weatherUpdated').textContent = hora;
+    const iconMarkup = WEATHER_ICONS[dados.icone] || WEATHER_ICONS.ceu_limpo;
+    weatherIcon.innerHTML = iconMarkup;
+    // espelha no mini círculo de clima do modo minimalista
+    minimalWeatherIcon.innerHTML = iconMarkup;
+    minimalWeatherValue.textContent = Math.round(dados.temp) + '°';
+    addEvent('clima', 'Dados do clima atualizados');
+  }
+
+  /* ================= lembretes ================= */
+  const remindersList = document.getElementById('remindersList');
+  const remindersCount = document.getElementById('remindersCount');
+  function renderReminders(items) {
+    remindersList.innerHTML = '';
+    const lista = items || [];
+    if (lista.length === 0) { remindersList.innerHTML = '<div class="reminders-empty">nenhum lembrete ativo</div>'; remindersCount.textContent = 0; return; }
+    lista.forEach(item => {
+      const div = document.createElement('div');
+      div.className = 'reminder-item' + (item.concluido ? ' done' : '');
+      div.innerHTML = `<div class="rd-dot"></div><div class="rd-body"><span class="rd-text">${item.texto}</span><span class="rd-time">${item.quando || ''}</span></div>`;
+      remindersList.appendChild(div);
+    });
+    remindersCount.textContent = lista.filter(i => !i.concluido).length;
+  }
+
+  /* ================= feed de eventos ================= */
   function addEvent(categoria, texto) {
-    const empty = eventsList.querySelector('.feed-empty'); if (empty) empty.remove();
-    const div = document.createElement('div');
-    div.className = 'feed-item';
     const time = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-    div.innerHTML = `<div class="fi-top"><span class="fi-label">${texto}</span><span class="fi-time">${time}</span></div>`;
-    eventsList.prepend(div);
-    while (eventsList.children.length > 30) eventsList.removeChild(eventsList.lastChild);
-    totalEventos++; eventsCount.textContent = totalEventos;
+    console.debug(`[evento:${categoria}] ${texto} — ${time}`);
   }
 
   const toolsList = document.getElementById('toolsList');
@@ -507,6 +697,7 @@
     timelineCount.textContent = timelineItems.length;
   }
   function sendTimelineAction(id, action) {
+    if (testModeOn) return; // evita mandar ações do modo teste para o servidor real
     if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ type: 'timeline_action', id, action }));
   }
 
@@ -564,24 +755,6 @@
   });
   document.addEventListener('click', () => { getAudioCtx(); }, { once: true });
 
-  /* ================= voz ================= */
-  let vozAtiva = true;
-  voiceToggle.addEventListener('click', () => {
-    vozAtiva = !vozAtiva; voiceValue.textContent = vozAtiva ? 'ON' : 'OFF'; voiceToggle.classList.toggle('on', vozAtiva); tocarSom('toggle');
-    if (!vozAtiva && window.speechSynthesis) { speechSynthesis.cancel(); setEstado('idle'); }
-  });
-  function falar(textoHtml) {
-    if (!vozAtiva || !window.speechSynthesis) return;
-    const tmp = document.createElement('div'); tmp.innerHTML = textoHtml;
-    const textoLimpo = tmp.textContent.trim(); if (!textoLimpo) return;
-    const utter = new SpeechSynthesisUtterance(textoLimpo);
-    utter.lang = 'pt-BR'; utter.rate = 1.02; utter.pitch = 0.85;
-    utter.onstart = () => { setEstado('speaking'); setSubsystem('voz', true); };
-    utter.onend = () => { setEstado('idle'); setSubsystem('voz', false); };
-    utter.onerror = () => setEstado('idle');
-    speechSynthesis.cancel(); speechSynthesis.speak(utter);
-  }
-
   /* ================= exportar registro ================= */
   exportBtn.addEventListener('click', () => {
     tocarSom('toggle');
@@ -604,14 +777,9 @@
     ws.onmessage = (msg) => {
       let evento; try { evento = JSON.parse(msg.data); } catch { return; }
       switch (evento.type) {
-        case 'log': addLogLine(evento.role, evento.text, evento.speech, evento.confidence); break;
-        case 'status':
-          if (!speechSynthesis || !speechSynthesis.speaking) setEstado(evento.state);
-          if (evento.state === 'thinking') setSubsystem('processamento', true, true);
-          break;
-        case 'memory':
-          setSubsystem('memoria', true, true);
-          break;
+        case 'log': addLogLine(evento.role, evento.text, evento.confidence); break;
+        case 'status': setEstado(evento.state); if (evento.state === 'thinking') setSubsystem('processamento', true, true); break;
+        case 'memory': setSubsystem('memoria', true, true); break;
         case 'stats':
           if (evento.cpu !== undefined) { document.getElementById('cpuVal').textContent = evento.cpu + '%'; document.getElementById('cpuBar').style.width = evento.cpu + '%'; }
           if (evento.mem !== undefined) { document.getElementById('memVal').textContent = evento.mem + '%'; document.getElementById('memBar').style.width = evento.mem + '%'; }
@@ -622,6 +790,9 @@
         case 'notification': notify(evento.text, evento.level || 'info'); break;
         case 'investigation': abrirInvestigacao(evento); showTab('investigacao'); break;
         case 'tactical_board': abrirQuadroTatico(evento); showTab('tatica'); break;
+        case 'tactical_frame': avancarQuadroTatico(evento); break;
+        case 'weather': renderWeather(evento); break;
+        case 'reminders': renderReminders(evento.items); break;
         case 'timeline':
           timelineItems = evento.items || []; renderTimeline(); break;
         case 'timeline_add':
@@ -637,11 +808,13 @@
   const sendBtn = document.getElementById('sendBtn');
   function enviarComando(texto) {
     texto = (texto || '').trim(); if (!texto) return;
+    if (testModeOn) { addLogLine('user', texto); cmdInput.value = ''; setTimeout(() => addLogLine('jarvis', 'Isto é uma resposta simulada do modo teste.', 'moderada'), 700); return; }
     if (!ws || ws.readyState !== WebSocket.OPEN) { setEstado('offline'); return; }
     ws.send(JSON.stringify({ type: 'command', text: texto })); cmdInput.value = '';
   }
   sendBtn.addEventListener('click', () => enviarComando(cmdInput.value));
   cmdInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); enviarComando(cmdInput.value); } });
+
 
   const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
   let reconhecendo = false; let recognition = null;
@@ -654,7 +827,6 @@
     recognition.onerror = () => { reconhecendo = false; micBtn.classList.remove('active'); };
     micBtn.addEventListener('click', () => {
       tocarSom('mic');
-      if (window.speechSynthesis && speechSynthesis.speaking) { speechSynthesis.cancel(); setEstado('idle'); }
       if (reconhecendo) { recognition.stop(); return; }
       reconhecendo = true; micBtn.classList.add('active');
       try { recognition.start(); } catch { reconhecendo = false; micBtn.classList.remove('active'); }

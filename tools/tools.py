@@ -3,16 +3,258 @@ import subprocess
 import urllib.parse
 import webbrowser
 import xml.etree.ElementTree as ET
-
+import json
+import time
 from datetime import datetime
 from pathlib import Path
 from urllib.request import urlopen, Request
 from zoneinfo import ZoneInfo
-
+import uuid
 from ytmusicapi import YTMusic
 
-import ui_bridge
+import tools.ui_bridge as ui_bridge
+from tools.voice import speak, limpar_para_fala
 
+
+WMO_CODE_MAP = {
+    0: ("céu limpo", "ceu_limpo"),
+    1: ("poucas nuvens", "ceu_limpo"),
+    2: ("parcialmente nublado", "nublado"),
+    3: ("nublado", "nublado"),
+    45: ("neblina", "neblina"),
+    48: ("neblina com geada", "neblina"),
+    51: ("garoa fraca", "chuva"),
+    53: ("garoa", "chuva"),
+    55: ("garoa forte", "chuva"),
+    56: ("garoa congelante", "chuva"),
+    57: ("garoa congelante forte", "chuva"),
+    61: ("chuva fraca", "chuva"),
+    63: ("chuva", "chuva"),
+    65: ("chuva forte", "chuva"),
+    66: ("chuva congelante", "chuva"),
+    67: ("chuva congelante forte", "chuva"),
+    71: ("neve fraca", "neve"),
+    73: ("neve", "neve"),
+    75: ("neve forte", "neve"),
+    77: ("grãos de neve", "neve"),
+    80: ("pancadas de chuva fracas", "chuva"),
+    81: ("pancadas de chuva", "chuva"),
+    82: ("pancadas de chuva fortes", "chuva"),
+    85: ("pancadas de neve fracas", "neve"),
+    86: ("pancadas de neve fortes", "neve"),
+    95: ("tempestade", "tempestade"),
+    96: ("tempestade com granizo", "tempestade"),
+    99: ("tempestade forte com granizo", "tempestade"),
+}
+
+
+REMINDERS_PATH = os.path.expanduser("~/.jarvis/reminders.json")
+
+def _load_reminders():
+    try:
+        with open(REMINDERS_PATH, "r", encoding="utf-8") as file:
+            return json.load(file)
+    except FileNotFoundError:
+        return []
+    except Exception:
+        return []
+
+
+def _save_reminders(reminders):
+    os.makedirs(os.path.dirname(REMINDERS_PATH), exist_ok=True)
+    with open(REMINDERS_PATH, "w", encoding="utf-8") as file:
+        json.dump(reminders, file, ensure_ascii=False, indent=2)
+
+
+def _broadcast_reminders(reminders):
+    ui_bridge.broadcast({
+        "type": "reminders",
+        "items": reminders,
+    })
+
+
+def add_reminder(texto: str, quando: str = None):
+    try:
+        reminders = _load_reminders()
+
+        novo = {
+            "id": str(uuid.uuid4()),
+            "texto": texto,
+            "quando": quando,
+            "concluido": False,
+        }
+
+        reminders.append(novo)
+        _save_reminders(reminders)
+        _broadcast_reminders(reminders)
+
+        return {
+            "success": True,
+            "reminder": novo,
+            "message": f"Lembrete adicionado: {texto}",
+        }
+
+    except Exception as error:
+        return {
+            "success": False,
+            "message": f"Não foi possível adicionar o lembrete: {error}",
+        }
+
+
+def list_reminders():
+    try:
+        reminders = _load_reminders()
+        _broadcast_reminders(reminders)
+
+        return {
+            "success": True,
+            "count": len(reminders),
+            "reminders": reminders,
+        }
+
+    except Exception as error:
+        return {
+            "success": False,
+            "message": f"Não foi possível listar os lembretes: {error}",
+        }
+
+
+def complete_reminder(texto: str):
+    try:
+        reminders = _load_reminders()
+        encontrado = None
+
+        for reminder in reminders:
+            if texto.lower() in reminder["texto"].lower() and not reminder["concluido"]:
+                reminder["concluido"] = True
+                encontrado = reminder
+                break
+
+        if not encontrado:
+            return {
+                "success": False,
+                "message": f"Nenhum lembrete pendente encontrado com: {texto}",
+            }
+
+        _save_reminders(reminders)
+        _broadcast_reminders(reminders)
+
+        return {
+            "success": True,
+            "reminder": encontrado,
+            "message": f"Lembrete concluído: {encontrado['texto']}",
+        }
+
+    except Exception as error:
+        return {
+            "success": False,
+            "message": f"Não foi possível concluir o lembrete: {error}",
+        }
+
+
+def remove_reminder(texto: str):
+    try:
+        reminders = _load_reminders()
+        tamanho_original = len(reminders)
+
+        reminders = [
+            r for r in reminders if texto.lower() not in r["texto"].lower()
+        ]
+
+        if len(reminders) == tamanho_original:
+            return {
+                "success": False,
+                "message": f"Nenhum lembrete encontrado com: {texto}",
+            }
+
+        _save_reminders(reminders)
+        _broadcast_reminders(reminders)
+
+        return {
+            "success": True,
+            "message": f"Lembrete(s) removido(s): {texto}",
+        }
+
+    except Exception as error:
+        return {
+            "success": False,
+            "message": f"Não foi possível remover o lembrete: {error}",
+        }
+
+
+def get_weather(local: str = "São Paulo, BR"):
+    try:
+        geocode_url = (
+            "https://geocoding-api.open-meteo.com/v1/search?"
+            f"name={urllib.parse.quote_plus(local)}"
+            "&count=1&language=pt&format=json"
+        )
+
+        with urlopen(geocode_url, timeout=10) as response:
+            geocode_data = json.loads(response.read())
+
+        results = geocode_data.get("results")
+
+        if not results:
+            return {
+                "success": False,
+                "message": f"Local não encontrado: {local}",
+            }
+
+        place = results[0]
+        latitude = place["latitude"]
+        longitude = place["longitude"]
+        nome_local = ", ".join(
+            filter(None, [place.get("name"), place.get("admin1"), place.get("country")])
+        )
+
+        forecast_url = (
+            "https://api.open-meteo.com/v1/forecast?"
+            f"latitude={latitude}&longitude={longitude}"
+            "&current=temperature_2m,apparent_temperature,"
+            "relative_humidity_2m,weather_code,wind_speed_10m"
+            "&daily=temperature_2m_min,temperature_2m_max"
+            "&timezone=auto"
+        )
+
+        with urlopen(forecast_url, timeout=10) as response:
+            forecast_data = json.loads(response.read())
+
+        current = forecast_data["current"]
+        daily = forecast_data["daily"]
+        weather_code = current.get("weather_code", 0)
+        condicao, icone = WMO_CODE_MAP.get(weather_code, ("indefinido", "nublado"))
+
+        payload = {
+            "type": "weather",
+            "temp": current["temperature_2m"],
+            "sensacao": current["apparent_temperature"],
+            "umidade": current["relative_humidity_2m"],
+            "vento": round(current["wind_speed_10m"]),
+            "min": daily["temperature_2m_min"][0],
+            "max": daily["temperature_2m_max"][0],
+            "condicao": condicao,
+            "local": nome_local,
+            "icone": icone,
+        }
+
+        ui_bridge.broadcast(payload)
+
+        return {
+            "success": True,
+            "local": nome_local,
+            "temperatura": current["temperature_2m"],
+            "condicao": condicao,
+            "message": (
+                f"Em {nome_local}: {current['temperature_2m']}°C, {condicao}."
+            ),
+        }
+
+    except Exception as error:
+        return {
+            "success": False,
+            "message": f"Não foi possível obter o clima: {error}",
+        }
 
 def get_current_time(timezone: str = "America/Sao_Paulo"):
     try:
@@ -538,6 +780,39 @@ def _validate_tactical_frame(frame, index):
     return None
 
 
+# Pausa usada entre quadros que não têm nenhuma anotação para narrar —
+# sem isso a animação pularia instantaneamente pra esses instantes.
+_PAUSA_QUADRO_SEM_NARRACAO = 1.2
+
+
+def _narrar_quadros_taticos(quadros):
+    """
+    Percorre os quadros em ordem e, para cada um:
+      1. Envia o evento 'tactical_frame' (índice + anotação) — é isso que
+         faz a interface avançar a animação para aquele instante.
+      2. Fala a anotação daquele instante pelo Fish Audio, bloqueando até
+         o áudio terminar.
+
+    Como o passo 2 é bloqueante, a duração de cada quadro na tela é
+    exatamente a duração da fala daquele instante — a animação fica
+    sincronizada com a narração por construção, não por um timer fixo.
+    """
+
+    for index, frame in enumerate(quadros):
+        anotacao = frame.get("anotacao") or ""
+
+        ui_bridge.broadcast({
+            "type": "tactical_frame",
+            "index": index,
+            "anotacao": anotacao,
+        })
+
+        if anotacao.strip():
+            speak(limpar_para_fala(anotacao))
+        else:
+            time.sleep(_PAUSA_QUADRO_SEM_NARRACAO)
+
+
 def show_tactical_board(
     titulo: str,
     quadros: list,
@@ -567,11 +842,17 @@ def show_tactical_board(
             "quadros": quadros,
         })
 
+        # Narra quadro a quadro, em sincronia com o TTS — bloqueia até a
+        # sequência inteira terminar de ser narrada.
+        _narrar_quadros_taticos(quadros)
+
         return {
             "success": True,
             "message": (
-                f"Quadro tático '{titulo}' exibido com "
-                f"{len(quadros)} instante(s)."
+                f"Quadro tático '{titulo}' narrado com "
+                f"{len(quadros)} instante(s). Não repita a explicação "
+                "quadro a quadro na sua resposta final, ela já foi "
+                "narrada — só complemente se fizer sentido."
             ),
         }
 
@@ -863,6 +1144,101 @@ TOOLS = [
             },
         },
     },
+
+    {
+        "type": "function",
+        "function": {
+            "name": "add_reminder",
+            "description": (
+                "Adiciona um novo lembrete e o exibe no painel de "
+                "lembretes da interface. Use quando o usuário pedir "
+                "para lembrá-lo de algo."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "texto": {
+                        "type": "string",
+                        "description": "O que deve ser lembrado.",
+                    },
+                    "quando": {
+                        "type": "string",
+                        "description": (
+                            "Horário ou data do lembrete, em texto livre "
+                            "(ex: '15:00', 'amanhã de manhã'). Opcional."
+                        ),
+                    },
+                },
+                "required": ["texto"],
+                "additionalProperties": False,
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "list_reminders",
+            "description": (
+                "Lista os lembretes atuais e atualiza o painel de "
+                "lembretes na interface."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {},
+                "required": [],
+                "additionalProperties": False,
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "complete_reminder",
+            "description": (
+                "Marca um lembrete pendente como concluído, buscando "
+                "pelo texto. Use quando o usuário disser que já fez "
+                "algo que estava nos lembretes."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "texto": {
+                        "type": "string",
+                        "description": (
+                            "Trecho do texto do lembrete a ser concluído."
+                        ),
+                    },
+                },
+                "required": ["texto"],
+                "additionalProperties": False,
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "remove_reminder",
+            "description": (
+                "Remove um ou mais lembretes que contenham o texto "
+                "informado. Use quando o usuário pedir para apagar "
+                "ou cancelar um lembrete."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "texto": {
+                        "type": "string",
+                        "description": (
+                            "Trecho do texto do lembrete a ser removido."
+                        ),
+                    },
+                },
+                "required": ["texto"],
+                "additionalProperties": False,
+            },
+        },
+    },
+
     {
         "type": "function",
         "function": {
@@ -884,6 +1260,31 @@ TOOLS = [
                     },
                 },
                 "required": ["title", "message"],
+                "additionalProperties": False,
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_weather",
+            "description": (
+                "Busca o clima atual de um local e exibe no painel de "
+                "clima da interface. Use quando o usuário perguntar como "
+                "está o tempo, a temperatura ou o clima em algum lugar."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "local": {
+                        "type": "string",
+                        "description": (
+                            "Nome da cidade (e opcionalmente estado/país). "
+                            "Padrão: São Paulo, BR."
+                        ),
+                    },
+                },
+                "required": [],
                 "additionalProperties": False,
             },
         },
@@ -954,18 +1355,25 @@ TOOLS = [
         "function": {
             "name": "show_tactical_board",
             "description": (
-                "Exibe um quadro tático de futebol na interface: "
+                "Exibe e NARRA um quadro tático de futebol na interface: "
                 "jogadores, bola e setas sobre um campo. Aceita uma "
                 "sequência de 1 ou mais quadros para simular uma "
                 "jogada se desenrolando no tempo — cada quadro é um "
-                "instante, e a interface anima a transição entre eles. "
+                "instante. Esta ferramenta já fala a 'anotacao' de cada "
+                "quadro em voz alta, em sincronia com a animação "
+                "avançando na interface (um quadro é exibido exatamente "
+                "quando sua anotação começa a ser narrada). Por isso, a "
+                "anotação de cada quadro deve ser escrita como texto "
+                "falado natural, curto e direto — é isso que o usuário "
+                "vai ouvir. "
                 "Use quando o usuário pedir uma análise tática, "
                 "simulação de jogada ou explicação visual de uma "
                 "situação de futebol. Coordenadas x e y vão de 0 a "
                 "100 (percentual do campo; x=0 é o gol do time da "
                 "casa, x=100 é o gol do visitante; y=0 é a lateral de "
                 "cima, y=100 é a lateral de baixo). Para jogadas com "
-                "movimento, gere de 3 a 6 quadros."
+                "movimento, gere de 3 a 6 quadros, cada um com sua "
+                "própria anotação."
             ),
             "parameters": {
                 "type": "object",
@@ -994,8 +1402,10 @@ TOOLS = [
                                 "anotacao": {
                                     "type": "string",
                                     "description": (
-                                        "O que acontece neste instante "
-                                        "(explicação tática curta)."
+                                        "O que acontece neste instante, "
+                                        "escrito como fala natural — será "
+                                        "narrado em voz alta exatamente "
+                                        "quando este quadro aparecer."
                                     ),
                                 },
                                 "jogadores": {
@@ -1078,6 +1488,7 @@ TOOL_FUNCTIONS = {
     "get_current_date": get_current_date,
     "open_website": open_website,
     "search_web": search_web,
+    "get_weather": get_weather,
     "open_application": open_application,
     "close_application": close_application,
     "open_folder": open_folder,
@@ -1091,4 +1502,8 @@ TOOL_FUNCTIONS = {
     "get_daily_news": get_daily_news,
     "play_music": play_music,
     "show_tactical_board": show_tactical_board,
+    "add_reminder": add_reminder,
+    "list_reminders": list_reminders,
+    "complete_reminder": complete_reminder,
+    "remove_reminder": remove_reminder,
 }
