@@ -11,12 +11,15 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 
-BASE_DIR = Path(__file__).parent
-JS_FILE = BASE_DIR / "script.js"
-HTML_FILE = BASE_DIR / "jarvis-hud.html"
+BASE_DIR = Path(__file__).resolve().parent.parent
+INTERFACE_DIR = BASE_DIR / "interface"
+
+JS_FILE = INTERFACE_DIR / "script.js"
+HTML_FILE = INTERFACE_DIR / "jarvis-hud.html"
+CSS_FILE = INTERFACE_DIR / "style.css"
+
 HOST = "127.0.0.1"
 PORT = 8765
-
 _clients = set()
 _loop = None
 
@@ -36,13 +39,16 @@ app = FastAPI(lifespan=lifespan)
 
 app.mount(
     "/static",
-    StaticFiles(directory=BASE_DIR),
+    StaticFiles(directory=INTERFACE_DIR),
     name="static",
 )
 
 @app.get("/script.js")
 async def javascript():
-    return FileResponse(JS_FILE, media_type="application/javascript")
+    return FileResponse(
+        JS_FILE,
+        media_type="application/javascript",
+    )
 
 @app.get("/")
 async def index():

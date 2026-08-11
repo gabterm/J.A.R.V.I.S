@@ -437,3 +437,24 @@
   .test-mode-badge { display: none; position: fixed; top: 16px; left: 22px; z-index: 96; font-family: var(--disp); font-size: 9px; letter-spacing: 2.5px; color: var(--mid); border: 1px solid var(--mid); background: rgba(var(--mid-rgb),0.08); padding: 5px 12px; border-radius: 2px; align-items: center; gap: 6px; }
   .test-mode-badge .tmb-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--mid); box-shadow: 0 0 6px var(--mid); animation: blink 1.4s ease-in-out infinite; }
   body.test-mode .test-mode-badge { display: flex; }
+
+  .code-block {
+  margin: 10px 0 0;
+  padding: 12px 14px;
+  overflow-x: auto;
+
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--panel-border);
+  border-left: 2px solid var(--cyan);
+
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 11px;
+  line-height: 1.6;
+
+  white-space: pre;
+}
+
+.code-block code {
+  font-family: inherit;
+}

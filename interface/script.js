@@ -803,6 +803,28 @@
   }
   conectar();
 
+  function formatMessage(text) {
+  if (!text) return '';
+
+
+  const escaped = text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+
+
+  return escaped.replace(
+    /```(\w+)?\n?([\s\S]*?)```/g,
+    (_, language, code) => {
+      return `
+        <pre class="code-block">
+          <code class="language-${language || 'text'}">${code.trim()}</code>
+        </pre>
+      `;
+    }
+  );
+}
+
   /* ================= comando (texto) ================= */
   const cmdInput = document.querySelector('.cmd-input');
   const sendBtn = document.getElementById('sendBtn');
