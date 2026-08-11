@@ -551,18 +551,30 @@
     }
   }
 
-  function typewriter(el, textoHtml) {
-    const tmp = document.createElement('div'); tmp.innerHTML = textoHtml;
-    const textoLimpo = tmp.textContent;
-    el.textContent = '';
-    const cursor = document.createElement('span'); cursor.className = 'type-cursor';
-    el.appendChild(cursor);
-    let i = 0; const speed = 16;
-    (function passo() {
-      if (i < textoLimpo.length) { cursor.insertAdjacentText('beforebegin', textoLimpo[i]); i++; setTimeout(passo, speed); }
-      else cursor.remove();
-    })();
+
+function typewriter(el, texto) {
+  el.innerHTML = '';
+
+  if (texto.includes('```')) {
+    el.innerHTML = formatMessage(texto);
+    return;
   }
+
+  let i = 0;
+  const speed = 16;
+
+  function passo() {
+    if (i < texto.length) {
+      el.textContent += texto[i];
+      i++;
+      setTimeout(passo, speed);
+    }
+  }
+
+  passo();
+}
+
+
 
   function addLogLine(role, text, confidence) {
     const empty = document.getElementById('logEmpty');
@@ -575,11 +587,29 @@
     const time = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
     const badge = (cls === 'jarvis' && confidence) ? `<span class="confidence-badge ${confidence}">${confidence}</span>` : '';
 
-    if (cls === 'jarvis') {
-      div.innerHTML = `<div class="tag-row"><span class="tag-left"><span class="tag">${tag}</span>${badge}</span><span class="time">${time}</span></div><span class="msg-text"></span>`;
-      log.appendChild(div);
-      typewriter(div.querySelector('.msg-text'), text);
-    } else {
+   
+
+  if (cls === 'jarvis') {
+  div.innerHTML = `
+    <div class="tag-row">
+      <span class="tag-left">
+        <span class="tag">${tag}</span>
+        ${badge}
+      </span>
+      <span class="time">${time}</span>
+    </div>
+    <span class="msg-text"></span>
+  `;
+
+  log.appendChild(div);
+  const msgText = div.querySelector('.msg-text');
+
+  if (text.includes('```')) {
+    msgText.innerHTML = formatMessage(text);
+  } else {
+    typewriter(msgText, text);
+  }
+}else {
       div.innerHTML = `<div class="tag-row"><span class="tag-left"><span class="tag">${tag}</span></span><span class="time">${time}</span></div>${text}`;
       log.appendChild(div);
     }
@@ -803,26 +833,32 @@
   }
   conectar();
 
-  function formatMessage(text) {
+function formatMessage(text) {
   if (!text) return '';
 
+  const parts = text.split(/(```[\s\S]*?```)/g);
 
-  const escaped = text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
+  return parts.map(part => {
+    if (part.startsWith('```') && part.endsWith('```')) {
+      const match = part.match(/^```(\w+)?\n?([\s\S]*?)```$/);
+      const language = match && match[1] ? match[1] : 'text';
+      const code = match && match[2] ? match[2].trim() : '';
 
+      const escapedCode = code
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
 
-  return escaped.replace(
-    /```(\w+)?\n?([\s\S]*?)```/g,
-    (_, language, code) => {
-      return `
-        <pre class="code-block">
-          <code class="language-${language || 'text'}">${code.trim()}</code>
-        </pre>
-      `;
+      return `<pre class="code-block"><code class="language-${language}">${escapedCode}</code></pre>`;
+    } else {
+      const escapedText = part
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+
+      return escapedText.replace(/\n/g, '<br>');
     }
-  );
+  }).join('');
 }
 
   /* ================= comando (texto) ================= */

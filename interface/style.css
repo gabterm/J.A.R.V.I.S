@@ -294,12 +294,12 @@
   .pitch-line, .pitch-line-outline { stroke: rgba(var(--cyan-rgb), 0.35); stroke-width: 0.3; fill: none; }
   .pitch-line-dot { fill: rgba(var(--cyan-rgb), 0.35); }
 
-  .tp-player { }
+  .tp-player{
   .tp-player circle { r: 2.3; stroke-width: 0.25; }
   .tp-player.tp-casa circle { fill: rgba(var(--cyan-rgb), 0.85); stroke: var(--cyan); }
   .tp-player.tp-visitante circle { fill: rgba(var(--warn-rgb), 0.85); stroke: var(--warn); }
   .tp-player text { font-family: var(--mono); font-size: 2.2px; fill: #04060a; text-anchor: middle; dominant-baseline: middle; font-weight: 700; }
-
+  }
   #tacticalBall { filter: drop-shadow(0 0 1px rgba(0,0,0,0.4)); }
 
   .tp-arrow { stroke-width: 0.4; transition: opacity 0.3s ease; }
@@ -438,23 +438,73 @@
   .test-mode-badge .tmb-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--mid); box-shadow: 0 0 6px var(--mid); animation: blink 1.4s ease-in-out infinite; }
   body.test-mode .test-mode-badge { display: flex; }
 
-  .code-block {
-  margin: 10px 0 0;
+.tp-player circle { r: 2.3; stroke-width: 0.25; }
+.tp-player.tp-casa circle { fill: rgba(var(--cyan-rgb), 0.85); stroke: var(--cyan); }
+.tp-player.tp-visitante circle { fill: rgba(var(--warn-rgb), 0.85); stroke: var(--warn); }
+.tp-player text { font-family: var(--mono); font-size: 2.2px; fill: #04060a; text-anchor: middle; dominant-baseline: middle; font-weight: 700; }
+
+#tacticalBall { filter: drop-shadow(0 0 1px rgba(0,0,0,0.4)); }
+
+.code-block {
+  margin: 10px 0;
   padding: 12px 14px;
   overflow-x: auto;
-
-  background: rgba(0, 0, 0, 0.35);
-  border: 1px solid var(--panel-border);
-  border-left: 2px solid var(--cyan);
-
-  color: var(--text);
+  background: rgba(20, 10, 4, 0.9); /* Fundo sutilmente aquecido */
+  border: 1px solid rgba(255, 102, 0, 0.2);
+  border-left: 3px solid #FF6600;
+  color: #ffffff;
   font-family: var(--mono);
-  font-size: 11px;
-  line-height: 1.6;
-
+  font-size: 11.5px;
+  line-height: 1.5;
   white-space: pre;
+  border-radius: 2px;
+  box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.6);
+  
+  text-shadow:
+    0 0 3px #FF6600,
+    0 0 6px rgba(255, 102, 0, 0.4);
 }
 
 .code-block code {
   font-family: inherit;
+  color: inherit;
+}
+
+.code-block .token.keyword,
+.code-block .token.operator {
+  color: #00f0ff;
+  font-weight: 700;
+  text-shadow: 0 0 4px rgba(0, 240, 255, 0.3);
+}
+
+.code-block .token.function,
+.code-block .token.method {
+  color: #38b6ff;
+  font-weight: 600;
+}
+
+.code-block .token.string,
+.code-block .token.char {
+  color: #70d6ff;
+}
+
+.code-block .token.number,
+.code-block .token.boolean {
+  color: #0099ff;
+  font-weight: 700;
+}
+
+.code-block .token.comment {
+  color: #3a5a78;
+  font-style: italic;
+}
+
+.code-block .token.class-name,
+.code-block .token.type {
+  color: #8edeff;
+}
+
+.code-block .token.variable,
+.code-block .token.property {
+  color: #b3ecff;
 }

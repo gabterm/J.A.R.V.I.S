@@ -34,18 +34,14 @@ def default_memory():
         "historico_recente": []
     }
 
-
 def load_memory():
-
     if not os.path.exists(MEMORY_FILE):
         memory = default_memory()
         save_memory(memory)
         return memory
 
     with open(MEMORY_FILE, "r", encoding="utf-8") as file:
-
         content = file.read().strip()
-
         if not content:
             memory = default_memory()
             save_memory(memory)
@@ -53,13 +49,9 @@ def load_memory():
 
         return json.loads(content)
 
-
 def save_memory(memory):
-
     with open(MEMORY_FILE, "w", encoding="utf-8") as file:
-
         json.dump(memory, file, indent=4, ensure_ascii=False)
-
 
 MEMORY_EXTRACTION_SCHEMA = """
 Você é um extrator de fatos. Analise a mensagem do usuário (e, se ajudar,
@@ -84,13 +76,9 @@ Regras:
 - Não inclua opiniões, suposições ou inferências.
 """
 
-
 def extract_facts(user_message, assistant_response):
-
     extraction = client.chat.completions.create(
-
         model="gpt-5.6-luna",
-
         messages=[
             {
                 "role": "system",
@@ -104,7 +92,6 @@ def extract_facts(user_message, assistant_response):
                 )
             }
         ],
-
         response_format={"type": "json_object"}
     )
 
@@ -115,9 +102,7 @@ def extract_facts(user_message, assistant_response):
     except (json.JSONDecodeError, TypeError):
         return {}
 
-
 def merge_facts_into_memory(memory, facts):
-
     if not facts:
         return memory
 
@@ -154,9 +139,7 @@ relevantes mencionados. Não invente nada que não esteja no material.
 Responda apenas com o texto do resumo, sem markdown, sem preâmbulo.
 """
 
-
 def add_to_history(memory, user_message, assistant_response):
-
     historico = memory.get("historico_recente", [])
 
     historico.append({
@@ -165,7 +148,6 @@ def add_to_history(memory, user_message, assistant_response):
     })
 
     if len(historico) > MAX_HISTORICO_BRUTO:
-
         excedente = historico[:-MAX_HISTORICO_BRUTO]
         historico = historico[-MAX_HISTORICO_BRUTO:]
 
@@ -175,16 +157,11 @@ def add_to_history(memory, user_message, assistant_response):
         )
 
     memory["historico_recente"] = historico
-
     return memory
 
-
 def condense_history(resumo_anterior, trocas_antigas):
-
     condensacao = client.chat.completions.create(
-
         model="gpt-5.6-luna",
-
         messages=[
             {"role": "system", "content": CONDENSE_PROMPT},
             {
@@ -197,17 +174,13 @@ def condense_history(resumo_anterior, trocas_antigas):
             }
         ]
     )
-
     return condensacao.choices[0].message.content.strip()
 
 def load_prompt():
-
     with open(PROMPT_FILE, "r", encoding="utf-8") as file:
-
         return file.read()
 
 def ask_jarvis(message, memory):
-
     system_prompt = load_prompt()
 
     fatos = {
@@ -261,7 +234,6 @@ def ask_jarvis(message, memory):
     sounds.play("thinking")
 
     while True:
-
         response = client.chat.completions.create(
             model="gpt-5.6-luna",
             messages=messages,
@@ -271,11 +243,9 @@ def ask_jarvis(message, memory):
         )
 
         assistant_message = response.choices[0].message
-
         messages.append(assistant_message)
 
         if not assistant_message.tool_calls:
-
             full_response = assistant_message.content or ""
 
             falar_resposta(full_response)
@@ -288,45 +258,34 @@ def ask_jarvis(message, memory):
             return full_response
 
         for tool_call in assistant_message.tool_calls:
-
             tool_name = tool_call.function.name
 
             try:
-
                 arguments = json.loads(
                     tool_call.function.arguments
                 )
-
             except json.JSONDecodeError:
-
                 result = {
                     "success": False,
                     "message": "Argumentos inválidos."
                 }
-
                 messages.append({
                     "role": "tool",
                     "tool_call_id": tool_call.id,
                     "content": json.dumps(result),
                 })
-
                 sounds.play("error")
-
                 continue
 
             tool_function = TOOL_FUNCTIONS.get(tool_name)
 
             if not tool_function:
-
                 result = {
                     "success": False,
                     "message": f"Ferramenta desconhecida: {tool_name}"
                 }
-
                 sounds.play("error")
-
             else:
-
                 print(
                     f"\n🔧 JARVIS executando: "
                     f"{tool_name}({arguments})"
@@ -339,16 +298,12 @@ def ask_jarvis(message, memory):
                 sounds.play("working")
 
                 try:
-
                     result = tool_function(**arguments)
-
                 except Exception as error:
-
                     result = {
                         "success": False,
                         "message": str(error),
                     }
-
                     sounds.play("error")
 
             messages.append({
@@ -359,85 +314,41 @@ def ask_jarvis(message, memory):
                     ensure_ascii=False
                 ),
             })
-def falar_resposta(full_response):
-    buffer = ""
-    bloco = []
-    quantidade_frases = 0
-    primeiro_bloco = True
 
+def falar_resposta(full_response):
+    print("JARVIS:", full_response)
+
+    ui_bridge.broadcast({
+        "type": "status",
+        "state": "speaking"
+    })
+    sounds.play("speaking")
+
+    ui_bridge.broadcast({
+        "type": "log",
+        "role": "jarvis",
+        "text": full_response
+    })
+
+    buffer = ""
     for char in full_response:
         buffer += char
-
         while True:
             frase, buffer = extrair_proxima_frase(buffer)
-
             if frase is None:
                 break
-
-            bloco.append(frase)
-            quantidade_frases += 1
-
-            if quantidade_frases >= 3:
-                texto_bloco = " ".join(bloco).strip()
-                bloco = []
-                quantidade_frases = 0
-
-                frase_falada = limpar_para_fala(texto_bloco)
-
-                print("JARVIS:", texto_bloco)
-
-                ui_bridge.broadcast({
-                    "type": "status",
-                    "state": "speaking"
-                })
-
-                if primeiro_bloco:
-                    sounds.play("speaking")
-                    primeiro_bloco = False
-
-                ui_bridge.broadcast({
-                    "type": "log",
-                    "role": "jarvis",
-                    "text": texto_bloco
-                })
-
-                if frase_falada:
-                    speak(frase_falada)
+            frase_falada = limpar_para_fala(frase)
+            if frase_falada:
+                speak(frase_falada)
 
     restante = buffer.strip()
-
     if restante:
-        bloco.append(restante)
-
-    if bloco:
-        texto_bloco = " ".join(bloco).strip()
-        frase_falada = limpar_para_fala(texto_bloco)
-
-        print("JARVIS:", texto_bloco)
-
-        ui_bridge.broadcast({
-            "type": "status",
-            "state": "speaking"
-        })
-
-        if primeiro_bloco:
-            sounds.play("speaking")
-            primeiro_bloco = False
-
-        ui_bridge.broadcast({
-            "type": "log",
-            "role": "jarvis",
-            "text": texto_bloco
-        })
-
+        frase_falada = limpar_para_fala(restante)
         if frase_falada:
             speak(frase_falada)
 
-
 def main():
-
     memory = load_memory()
-
     ui_bridge.start_server_in_background()
 
     fatos_iniciais = {
@@ -447,26 +358,20 @@ def main():
     ui_bridge.broadcast({"type": "memory", "facts": fatos_iniciais})
 
     print("\n🤖 JARVIS iniciado.\n")
-
     sounds.play("startup")
 
     if memory.get("primeira_interacao"):
-
         response = ask_jarvis(
             """
 O usuário acabou de iniciar o sistema.
-
 Comece a primeira interação.
-
 Apresente-se como JARVIS.
 Explique que você está aqui para ajudar.
 Faça somente uma pergunta simples para conhecer o usuário.
-
 Não faça várias perguntas.
 """,
             memory
         )
-
         memory["primeira_interacao"] = False
         save_memory(memory)
 
@@ -483,7 +388,6 @@ Não faça várias perguntas.
     threading.Thread(target=escutar_terminal, daemon=True).start()
 
     while True:
-
         user_input = ui_bridge.mensagens_entrada.get()
 
         if user_input.lower() in ["sair", "exit", "quit"]:
@@ -507,7 +411,6 @@ Não faça várias perguntas.
             if k not in ("resumo_contexto", "historico_recente")
         }
         ui_bridge.broadcast({"type": "memory", "facts": fatos_para_ui})
-
 
 if __name__ == "__main__":
     main()
