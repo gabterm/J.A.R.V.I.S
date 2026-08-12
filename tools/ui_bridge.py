@@ -9,12 +9,13 @@ import uvicorn
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import RedirectResponse
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 INTERFACE_DIR = BASE_DIR / "interface"
 
-JS_FILE = INTERFACE_DIR / "script.js"
+JS_FILE = INTERFACE_DIR / "main.js"
 HTML_FILE = INTERFACE_DIR / "jarvis-hud.html"
 CSS_FILE = INTERFACE_DIR / "style.css"
 
@@ -43,12 +44,9 @@ app.mount(
     name="static",
 )
 
-@app.get("/script.js")
+@app.get("/main.js")
 async def javascript():
-    return FileResponse(
-        JS_FILE,
-        media_type="application/javascript",
-    )
+    return RedirectResponse(url="/static/js/main.js")
 
 @app.get("/")
 async def index():

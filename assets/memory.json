@@ -144,7 +144,8 @@
         "está com dificuldade para se concentrar e se sente desfocado",
         "apenas testando",
         "Esteve focado nas últimas horas",
-        "Não enviou nenhuma mensagem durante esse período"
+        "Não enviou nenhuma mensagem durante esse período",
+        "teve um dia bastante corrido"
     ],
     "preferencias": [
         "Não gosta muito de frases de efeito",
@@ -184,18 +185,6 @@
     ],
     "historico_recente": [
         {
-            "usuario": "o quadro tatuco nao funcioneou, tente novamente",
-            "jarvis": "Agora sim, senhor. O quadro tático foi executado novamente com a formação quatro três três, movimentação da bola, infiltração pelo lado direito e finalização do centroavante."
-        },
-        {
-            "usuario": "boa tarde, jarvis",
-            "jarvis": "Boa tarde, senhor Gabriel. Estou à disposição. O que deseja fazer hoje?"
-        },
-        {
-            "usuario": "estive focado nas ultimas horas e não enviei nenhuma mensagem nesee peirodo",
-            "jarvis": "Entendido, senhor. Então o senhor esteve concentrado nas últimas horas, sem interagir comigo nesse período. Uma ocorrência rara e, devo admitir, bastante eficiente.\n\nEspero que o foco tenha rendido bons resultados."
-        },
-        {
             "usuario": "boa tarde jarvis",
             "jarvis": "Boa tarde, senhor Gabriel. É um prazer recebê-lo novamente. Como foi o resultado desse período de foco?"
         },
@@ -222,7 +211,19 @@
         {
             "usuario": "me ocorreu que posso fazer algo semelhante para explicacoes cientifics",
             "jarvis": "Uma excelente ideia, senhor. O mesmo princípio do quadro tático pode funcionar muito bem como uma ferramenta visual para explicações científicas, especialmente quando o conceito envolve movimento, interação ou transformação.\n\nEm vez de jogadores, poderíamos representar partículas, átomos, moléculas, células, campos, forças ou corpos celestes. As setas poderiam indicar movimento, transferência de energia, atração, repulsão, ligação química, fluxo ou propagação de ondas. E a sequência de quadros permitiria mostrar o fenômeno acontecendo passo a passo, não apenas apresentar um diagrama estático.\n\nPor exemplo, seria possível explicar uma reação química mostrando primeiro os reagentes separados, depois as colisões entre as moléculas, em seguida a quebra e a formação de ligações e, por fim, os produtos resultantes. Também poderíamos representar difusão, osmose, transmissão de impulsos nervosos, órbitas gravitacionais, circuitos elétricos, colisões entre partículas ou até a expansão de um universo hipotético.\n\nA estrutura poderia ser dividida em quatro elementos principais: entidades, propriedades, interações e tempo. As entidades seriam os objetos visíveis. As propriedades poderiam incluir carga, massa, temperatura, velocidade ou estado físico. As interações mostrariam o que está acontecendo entre elas. O tempo organizaria a transformação em uma sequência compreensível.\n\nHá também uma diferença importante em relação ao futebol: em ciência, nem sempre devemos representar as entidades literalmente. Uma seta pode representar uma força, um campo ou um fluxo de probabilidade, e não necessariamente um objeto se deslocando. Portanto, seria útil distinguir visualmente entre movimento real, influência, transferência e hipótese.\n\nEu começaria com um sistema genérico de cenas científicas. Cada cena teria um título, uma descrição narrada, um conjunto de entidades com posição e propriedades, além de interações e transições. Depois, poderiam ser criados módulos específicos para química, física, biologia e astronomia.\n\nUm primeiro experimento interessante seria visualizar uma ligação iônica entre sódio e cloro. O quadro mostraria o elétron de valência do sódio, a aproximação do cloro, a transferência do elétron e a formação dos íons com cargas opostas. Seria simples o bastante para testar o mecanismo, mas rico o suficiente para validar partículas, rótulos, setas, cores e narração.\n\nIsso poderia evoluir para algo bastante poderoso: não apenas mostrar uma animação, mas permitir que o senhor altere parâmetros e observe as consequências. Por exemplo, mudar a temperatura em uma simulação de gás, aumentar a concentração de uma solução ou modificar a massa de um corpo em uma órbita. Nesse ponto, o sistema deixaria de ser apenas ilustrativo e passaria a funcionar como um laboratório visual interativo."
+        },
+        {
+            "usuario": "boa noite, jarvis",
+            "jarvis": "Boa noite, senhor Gabriel. Estou à disposição. Como foi o seu dia?"
+        },
+        {
+            "usuario": "foi um bom dia, bastante corrido",
+            "jarvis": "Fico satisfeito, senhor. Um dia corrido, mas bom, costuma indicar que houve bastante coisa acontecendo, ainda que o relógio tenha insistido em colaborar pouco.\n\nAgora talvez seja um bom momento para desacelerar um pouco e organizar o que ficou pendente. Se desejar, posso ajudá-lo a revisar o dia, planejar amanhã ou simplesmente conversar sobre qualquer assunto."
+        },
+        {
+            "usuario": "boa noite, jarvis",
+            "jarvis": "Boa noite, senhor Gabriel. Espero que o dia tenha terminado bem, apesar da correria. Estou à disposição para conversarmos ou ajudá-lo com o que precisar."
         }
     ],
-    "resumo_contexto": "Gabriel confirmou que o teste de exibição de código foi concluído com sucesso, validando destaque de sintaxe, formatação, quebras de linha e indentação para HTML, Python e JavaScript. Solicitou a montagem de um time no esquema 4-3-3; foi proposto um time da casa com goleiro 1, defesa formada pelos jogadores 2, 3, 4 e 6, meio-campo com 5, 8 e 10, e ataque com 7, 9 e 11. A estrutura prioriza um volante protegendo a entrada da área, dois meio-campistas nos corredores internos e pontas dando amplitude, com avanço do lateral do lado da bola compensado pela cobertura do volante."
+    "resumo_contexto": "Gabriel cumprimentou o JARVIS com “boa tarde” e informou que passou as últimas horas concentrado, sem enviar mensagens. O quadro tático foi executado novamente com sucesso, exibindo formação 4-3-3, movimentação da bola, infiltração pelo lado direito e finalização do centroavante."
 }
