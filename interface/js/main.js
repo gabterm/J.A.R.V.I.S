@@ -862,16 +862,37 @@ function formatMessage(text) {
 }
 
   /* ================= comando (texto) ================= */
-  const cmdInput = document.querySelector('.cmd-input');
-  const sendBtn = document.getElementById('sendBtn');
-  function enviarComando(texto) {
-    texto = (texto || '').trim(); if (!texto) return;
-    if (testModeOn) { addLogLine('user', texto); cmdInput.value = ''; setTimeout(() => addLogLine('jarvis', 'Isto é uma resposta simulada do modo teste.', 'moderada'), 700); return; }
-    if (!ws || ws.readyState !== WebSocket.OPEN) { setEstado('offline'); return; }
-    ws.send(JSON.stringify({ type: 'command', text: texto })); cmdInput.value = '';
+ /* ================= comando (texto) ================= */
+const cmdInput = document.querySelector('.cmd-input');
+const cmdInputBaseHeight = cmdInput.scrollHeight; // guarda a altura de 1 linha, calculada com o CSS já aplicado
+
+const sendBtn = document.getElementById('sendBtn');
+function enviarComando(texto) {
+  texto = (texto || '').trim(); if (!texto) return;
+  if (testModeOn) { addLogLine('user', texto); resetCmdInput(); setTimeout(() => addLogLine('jarvis', 'Isto é uma resposta simulada do modo teste.', 'moderada'), 700); return; }
+  if (!ws || ws.readyState !== WebSocket.OPEN) { setEstado('offline'); return; }
+  ws.send(JSON.stringify({ type: 'command', text: texto })); resetCmdInput();
+}
+
+function resetCmdInput() {
+  cmdInput.value = '';
+  cmdInput.style.height = cmdInputBaseHeight + 'px';
+}
+
+function autoResizeCmdInput() {
+  cmdInput.style.height = 'auto';
+  cmdInput.style.height = Math.min(cmdInput.scrollHeight, 160) + 'px';
+}
+
+cmdInput.addEventListener('input', autoResizeCmdInput);
+
+sendBtn.addEventListener('click', () => enviarComando(cmdInput.value));
+cmdInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    enviarComando(cmdInput.value);
   }
-  sendBtn.addEventListener('click', () => enviarComando(cmdInput.value));
-  cmdInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); enviarComando(cmdInput.value); } });
+});
 
 
   const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -893,3 +914,16 @@ function formatMessage(text) {
     micBtn.style.opacity = '0.3'; micBtn.style.cursor = 'not-allowed';
     micBtn.title = 'Reconhecimento de voz não suportado neste navegador — use o Chrome, ou digite o comando.';
   }
+
+  (function () {
+  const cmdInput = document.querySelector('.cmd-input');
+  if (!cmdInput) return;
+
+  function resize() {
+    cmdInput.style.height = 'auto';
+    cmdInput.style.height = Math.min(cmdInput.scrollHeight, 160) + 'px';
+  }
+
+  cmdInput.addEventListener('input', resize);
+  resize();
+})();
