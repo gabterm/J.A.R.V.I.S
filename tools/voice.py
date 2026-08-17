@@ -204,7 +204,6 @@ def numero_por_extenso(n, idioma="pt", genero="masc"):
     else:
         unidades = UNIDADES_FEM if genero == "fem" else UNIDADES_MASC
         dezenas = DEZENAS
-        centenas = CENTENAS
         conectivo = " e "
 
     if n < 20:
@@ -214,7 +213,7 @@ def numero_por_extenso(n, idioma="pt", genero="masc"):
     resto = n % 10
 
     if resto == 0:
-        return dezenas[dezena][centenas]
+        return dezenas[dezena]
 
     return f"{dezenas[dezena]}{conectivo}{unidades[resto]}"
 
@@ -233,14 +232,19 @@ def ler_horas(texto, idioma="pt"):
         minuto_num = int(minuto) if minuto is not None else 0
 
         if idioma != "pt":
-
-            hora_extenso = numero_por_extenso(hora, idioma)
+            if hora == 0:
+                base = "midnight"
+            elif hora == 12:
+                base = "noon"
+            else:
+                hora_12 = hora % 12
+                base = numero_por_extenso(hora_12, idioma)
 
             if minuto_num == 0:
-                return f"{hora_extenso} o'clock"
+                return base if hora in (0, 12) else f"{base} o'clock"
 
             minuto_extenso = numero_por_extenso(minuto_num, idioma)
-            return f"{hora_extenso} {minuto_extenso}"
+            return f"{base} {minuto_extenso}"
 
         if hora == 0:
             base = "meia-noite"

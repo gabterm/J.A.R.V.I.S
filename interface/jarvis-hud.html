@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700;800&family=Share+Tech+Mono&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/static/css/style.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 </head>
 <body>
 
@@ -141,6 +142,7 @@
         <button class="tab-btn active" id="tabRegistro">REGISTRO</button>
         <button class="tab-btn" id="tabInvestigacao">INVESTIGAÇÃO<span class="tab-alert-dot" id="invAlertDot" style="display:none"></span></button>
         <button class="tab-btn" id="tabTatica">TÁTICA<span class="tab-alert-dot" id="tacticalAlertDot" style="display:none"></span></button>
+        <button class="tab-btn" id="tabMapa">MAPA<span class="tab-alert-dot" id="mapAlertDot" style="display:none"></span></button>
       </div>
 
       <div class="panel log-panel" id="logPanel">
@@ -208,6 +210,18 @@
           </div>
         </div>
       </div>
+
+      <div class="panel map-panel" id="mapPanel">
+        <div class="panel-title">ROTA <span class="accent" id="mapModoLabel"></span></div>
+        <div class="map-empty" id="mapEmpty">NENHUMA ROTA CALCULADA</div>
+        <div id="mapContainer" style="display:none; height:340px; border-radius:6px; overflow:hidden;"></div>
+        <div class="map-info" id="mapInfo" style="display:none">
+          <div class="map-info-row"><span>DE</span><b id="mapOrigin"></b></div>
+          <div class="map-info-row"><span>PARA</span><b id="mapDest"></b></div>
+          <div class="map-info-row"><span>DISTÂNCIA</span><b id="mapDistance"></b></div>
+          <div class="map-info-row"><span>TEMPO</span><b id="mapDuration"></b></div>
+        </div>
+      </div>
     </div>
 
     <!-- SIDEBAR DIREITA -->
@@ -270,6 +284,7 @@
 
 </div>
 
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script type="module" src="/static/js/main.js"></script>
 
 </body>

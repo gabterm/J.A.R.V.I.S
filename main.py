@@ -1,7 +1,9 @@
 import json
 import os
-from dotenv import load_dotenv
+import re
 import threading
+import uuid
+from dotenv import load_dotenv
 from tools.tools import TOOLS, TOOL_FUNCTIONS
 from openai import OpenAI
 from tools.jarvis_sounds import sounds
@@ -21,6 +23,12 @@ ASSETS_DIR = BASE_DIR / "assets"
 MEMORY_FILE = ASSETS_DIR / "memory.json"
 PROMPT_FILE = ASSETS_DIR / "prompt.txt"
 
+# Protege memory.json e o dict `memory` em memória: a thread principal
+# (conversa) e a thread de ações de timeline (pin/unpin/remove) escrevem
+# nele de forma concorrente.
+memory_lock = threading.Lock()
+
+
 def default_memory():
     return {
         "primeira_interacao": True,
@@ -31,8 +39,10 @@ def default_memory():
         "preferencias": [],
         "objetivos": [],
         "resumo_contexto": "",
-        "historico_recente": []
+        "historico_recente": [],
+        "timeline": [],  # [{id, tipo, text, pinned}, ...]
     }
+
 
 def load_memory():
     if not os.path.exists(MEMORY_FILE):
@@ -47,11 +57,32 @@ def load_memory():
             save_memory(memory)
             return memory
 
-        return json.loads(content)
+        memory = json.loads(content)
+
+    # Migração leve para memory.json criados antes do campo timeline existir.
+    memory.setdefault("timeline", [])
+    return memory
+
 
 def save_memory(memory):
     with open(MEMORY_FILE, "w", encoding="utf-8") as file:
         json.dump(memory, file, indent=4, ensure_ascii=False)
+
+
+def _normalizar(texto):
+    """
+    Normaliza texto só para fins de comparação/dedupe — nunca é o que
+    é salvo. Resolve o grosso dos near-duplicates que o extrator de
+    fatos gera entre chamadas (aspas, capitalização, espaços extras),
+    ex: 'Ser chamado apenas de "senhor"' vs 'ser chamado apenas de senhor'.
+    """
+    if not isinstance(texto, str):
+        return texto
+    t = texto.strip().strip("\"'").lower()
+    t = re.sub(r"\s+", " ", t)
+    t = re.sub(r"[.,;:!?]+$", "", t)
+    return t
+
 
 MEMORY_EXTRACTION_SCHEMA = """
 Você é um extrator de fatos. Analise a mensagem do usuário (e, se ajudar,
@@ -75,6 +106,7 @@ Regras:
 - NUNCA invente informação. Só extraia o que foi dito literalmente.
 - Não inclua opiniões, suposições ou inferências.
 """
+
 
 def extract_facts(user_message, assistant_response):
     extraction = client.chat.completions.create(
@@ -102,6 +134,37 @@ def extract_facts(user_message, assistant_response):
     except (json.JSONDecodeError, TypeError):
         return {}
 
+
+def novos_itens_timeline(memory, facts):
+    """
+    Compara os fatos recém-extraídos contra o que já existe em memory
+    (por texto normalizado) e devolve só os itens genuinamente novos,
+    já no formato usado pela timeline da UI.
+    """
+    campos = (
+        ("interesses", "interesse"),
+        ("rotina", "rotina"),
+        ("preferencias", "preferencia"),
+        ("objetivos", "objetivo"),
+    )
+    novos = []
+    for campo, rotulo in campos:
+        existentes_norm = {_normalizar(i) for i in memory.get(campo, [])}
+        for item in (facts.get(campo) or []):
+            if not isinstance(item, str):
+                continue
+            item = item.strip()
+            if item and _normalizar(item) not in existentes_norm:
+                novos.append({
+                    "id": str(uuid.uuid4()),
+                    "tipo": rotulo,
+                    "text": item,
+                    "pinned": False,
+                })
+                existentes_norm.add(_normalizar(item))
+    return novos
+
+
 def merge_facts_into_memory(memory, facts):
     if not facts:
         return memory
@@ -116,28 +179,19 @@ def merge_facts_into_memory(memory, facts):
         if not isinstance(new_items, list):
             continue
         existing = memory.get(field, [])
+        existing_norm = {_normalizar(i) for i in existing}
         for item in new_items:
             item = item.strip() if isinstance(item, str) else item
-            if item and item not in existing:
+            if item and _normalizar(item) not in existing_norm:
                 existing.append(item)
+                existing_norm.add(_normalizar(item))
         memory[field] = existing
 
     return memory
 
+
 MAX_HISTORICO_BRUTO = 10
 
-CONDENSE_PROMPT = """
-Você resume conversas para servir de memória de longo prazo de um
-assistente pessoal chamado JARVIS.
-
-Receberá um resumo anterior (pode estar vazio) e uma lista de trocas mais
-antigas que precisam ser condensadas nele.
-
-Produza um novo resumo em português, em terceira pessoa, curto e denso,
-preservando fatos, decisões, contexto de projetos e preferências
-relevantes mencionados. Não invente nada que não esteja no material.
-Responda apenas com o texto do resumo, sem markdown, sem preâmbulo.
-"""
 
 def add_to_history(memory, user_message, assistant_response):
     historico = memory.get("historico_recente", [])
@@ -159,6 +213,21 @@ def add_to_history(memory, user_message, assistant_response):
     memory["historico_recente"] = historico
     return memory
 
+
+CONDENSE_PROMPT = """
+Você resume conversas para servir de memória de longo prazo de um
+assistente pessoal chamado JARVIS.
+
+Receberá um resumo anterior (pode estar vazio) e uma lista de trocas mais
+antigas que precisam ser condensadas nele.
+
+Produza um novo resumo em português, em terceira pessoa, curto e denso,
+preservando fatos, decisões, contexto de projetos e preferências
+relevantes mencionados. Não invente nada que não esteja no material.
+Responda apenas com o texto do resumo, sem markdown, sem preâmbulo.
+"""
+
+
 def condense_history(resumo_anterior, trocas_antigas):
     condensacao = client.chat.completions.create(
         model="gpt-5.6-luna",
@@ -176,9 +245,11 @@ def condense_history(resumo_anterior, trocas_antigas):
     )
     return condensacao.choices[0].message.content.strip()
 
+
 def load_prompt():
     with open(PROMPT_FILE, "r", encoding="utf-8") as file:
         return file.read()
+
 
 def ask_jarvis(message, memory):
     system_prompt = load_prompt()
@@ -186,7 +257,7 @@ def ask_jarvis(message, memory):
     fatos = {
         k: v
         for k, v in memory.items()
-        if k not in ("resumo_contexto", "historico_recente")
+        if k not in ("resumo_contexto", "historico_recente", "timeline")
     }
 
     contexto_parts = [
@@ -275,6 +346,12 @@ def ask_jarvis(message, memory):
                     "content": json.dumps(result),
                 })
                 sounds.play("error")
+                ui_bridge.broadcast({
+                    "type": "tool_exec",
+                    "name": tool_name,
+                    "status": "error",
+                    "result": "Argumentos inválidos.",
+                })
                 continue
 
             tool_function = TOOL_FUNCTIONS.get(tool_name)
@@ -285,6 +362,12 @@ def ask_jarvis(message, memory):
                     "message": f"Ferramenta desconhecida: {tool_name}"
                 }
                 sounds.play("error")
+                ui_bridge.broadcast({
+                    "type": "tool_exec",
+                    "name": tool_name,
+                    "status": "error",
+                    "result": result["message"],
+                })
             else:
                 print(
                     f"\n🔧 JARVIS executando: "
@@ -292,19 +375,35 @@ def ask_jarvis(message, memory):
                 )
 
                 ui_bridge.broadcast({
-                    "type": "status",
-                    "state": "working"
+                    "type": "tool_exec",
+                    "name": tool_name,
+                    "status": "running",
                 })
                 sounds.play("working")
 
                 try:
                     result = tool_function(**arguments)
+                    ok = result.get("success", True) if isinstance(result, dict) else True
+                    ui_bridge.broadcast({
+                        "type": "tool_exec",
+                        "name": tool_name,
+                        "status": "success" if ok else "error",
+                        "result": str(result.get("message", "")) if isinstance(result, dict) else str(result),
+                    })
+                    if not ok:
+                        sounds.play("error")
                 except Exception as error:
                     result = {
                         "success": False,
                         "message": str(error),
                     }
                     sounds.play("error")
+                    ui_bridge.broadcast({
+                        "type": "tool_exec",
+                        "name": tool_name,
+                        "status": "error",
+                        "result": str(error),
+                    })
 
             messages.append({
                 "role": "tool",
@@ -314,6 +413,7 @@ def ask_jarvis(message, memory):
                     ensure_ascii=False
                 ),
             })
+
 
 def falar_resposta(full_response):
     print("JARVIS:", full_response)
@@ -347,15 +447,59 @@ def falar_resposta(full_response):
         if frase_falada:
             speak(frase_falada)
 
+
+def escutar_terminal():
+    while True:
+        try:
+            texto = input("\nVocê: ")
+        except EOFError:
+            break
+        texto = texto.strip()
+        if texto:
+            ui_bridge.mensagens_entrada.put(texto)
+
+
+def escutar_acoes_timeline(memory_ref):
+    """
+    Consome pin/unpin/remove vindos da UI (fila separada da de comandos,
+    já que essas ações não passam pelo LLM). Muta e persiste o mesmo
+    memory.json usado pelo resto do JARVIS, e rebroadcasta a timeline
+    atualizada para todos os clientes conectados.
+    """
+    while True:
+        acao = ui_bridge.acoes_entrada.get()
+        item_id = acao["id"]
+        tipo_acao = acao["action"]
+
+        with memory_lock:
+            timeline = memory_ref.get("timeline", [])
+
+            if tipo_acao == "remove":
+                memory_ref["timeline"] = [
+                    i for i in timeline if i["id"] != item_id
+                ]
+            else:
+                for item in timeline:
+                    if item["id"] == item_id:
+                        item["pinned"] = (tipo_acao == "pin")
+                        break
+
+            save_memory(memory_ref)
+            timeline_atual = list(memory_ref.get("timeline", []))
+
+        ui_bridge.broadcast({"type": "timeline", "items": timeline_atual})
+
+
 def main():
     memory = load_memory()
     ui_bridge.start_server_in_background()
 
     fatos_iniciais = {
         k: v for k, v in memory.items()
-        if k not in ("resumo_contexto", "historico_recente")
+        if k not in ("resumo_contexto", "historico_recente", "timeline")
     }
     ui_bridge.broadcast({"type": "memory", "facts": fatos_iniciais})
+    ui_bridge.broadcast({"type": "timeline", "items": memory.get("timeline", [])})
 
     print("\n🤖 JARVIS iniciado.\n")
     sounds.play("startup")
@@ -373,19 +517,15 @@ Não faça várias perguntas.
             memory
         )
         memory["primeira_interacao"] = False
-        save_memory(memory)
-
-    def escutar_terminal():
-        while True:
-            try:
-                texto = input("\nVocê: ")
-            except EOFError:
-                break
-            texto = texto.strip()
-            if texto:
-                ui_bridge.mensagens_entrada.put(texto)
+        with memory_lock:
+            save_memory(memory)
 
     threading.Thread(target=escutar_terminal, daemon=True).start()
+    threading.Thread(
+        target=escutar_acoes_timeline,
+        args=(memory,),
+        daemon=True,
+    ).start()
 
     while True:
         user_input = ui_bridge.mensagens_entrada.get()
@@ -400,17 +540,24 @@ Não faça várias perguntas.
         response = ask_jarvis(user_input, memory)
 
         facts = extract_facts(user_input, response)
-        memory = merge_facts_into_memory(memory, facts)
 
-        memory = add_to_history(memory, user_input, response)
+        with memory_lock:
+            novos = novos_itens_timeline(memory, facts)
+            memory = merge_facts_into_memory(memory, facts)
+            memory.setdefault("timeline", []).extend(novos)
+            memory = add_to_history(memory, user_input, response)
+            save_memory(memory)
 
-        save_memory(memory)
+            fatos_para_ui = {
+                k: v for k, v in memory.items()
+                if k not in ("resumo_contexto", "historico_recente", "timeline")
+            }
 
-        fatos_para_ui = {
-            k: v for k, v in memory.items()
-            if k not in ("resumo_contexto", "historico_recente")
-        }
+        for item in novos:
+            ui_bridge.broadcast({"type": "timeline_add", "item": item})
+
         ui_bridge.broadcast({"type": "memory", "facts": fatos_para_ui})
+
 
 if __name__ == "__main__":
     main()

@@ -181,6 +181,105 @@ def remove_reminder(texto: str):
             "message": f"Não foi possível remover o lembrete: {error}",
         }
 
+def _geocode_local(local: str):
+    url = (
+        "https://nominatim.openstreetmap.org/search?"
+        f"q={urllib.parse.quote_plus(local)}&format=json&limit=1"
+    )
+    request = Request(url, headers={"User-Agent": "JARVIS/1.0 (assistente pessoal)"})
+    with urlopen(request, timeout=10) as response:
+        data = json.loads(response.read())
+
+    if not data:
+        return None
+
+    item = data[0]
+    return {
+        "lat": float(item["lat"]),
+        "lon": float(item["lon"]),
+        "nome": item.get("display_name", local),
+    }
+
+
+def _osrm_route(origem_lat, origem_lon, destino_lat, destino_lon, profile="driving"):
+    url = (
+        f"https://router.project-osrm.org/route/v1/{profile}/"
+        f"{origem_lon},{origem_lat};{destino_lon},{destino_lat}"
+        "?overview=full&geometries=geojson"
+    )
+    request = Request(url, headers={"User-Agent": "JARVIS/1.0"})
+    with urlopen(request, timeout=10) as response:
+        return json.loads(response.read())
+
+
+def get_distance(origem: str, destino: str, modo: str = "driving"):
+    try:
+        ponto_origem = _geocode_local(origem)
+        if not ponto_origem:
+            return {
+                "success": False,
+                "message": f"Local de origem não encontrado: {origem}",
+            }
+
+        # Nominatim pede no máximo 1 requisição por segundo
+        time.sleep(1)
+
+        ponto_destino = _geocode_local(destino)
+        if not ponto_destino:
+            return {
+                "success": False,
+                "message": f"Local de destino não encontrado: {destino}",
+            }
+
+        perfil = modo if modo in ("driving", "walking", "cycling") else "driving"
+
+        rota = _osrm_route(
+            ponto_origem["lat"], ponto_origem["lon"],
+            ponto_destino["lat"], ponto_destino["lon"],
+            perfil,
+        )
+
+        if rota.get("code") != "Ok" or not rota.get("routes"):
+            return {
+                "success": False,
+                "message": "Não foi possível calcular a rota entre os locais.",
+            }
+
+        trajeto = rota["routes"][0]
+        distancia_km = round(trajeto["distance"] / 1000, 1)
+        duracao_min = round(trajeto["duration"] / 60)
+
+        ui_bridge.broadcast({
+            "type": "map",
+            "origem": {"lat": ponto_origem["lat"], "lon": ponto_origem["lon"], "nome": origem},
+            "destino": {"lat": ponto_destino["lat"], "lon": ponto_destino["lon"], "nome": destino},
+            "distancia_km": distancia_km,
+            "duracao_min": duracao_min,
+            "modo": perfil,
+            "geometria": trajeto["geometry"],
+        })
+
+        horas, minutos = divmod(duracao_min, 60)
+        duracao_texto = f"{horas}h{minutos:02d}" if horas else f"{minutos} min"
+        modo_texto = {"driving": "de carro", "walking": "a pé", "cycling": "de bicicleta"}[perfil]
+
+        return {
+            "success": True,
+            "origem": origem,
+            "destino": destino,
+            "distancia_km": distancia_km,
+            "duracao_min": duracao_min,
+            "message": (
+                f"De {origem} até {destino}: {distancia_km} km, "
+                f"aproximadamente {duracao_texto} {modo_texto}."
+            ),
+        }
+
+    except Exception as error:
+        return {
+            "success": False,
+            "message": f"Não foi possível calcular a distância: {error}",
+        }
 
 def get_weather(local: str = "São Paulo, BR"):
     try:
@@ -1350,6 +1449,34 @@ TOOLS = [
             },
         },
     },
+
+    {
+    "type": "function",
+    "function": {
+        "name": "get_distance",
+        "description": (
+            "Calcula a distância e o tempo de viagem entre dois locais e "
+            "exibe a rota no mapa da interface. Use quando o usuário "
+            "pedir a distância entre lugares, quanto tempo leva pra "
+            "chegar em algum lugar, ou pedir pra ver uma rota no mapa."
+        ),
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "origem": {"type": "string", "description": "Local de partida."},
+                "destino": {"type": "string", "description": "Local de destino."},
+                "modo": {
+                    "type": "string",
+                    "enum": ["driving", "walking", "cycling"],
+                    "description": "Meio de transporte. Padrão: driving.",
+                },
+            },
+            "required": ["origem", "destino"],
+            "additionalProperties": False,
+        },
+    },
+},
+
     {
         "type": "function",
         "function": {
@@ -1489,6 +1616,7 @@ TOOL_FUNCTIONS = {
     "open_website": open_website,
     "search_web": search_web,
     "get_weather": get_weather,
+    "get_distance": get_distance,
     "open_application": open_application,
     "close_application": close_application,
     "open_folder": open_folder,

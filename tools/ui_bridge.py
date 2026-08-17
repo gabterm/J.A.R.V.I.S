@@ -24,7 +24,13 @@ PORT = 8765
 _clients = set()
 _loop = None
 
+# Comandos de texto (terminal ou caixa de comando da UI) — sempre strings.
 mensagens_entrada = queue.Queue()
+
+# Ações estruturadas vindas da UI que não são comandos de linguagem natural
+# (pin/unpin/remove de timeline, e futuras ações do tipo). Fila separada
+# de propósito: main.py não pode chamar .lower() em cima disso.
+acoes_entrada = queue.Queue()
 
 
 @asynccontextmanager
@@ -67,11 +73,23 @@ async def websocket_endpoint(websocket: WebSocket):
             except json.JSONDecodeError:
                 continue
 
-            if evento.get("type") == "command":
+            tipo = evento.get("type")
+
+            if tipo == "command":
                 texto = (evento.get("text") or "").strip()
 
                 if texto:
                     mensagens_entrada.put(texto)
+
+            elif tipo == "timeline_action":
+                item_id = evento.get("id")
+                acao = evento.get("action")
+
+                if item_id and acao in ("pin", "unpin", "remove"):
+                    acoes_entrada.put({
+                        "id": item_id,
+                        "action": acao,
+                    })
 
     except WebSocketDisconnect:
         _clients.discard(websocket)

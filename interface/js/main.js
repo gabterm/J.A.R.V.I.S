@@ -1,5 +1,4 @@
-
-  const bootLines = ['INICIALIZANDO NÚCLEO...', 'CARREGANDO PROTOCOLOS DE VOZ...', 'ESTABELECENDO CANAL SEGURO...', 'SINCRONIZANDO TELEMETRIA...', 'J.A.R.V.I.S PRONTO.'];
+const bootLines = ['INICIALIZANDO NÚCLEO...', 'CARREGANDO PROTOCOLOS DE VOZ...', 'ESTABELECENDO CANAL SEGURO...', 'SINCRONIZANDO TELEMETRIA...', 'J.A.R.V.I.S PRONTO.'];
   const bootTextEl = document.getElementById('bootText');
   const bootBarFill = document.getElementById('bootBarFill');
   const bootOverlay = document.getElementById('bootOverlay');
@@ -286,6 +285,16 @@
       document.getElementById('memVal').textContent = mem + '%'; document.getElementById('memBar').style.width = mem + '%';
       document.getElementById('diskVal').textContent = disk + '%'; document.getElementById('diskBar').style.width = disk + '%';
     }, 2500));
+
+    // rota simulada no mapa (São Paulo -> Rio de Janeiro)
+    renderMap({
+      origem: { lat: -23.5505, lon: -46.6333, nome: 'São Paulo, SP (teste)' },
+      destino: { lat: -22.9068, lon: -43.1729, nome: 'Rio de Janeiro, RJ (teste)' },
+      distancia_km: 429.3,
+      duracao_min: 340,
+      modo: 'driving',
+      geometria: null,
+    });
   }
 
   function pararModoTeste() {
@@ -340,29 +349,62 @@
     }
   }
 
-  /* ================= abas: registro / investigação / tática ================= */
+  /* ================= abas: registro / investigação / tática / mapa ================= */
   const tabRegistro = document.getElementById('tabRegistro');
   const tabInvestigacao = document.getElementById('tabInvestigacao');
   const tabTatica = document.getElementById('tabTatica');
+  const tabMapa = document.getElementById('tabMapa');
   const logPanel = document.getElementById('logPanel');
   const investigationPanel = document.getElementById('investigationPanel');
   const tacticalPanel = document.getElementById('tacticalPanel');
+  const mapPanel = document.getElementById('mapPanel');
   const invAlertDot = document.getElementById('invAlertDot');
   const tacticalAlertDot = document.getElementById('tacticalAlertDot');
+  const mapAlertDot = document.getElementById('mapAlertDot');
+
+  // Visibilidade das abas é controlada por display inline (não por classes
+  // CSS) — assim não depende de o style.css ter uma regra específica pra
+  // cada painel novo (foi o que quebrou o painel de mapa: ele não tinha
+  // uma regra ".map-panel { display:none }" correspondente e por isso
+  // aparecia em cima de todas as outras abas ao mesmo tempo).
+  const TAB_PANELS = {
+    registro: logPanel,
+    investigacao: investigationPanel,
+    tatica: tacticalPanel,
+    mapa: mapPanel,
+  };
 
   function showTab(tab) {
     tabRegistro.classList.toggle('active', tab === 'registro');
     tabInvestigacao.classList.toggle('active', tab === 'investigacao');
     tabTatica.classList.toggle('active', tab === 'tatica');
-    logPanel.classList.toggle('hidden-tab', tab !== 'registro');
+    tabMapa.classList.toggle('active', tab === 'mapa');
+
+    Object.entries(TAB_PANELS).forEach(([nome, painel]) => {
+      painel.style.display = nome === tab ? 'flex' : 'none';
+    });
+
+    // classe .visible mantida por compatibilidade, caso algum CSS
+    // existente ainda dependa dela pra estilizar (bordas, animação etc.)
     investigationPanel.classList.toggle('visible', tab === 'investigacao');
     tacticalPanel.classList.toggle('visible', tab === 'tatica');
+    mapPanel.classList.toggle('visible', tab === 'mapa');
+
     if (tab === 'investigacao') invAlertDot.style.display = 'none';
     if (tab === 'tatica') tacticalAlertDot.style.display = 'none';
+    if (tab === 'mapa') mapAlertDot.style.display = 'none';
+    // o Leaflet precisa recalcular o tamanho do container quando a aba
+    // estava escondida (display:none) no momento em que o mapa foi criado
+    if (tab === 'mapa' && jarvisMap) setTimeout(() => jarvisMap.invalidateSize(), 60);
   }
+
+  // Estado inicial: só a aba REGISTRO visível, o resto escondido —
+  // roda assim que os elementos existem, antes de qualquer evento chegar.
+  showTab('registro');
   tabRegistro.addEventListener('click', () => { showTab('registro'); tocarSom('toggle'); });
   tabInvestigacao.addEventListener('click', () => { showTab('investigacao'); tocarSom('toggle'); });
   tabTatica.addEventListener('click', () => { showTab('tatica'); tocarSom('toggle'); });
+  tabMapa.addEventListener('click', () => { showTab('mapa'); tocarSom('toggle'); });
 
   function renderList(html) {
     if (Array.isArray(html)) return '<ul>' + html.map(i => `<li>${i}</li>`).join('') + '</ul>';
@@ -677,6 +719,80 @@ function typewriter(el, texto) {
     remindersCount.textContent = lista.filter(i => !i.concluido).length;
   }
 
+  /* ================= mapa / distância ================= */
+  let jarvisMap = null;
+  let mapRouteLayer = null;
+  let mapMarkerOrigin = null;
+  let mapMarkerDest = null;
+
+  function ensureMapInitialized() {
+    if (jarvisMap) return;
+    if (typeof L === 'undefined') {
+      console.warn('Leaflet não carregado — verifique o script no <head>.');
+      return;
+    }
+    jarvisMap = L.map('mapContainer', { zoomControl: true, attributionControl: true }).setView([-23.55, -46.63], 5);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; OpenStreetMap &copy; CARTO',
+      subdomains: 'abcd',
+      maxZoom: 19,
+    }).addTo(jarvisMap);
+  }
+
+  function renderMap(dados) {
+    ensureMapInitialized();
+    if (!jarvisMap) return;
+
+    document.getElementById('mapEmpty').style.display = 'none';
+    document.getElementById('mapContainer').style.display = 'block';
+    document.getElementById('mapInfo').style.display = 'flex';
+    document.getElementById('mapModoLabel').textContent = (dados.modo || '').toUpperCase();
+
+    // se o container estava com display:none quando o mapa foi criado, o
+    // Leaflet mede tudo como 0x0 — corrige o tamanho depois de exibir
+    setTimeout(() => jarvisMap.invalidateSize(), 60);
+
+    [mapMarkerOrigin, mapMarkerDest, mapRouteLayer].forEach(layer => {
+      if (layer) jarvisMap.removeLayer(layer);
+    });
+
+    const rgb = getCyanRgb();
+    const corOrigem = `rgb(${rgb})`;
+    const corDestino = '#ff5a5a';
+
+    mapMarkerOrigin = L.circleMarker([dados.origem.lat, dados.origem.lon], {
+      radius: 6, color: corOrigem, fillColor: corOrigem, fillOpacity: 0.9, weight: 2,
+    }).addTo(jarvisMap).bindPopup(dados.origem.nome);
+
+    mapMarkerDest = L.circleMarker([dados.destino.lat, dados.destino.lon], {
+      radius: 6, color: corDestino, fillColor: corDestino, fillOpacity: 0.9, weight: 2,
+    }).addTo(jarvisMap).bindPopup(dados.destino.nome);
+
+    if (dados.geometria && dados.geometria.coordinates) {
+      const coords = dados.geometria.coordinates.map(c => [c[1], c[0]]);
+      mapRouteLayer = L.polyline(coords, { color: corOrigem, weight: 3, opacity: 0.85 }).addTo(jarvisMap);
+      jarvisMap.fitBounds(mapRouteLayer.getBounds(), { padding: [30, 30] });
+    } else {
+      const bounds = L.latLngBounds([
+        [dados.origem.lat, dados.origem.lon],
+        [dados.destino.lat, dados.destino.lon],
+      ]);
+      jarvisMap.fitBounds(bounds, { padding: [30, 30] });
+    }
+
+    document.getElementById('mapOrigin').textContent = dados.origem.nome;
+    document.getElementById('mapDest').textContent = dados.destino.nome;
+    document.getElementById('mapDistance').textContent = dados.distancia_km + ' km';
+
+    const totalMin = Math.round(dados.duracao_min || 0);
+    const h = Math.floor(totalMin / 60);
+    const m = totalMin % 60;
+    document.getElementById('mapDuration').textContent = h > 0 ? `${h}h${String(m).padStart(2, '0')}` : `${m} min`;
+
+    if (!mapPanel.classList.contains('visible')) mapAlertDot.style.display = 'inline-block';
+    addEvent('mapa', `Rota calculada: ${dados.origem.nome} → ${dados.destino.nome}`);
+  }
+
   /* ================= feed de eventos ================= */
   function addEvent(categoria, texto) {
     const time = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
@@ -823,6 +939,7 @@ function typewriter(el, texto) {
         case 'tactical_frame': avancarQuadroTatico(evento); break;
         case 'weather': renderWeather(evento); break;
         case 'reminders': renderReminders(evento.items); break;
+        case 'map': renderMap(evento); showTab('mapa'); break;
         case 'timeline':
           timelineItems = evento.items || []; renderTimeline(); break;
         case 'timeline_add':
