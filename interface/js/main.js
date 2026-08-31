@@ -1,4 +1,3 @@
-/* ================= boot ================= */
 const bootLines = ['INICIALIZANDO NÚCLEO...', 'CARREGANDO PROTOCOLOS DE VOZ...', 'ESTABELECENDO CANAL SEGURO...', 'SINCRONIZANDO TELEMETRIA...', 'J.A.R.V.I.S PRONTO.'];
 const bootTextEl = document.getElementById('bootText');
 const bootBarFill = document.getElementById('bootBarFill');
@@ -22,7 +21,6 @@ runBoot();
 
 let animSpeedMult = 1;
 
-/* ================= partículas de fundo ================= */
 const canvas = document.getElementById('bgCanvas');
 const ctx2d = canvas.getContext('2d');
 let particles = [];
@@ -47,28 +45,9 @@ function drawBg() {
 }
 drawBg();
 
-/* ================= glitch periódico no wordmark ================= */
 const wordmark = document.getElementById('wordmark');
 setInterval(() => { wordmark.classList.add('glitch'); setTimeout(() => wordmark.classList.remove('glitch'), 400); }, 16000 + Math.random() * 6000);
 
-/* ================= telemetria (tags do núcleo) ================= */
-const tagLink = document.getElementById('tagLink');
-const tagNode = document.getElementById('tagNode');
-const tagCtx = document.getElementById('tagCtx');
-const tagConf = document.getElementById('tagConf');
-const tagSys = document.getElementById('tagSys');
-let lastPingSent = 0;
-setInterval(() => {
-  // NODE é decorativo (identificador de sessão); os demais refletem estado real quando disponível
-  tagNode.textContent = '0x' + Math.floor(Math.random() * 65535).toString(16).padStart(4, '0').toUpperCase();
-}, 4000);
-
-/* ================= relógio / uptime ================= */
-function tick() {
-  const agora = new Date();
-  document.getElementById('clock').textContent = agora.toLocaleTimeString('pt-BR');
-}
-tick(); setInterval(tick, 1000);
 const start = Date.now();
 function updateUptime() {
   const diff = Math.floor((Date.now() - start) / 1000);
@@ -81,7 +60,6 @@ setInterval(updateUptime, 1000);
 let dotCount = 1;
 setInterval(() => { dotCount = (dotCount % 3) + 1; const dots = document.getElementById('dots'); if (dots) dots.textContent = '.'.repeat(dotCount); }, 600);
 
-/* ================= settings drawer (tema + som) ================= */
 const settingsToggle = document.getElementById('settingsToggle');
 const settingsDrawer = document.getElementById('settingsDrawer');
 const soundSwitch = document.getElementById('soundSwitch');
@@ -100,7 +78,7 @@ document.querySelectorAll('.swatch').forEach(sw => {
   sw.addEventListener('click', () => {
     document.querySelectorAll('.swatch').forEach(s => s.classList.remove('selected'));
     sw.classList.add('selected');
-    document.body.classList.remove('theme-amber', 'theme-green', 'theme-red');
+    document.body.classList.remove('theme-amber', 'theme-violet', 'theme-red');
     const tema = sw.dataset.theme;
     if (tema !== 'cyan') document.body.classList.add('theme-' + tema);
     tocarSom('toggle');
@@ -167,11 +145,6 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && mediaOverlay.classList.contains('open')) fecharMedia();
 });
 
-/* ================= navegação ao vivo (browser_open/click/type/...) =================
-   Cada ação de navegação do backend (Playwright, tools/web_agent.py) manda
-   um screenshot em base64 via 'browser_screenshot'. Aqui só trocamos a
-   imagem exibida — não há iframe nem controle de clique no navegador do
-   usuário, a navegação real acontece inteira no backend. */
 const browserOverlay = document.getElementById('browserOverlay');
 const browserTitle = document.getElementById('browserTitle');
 const browserUrl = document.getElementById('browserUrl');
@@ -199,11 +172,6 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && browserOverlay.classList.contains('open')) fecharNavegacaoAoVivo();
 });
 
-/* ================= quadro de raciocínio (show_reasoning_board) =================
-   Recebe 'reasoning_board' (abre o overlay) seguido de um ou mais 'reasoning_frame'
-   (cada um é o ESTADO COMPLETO do quadro naquele instante — nós + conexões).
-   O backend já narra cada quadro em voz alta de forma bloqueante e sincronizada,
-   então aqui é só desenhar o SVG de novo a cada frame recebido. */
 const reasoningOverlay = document.getElementById('reasoningOverlay');
 const reasoningTitle = document.getElementById('reasoningTitle');
 const reasoningSvg = document.getElementById('reasoningSvg');
@@ -258,7 +226,6 @@ function renderQuadroRaciocinio(nos, conexoes, anotacao) {
 
   const partes = [];
 
-  // conexões primeiro, pra ficarem atrás dos nós
   (conexoes || []).forEach(c => {
     const de = porId[c.de], para = porId[c.para];
     if (!de || !para) return;
@@ -292,19 +259,17 @@ function renderQuadroRaciocinio(nos, conexoes, anotacao) {
   reasoningCaption.textContent = anotacao || '';
 }
 
-/* ================= núcleo: estados ================= */
 const micBtn = document.getElementById('micBtn');
-const coreStage = document.getElementById('coreStage');
-const coreStatus = document.getElementById('coreStatus');
+const clockStage = document.getElementById('clockStage');
+const clockStatus = document.getElementById('clockStatus');
 const statusPillText = document.getElementById('statusPillText');
 const ESTADOS = { idle: 'AGUARDANDO COMANDO', thinking: 'PROCESSANDO', speaking: 'FALANDO', listening: 'OUVINDO', alert: 'ALERTA', offline: 'DESCONECTADO' };
 
 function setEstado(estado) {
   const label = ESTADOS[estado] || estado.toUpperCase();
-  coreStatus.innerHTML = `${label}<b id="dots">.</b>`;
+  clockStatus.innerHTML = `${label}<b id="dots">.</b>`;
   micBtn.classList.toggle('active', estado === 'speaking' || estado === 'thinking' || estado === 'listening');
-  coreStage.className = 'core-stage mode-' + (estado === 'offline' ? 'alert' : estado);
-  tagSys.textContent = estado === 'offline' ? 'ERR' : 'OK';
+  clockStage.className = 'clock-stage mode-' + (estado === 'offline' ? 'alert' : estado);
 
   const jaOffline = document.body.classList.contains('offline');
   if (estado === 'offline' && !jaOffline) {
@@ -330,7 +295,40 @@ function setSubsystem(nome, active, pulseOnly) {
   if (pulseOnly) setTimeout(() => { if (nome !== 'websocket') el.classList.remove('active'); }, 2200);
 }
 
-/* ================= terminal (registro de interação) ================= */
+const clockTimeEl = document.getElementById('clockTime');
+const clockDateEl = document.getElementById('clockDate');
+const clockSecondHand = document.getElementById('clockSecondHand');
+const clockFormatToggle = document.getElementById('clockFormatToggle');
+let formato24h = true;
+
+function atualizarRelogioCentral() {
+  const agora = new Date();
+  const seg = agora.getSeconds();
+  const graus = (seg / 60) * 360;
+  clockSecondHand.style.transform = `translate(-50%,0) rotate(${graus}deg)`;
+
+  let horas = agora.getHours();
+  let sufixo = '';
+  if (!formato24h) {
+    sufixo = horas >= 12 ? ' PM' : ' AM';
+    horas = horas % 12; if (horas === 0) horas = 12;
+  }
+  const hh = String(horas).padStart(2, '0');
+  const mm = String(agora.getMinutes()).padStart(2, '0');
+  const ss = String(seg).padStart(2, '0');
+  clockTimeEl.textContent = `${hh}:${mm}:${ss}${sufixo}`;
+  clockDateEl.textContent = agora.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+}
+atualizarRelogioCentral();
+setInterval(atualizarRelogioCentral, 1000);
+
+clockFormatToggle.addEventListener('click', () => {
+  formato24h = !formato24h;
+  clockFormatToggle.textContent = formato24h ? '24H' : '12H';
+  atualizarRelogioCentral();
+  tocarSom('toggle');
+});
+
 const terminalBody = document.getElementById('terminalBody');
 function addTermLine(role, text, opts) {
   const empty = document.getElementById('terminalEmpty'); if (empty) empty.remove();
@@ -338,19 +336,23 @@ function addTermLine(role, text, opts) {
   const cls = role === 'user' ? 'role-user' : (role === 'system' ? 'role-system' : 'role-jarvis');
   div.className = `term-line ${cls}`;
   const prefix = role === 'user'
-  ? 'araujo@jarvis:~$'
-  : role === 'system'
-    ? '[sistema]'
-    : 'jarvis>';
+    ? 'araujo@jarvis:~$'
+    : role === 'system'
+      ? '[sistema]'
+      : 'jarvis>';
   const time = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
   div.innerHTML = `<span class="t-time">${time}</span> <span class="t-prefix">${prefix}</span> <span class="t-text"></span>`;
+  div.addEventListener('click', () => {
+    navigator.clipboard?.writeText((text || '').trim()).catch(() => {});
+    div.classList.add('copied');
+    setTimeout(() => div.classList.remove('copied'), 500);
+  });
   terminalBody.appendChild(div);
   const textEl = div.querySelector('.t-text');
   typewriter(textEl, text || '');
   terminalBody.scrollTop = terminalBody.scrollHeight;
   while (terminalBody.children.length > 60) terminalBody.removeChild(terminalBody.firstChild);
 
-  registrarAtividade(role);
   if (role === 'user') { tocarSom('envio'); }
   else if (role !== 'system') { tocarSom('recebido'); }
 }
@@ -360,17 +362,6 @@ function typewriter(el, texto) {
   passo();
 }
 
-/* ================= execução manual de ferramentas (slash commands) =================
-   Espelha 1:1 as funções de tools.py (TOOL_FUNCTIONS). Digitar "/nome chave=valor ..."
-   no terminal chama a ferramenta DIRETO no backend, sem passar pelo modelo — ideal
-   pra testar. Texto sem "/" continua indo pro fluxo normal de chat (LLM).
-
-   IMPORTANTE: pra isso realmente executar algo, o servidor por trás do WebSocket
-   precisa tratar mensagens { type: "tool_call", name, args } e responder com
-   "tool_exec"/"tool_result". Se o seu backend só trata { type: "command" } (o
-   texto solto que vai pro LLM), o comando aparece no terminal mas nunca roda —
-   é a causa mais provável de "/help" ou "/get_weather ..." parecerem não fazer
-   nada. Vale conferir o handler do WebSocket no servidor. */
 const TOOLS_META = {
   get_current_time:    { params: [{ n: 'timezone', req: false }] },
   get_current_date:    { params: [{ n: 'timezone', req: false }] },
@@ -399,7 +390,6 @@ const TOOLS_META = {
   show_simulation:     { params: [{ n: 'titulo', req: true }, { n: 'objetos', req: true, tipo: 'json' }, { n: 'modo', req: false }, { n: 'duracao', req: false }, { n: 'loop', req: false }, { n: 'velocidade', req: false }, { n: 'anotacao', req: false }] },
 };
 
-// tokeniza "chave=valor" respeitando aspas ("...") e colchetes/chaves ([...] / {...})
 function tokenizarArgs(resto) {
   const regex = /(\w+)=("(?:[^"\\]|\\.)*"|\[[^\]]*\]|\{[^}]*\}|\S+)/g;
   const args = {}; let m;
@@ -407,7 +397,7 @@ function tokenizarArgs(resto) {
     let [, chave, valor] = m;
     if (valor.startsWith('"') && valor.endsWith('"')) valor = valor.slice(1, -1);
     else if (valor.startsWith('[') || valor.startsWith('{')) {
-      try { valor = JSON.parse(valor); } catch { /* mantém como string se o JSON for inválido */ }
+      try { valor = JSON.parse(valor); } catch {}
     } else if (/^-?\d+$/.test(valor)) valor = parseInt(valor, 10);
     args[chave] = valor;
   }
@@ -422,7 +412,9 @@ function listarFerramentas() {
   addTermLine('system', `FERRAMENTAS DISPONÍVEIS:\n${linhas.join('\n')}\n\nSintaxe: /ferramenta chave="valor" chave2=valor2`);
 }
 
-// retorna true se tratou o input como slash-command (não deve seguir pro chat normal)
+let cmdHistory = [];
+let cmdHistoryPos = -1;
+
 function tratarSlashCommand(texto) {
   if (!texto.startsWith('/')) return false;
   const semBarra = texto.slice(1).trim();
@@ -434,7 +426,7 @@ function tratarSlashCommand(texto) {
   resetCmdInput();
 
   if (nome === 'help' || nome === 'ajuda') { listarFerramentas(); return true; }
-  if (nome === 'clear' || nome === 'limpar') { terminalBody.innerHTML = '<div class="term-empty" id="terminalEmpty">t</div>'; return true; }
+  if (nome === 'clear' || nome === 'limpar') { terminalBody.innerHTML = '<div class="term-empty" id="terminalEmpty"></div>'; return true; }
 
   const meta = TOOLS_META[nome];
   if (!meta) {
@@ -465,58 +457,42 @@ function formatarResultadoFerramenta(evento) {
   try { return JSON.stringify(evento.data ?? evento, null, 2); } catch { return String(evento.data); }
 }
 
-/* ================= system logs ================= */
 const logsBody = document.getElementById('logsBody');
 const logsCount = document.getElementById('logsCount');
+const logsToolbar = document.getElementById('logsToolbar');
 let totalLogs = 0;
+let filtroLogAtivo = 'all';
+
 function addLogEvent(level, texto) {
   const empty = document.getElementById('logsEmpty'); if (empty) empty.remove();
   const div = document.createElement('div');
   div.className = `log-row level-${level}`;
+  div.dataset.level = level;
   const time = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
   const label = level === 'info' ? 'INFO' : (level === 'warn' ? 'WARN' : 'ERROR');
   div.innerHTML = `<span class="lg-time">${time}</span><span class="lg-level">${label}</span><span class="lg-text">${texto}</span>`;
+  if (filtroLogAtivo !== 'all' && filtroLogAtivo !== level) div.style.display = 'none';
+  div.addEventListener('click', () => {
+    navigator.clipboard?.writeText(texto).catch(() => {});
+    div.classList.add('copied');
+    setTimeout(() => div.classList.remove('copied'), 500);
+  });
   logsBody.prepend(div);
   while (logsBody.children.length > 50) logsBody.removeChild(logsBody.lastChild);
   totalLogs++; logsCount.textContent = totalLogs;
 }
 
-/* ================= atividade (mensagens / min) ================= */
-let activityTimestamps = { user: [], jarvis: [] };
-const activityValueEl = document.getElementById('activityValue');
-const activitySvg = document.getElementById('activitySvg');
-function registrarAtividade(role) {
-  const key = role === 'user' ? 'user' : 'jarvis';
-  if (!activityTimestamps[key]) return;
-  activityTimestamps[key].push(Date.now());
-  renderActivity();
-}
-function renderActivity() {
-  const now = Date.now();
-  const janela = 60000; // 1 min
-  ['user', 'jarvis'].forEach(k => { activityTimestamps[k] = activityTimestamps[k].filter(t => now - t <= janela); });
-  const total = activityTimestamps.user.length + activityTimestamps.jarvis.length;
-  activityValueEl.textContent = total;
+logsToolbar.addEventListener('click', (e) => {
+  const btn = e.target.closest('.logs-filter-btn');
+  if (!btn) return;
+  filtroLogAtivo = btn.dataset.level;
+  logsToolbar.querySelectorAll('.logs-filter-btn').forEach(b => b.classList.toggle('active', b === btn));
+  logsBody.querySelectorAll('.log-row').forEach(row => {
+    row.style.display = (filtroLogAtivo === 'all' || row.dataset.level === filtroLogAtivo) ? '' : 'none';
+  });
+  tocarSom('toggle');
+});
 
-  // agrupa em 12 baldes de 5s para desenhar a linha
-  const buckets = 12; const bucketMs = janela / buckets;
-  function toPoints(arr) {
-    const counts = new Array(buckets).fill(0);
-    arr.forEach(t => { const idx = Math.min(buckets - 1, Math.floor((now - t) / bucketMs)); counts[buckets - 1 - idx]++; });
-    const max = Math.max(1, ...counts);
-    return counts.map((c, i) => `${(i / (buckets - 1)) * 100},${40 - (c / max) * 34 - 2}`).join(' ');
-  }
-  const ptsDown = toPoints(activityTimestamps.user);
-  const ptsUp = toPoints(activityTimestamps.jarvis);
-  activitySvg.innerHTML = `
-    <polyline class="activity-line" points="${ptsDown}"/>
-    <polyline class="activity-line up" points="${ptsUp}"/>
-  `;
-}
-setInterval(renderActivity, 4000);
-renderActivity();
-
-/* ================= notificações ================= */
 const notifBox = document.getElementById('notifications');
 function notify(texto, level = 'info') {
   const div = document.createElement('div');
@@ -528,7 +504,6 @@ function notify(texto, level = 'info') {
   setTimeout(() => { div.classList.remove('show'); setTimeout(() => div.remove(), 400); }, 5000);
 }
 
-/* ================= som ================= */
 let audioCtx = null;
 function getAudioCtx() { if (!audioCtx) { const AC = window.AudioContext || window.webkitAudioContext; if (AC) audioCtx = new AC(); } return audioCtx; }
 function beep({ freq = 880, dur = 0.08, type = 'sine', vol = 0.08, delay = 0, glideTo = null }) {
@@ -557,7 +532,6 @@ function tocarSom(tipo) {
 }
 document.addEventListener('click', () => { getAudioCtx(); }, { once: true });
 
-/* ================= exportar registro ================= */
 document.getElementById('exportBtn').addEventListener('click', () => {
   tocarSom('toggle');
   const linhas = Array.from(document.querySelectorAll('.term-line')).map(el => el.textContent.trim());
@@ -566,889 +540,13 @@ document.getElementById('exportBtn').addEventListener('click', () => {
   a.href = url; a.download = `jarvis-registro-${Date.now()}.txt`; a.click(); URL.revokeObjectURL(url);
 });
 
-/* ================= nav lateral (foco visual) ================= */
-document.querySelectorAll('.nav-item').forEach(item => {
-  item.addEventListener('click', () => {
-    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-    item.classList.add('active');
-    tocarSom('toggle');
-  });
-});
-
-/* ================= clima (autônomo — busca direto no navegador, sem passar pela tool get_weather) ================= */
-/* ================= clima ================= */
-
-const WMO_MAP_JS = {
-  0:  ['céu limpo', 'sun'],
-  1:  ['poucas nuvens', 'cloud-sun'],
-  2:  ['parcialmente nublado', 'cloud-sun'],
-  3:  ['nublado', 'cloud'],
-
-  45: ['neblina', 'cloud-fog'],
-  48: ['neblina com geada', 'cloud-fog'],
-
-  51: ['garoa fraca', 'cloud-drizzle'],
-  53: ['garoa', 'cloud-drizzle'],
-  55: ['garoa forte', 'cloud-rain'],
-
-  56: ['garoa congelante', 'cloud-rain'],
-  57: ['garoa congelante forte', 'cloud-rain'],
-
-  61: ['chuva fraca', 'cloud-drizzle'],
-  63: ['chuva', 'cloud-rain'],
-  65: ['chuva forte', 'cloud-rain'],
-
-  66: ['chuva congelante', 'cloud-rain'],
-  67: ['chuva congelante forte', 'cloud-rain'],
-
-  71: ['neve fraca', 'cloud-snow'],
-  73: ['neve', 'cloud-snow'],
-  75: ['neve forte', 'snowflake'],
-  77: ['grãos de neve', 'cloud-snow'],
-
-  80: ['pancadas fracas', 'cloud-sun-rain'],
-  81: ['pancadas de chuva', 'cloud-rain'],
-  82: ['pancadas fortes', 'cloud-lightning'],
-
-  85: ['pancadas de neve fracas', 'cloud-snow'],
-  86: ['pancadas de neve fortes', 'snowflake'],
-
-  95: ['tempestade', 'cloud-lightning'],
-  96: ['tempestade com granizo', 'cloud-lightning'],
-  99: ['tempestade forte', 'cloud-lightning'],
-};
-
-const ICON_POR_CATEGORIA = {
-  ceu_limpo: 'sun',
-  nublado: 'cloud',
-  chuva: 'cloud-rain',
-  neve: 'snowflake',
-  tempestade: 'cloud-lightning',
-  neblina: 'cloud-fog',
-};
-const WEATHER_DEFAULT_LOCAL = 'Curitiba, BR'; // usado só se a geolocalização do navegador falhar/for negada
-const WEATHER_REFRESH_MS = 15 * 60 * 1000; // atualiza sozinho a cada 15 minutos
-
-function aplicarClima({ temp, sensacao, umidade, vento, min, max, condTexto, icone, local }) {
-  document.getElementById('weatherIcon').innerHTML = `
-  <i data-lucide="${icone}"></i>
-`;
-
-lucide.createIcons();
-  document.getElementById('weatherTemp').textContent = Math.round(temp) + '°';
-  document.getElementById('weatherCond').textContent = condTexto;
-  document.getElementById('weatherLoc').textContent = local;
-  document.getElementById('weatherFeels').textContent = Math.round(sensacao) + '°';
-  document.getElementById('weatherMinMax').textContent = Math.round(min) + '° / ' + Math.round(max) + '°';
-  document.getElementById('weatherHumidity').textContent = Math.round(umidade) + '%';
-  document.getElementById('weatherWind').textContent = Math.round(vento) + ' km/h';
-  document.getElementById('weatherAccent').textContent = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-}
-
-async function buscarClimaPorCoordenadas(lat, lon, nomeLocal) {
-  try {
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}` +
-      `&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m` +
-      `&daily=temperature_2m_min,temperature_2m_max&timezone=auto`;
-    const resp = await fetch(url);
-    const data = await resp.json();
-   const [condTexto, icone] =
-  WMO_MAP_JS[data.current.weather_code] ||
-  ['indefinido', 'thermometer'];
-    aplicarClima({
-      temp: data.current.temperature_2m,
-      sensacao: data.current.apparent_temperature,
-      umidade: data.current.relative_humidity_2m,
-      vento: data.current.wind_speed_10m,
-      min: data.daily.temperature_2m_min[0],
-      max: data.daily.temperature_2m_max[0],
-      condTexto, icone,
-      local: nomeLocal,
-    });
-  } catch (error) {
-    document.getElementById('weatherCond').textContent = 'indisponível';
-  }
-}
-
-async function buscarClimaPorNome(local) {
-  try {
-    const geoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(local)}&count=1&language=pt&format=json`;
-    const geoResp = await fetch(geoUrl);
-    const geoData = await geoResp.json();
-    const item = (geoData.results || [])[0];
-    if (!item) { document.getElementById('weatherCond').textContent = 'local não encontrado'; return; }
-    const nomeLocal = [item.name, item.admin1, item.country].filter(Boolean).join(', ');
-    await buscarClimaPorCoordenadas(item.latitude, item.longitude, nomeLocal);
-  } catch (error) {
-    document.getElementById('weatherCond').textContent = 'indisponível';
-  }
-}
-
-function atualizarClima() {
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(
-      (pos) => buscarClimaPorCoordenadas(pos.coords.latitude, pos.coords.longitude, 'localização atual'),
-      () => buscarClimaPorNome(WEATHER_DEFAULT_LOCAL),
-      { timeout: 4000 }
-    );
-  } else {
-    buscarClimaPorNome(WEATHER_DEFAULT_LOCAL);
-  }
-}
-atualizarClima();
-setInterval(atualizarClima, WEATHER_REFRESH_MS);
-
-/* ================= terra 3d (three.js, textura procedural — sem depender de imagem externa) ================= */
-/* ================= TERRA 3D — TERRA HOLOGRÁFICA ================= */
-function initEarth() {
-  const container = document.getElementById('earthStage');
-  if (!container || !window.THREE) return;
-
-  const width = container.clientWidth || 300;
-  const height = container.clientHeight || 300;
-
-  const scene = new THREE.Scene();
-
-  const camera = new THREE.PerspectiveCamera(
-    38,
-    width / height,
-    0.1,
-    100
-  );
-
-  camera.position.set(0, 0, 4.2);
-
-  const renderer = new THREE.WebGLRenderer({
-    antialias: true,
-    alpha: true
-  });
-
-  renderer.setPixelRatio(
-    Math.min(window.devicePixelRatio || 1, 2)
-  );
-
-  renderer.setSize(width, height);
-  renderer.setClearColor(0x000000, 0);
-
-  container.innerHTML = '';
-  container.appendChild(renderer.domElement);
-
-  /* ================= GRUPO DA TERRA ================= */
-
-  const earthGroup = new THREE.Group();
-  scene.add(earthGroup);
-
-  /* ================= TEXTURA REAL DA TERRA ================= */
-
-  const textureLoader = new THREE.TextureLoader();
-
-  const earthTexture = textureLoader.load(
-    '/static/assets/earth-map.jpg'
-  );
-
-  earthTexture.colorSpace = THREE.SRGBColorSpace;
-
-  /*
-   * Esfera principal.
-   *
-   * A textura mantém os continentes reconhecíveis,
-   * enquanto a transparência transforma a aparência
-   * em uma projeção holográfica.
-   */
-  const earthGeometry = new THREE.SphereGeometry(
-    1.28,
-    64,
-    64
-  );
-
-  const earthMaterial = new THREE.MeshBasicMaterial({
-    map: earthTexture,
-    transparent: true,
-    opacity: 0.72
-  });
-
-  const earth = new THREE.Mesh(
-    earthGeometry,
-    earthMaterial
-  );
-
-  earthGroup.add(earth);
-
-  /* ================= CAMADA AZUL HOLOGRÁFICA ================= */
-
-  const holoGeometry = new THREE.SphereGeometry(
-    1.285,
-    64,
-    64
-  );
-
-  const holoMaterial = new THREE.MeshBasicMaterial({
-    color: 0x5be3ff,
-    transparent: true,
-    opacity: 0.08,
-    blending: THREE.AdditiveBlending,
-    depthWrite: false
-  });
-
-  const holoEarth = new THREE.Mesh(
-    holoGeometry,
-    holoMaterial
-  );
-
-  earthGroup.add(holoEarth);
-
-  /* ================= WIREFRAME ================= */
-
-  const wireGeometry = new THREE.SphereGeometry(
-    1.30,
-    32,
-    20
-  );
-
-  const wireMaterial = new THREE.MeshBasicMaterial({
-    color: 0x5be3ff,
-    wireframe: true,
-    transparent: true,
-    opacity: 0.20,
-    blending: THREE.AdditiveBlending,
-    depthWrite: false
-  });
-
-  const wireEarth = new THREE.Mesh(
-    wireGeometry,
-    wireMaterial
-  );
-
-  earthGroup.add(wireEarth);
-
-  /* ================= LATITUDE / LONGITUDE ================= */
-
-  const gridMaterial = new THREE.LineBasicMaterial({
-    color: 0x5be3ff,
-    transparent: true,
-    opacity: 0.14,
-    blending: THREE.AdditiveBlending
-  });
-
-  function criarLatitude(latitude) {
-    const points = [];
-
-    const lat = THREE.MathUtils.degToRad(latitude);
-
-    const radius =
-      Math.cos(lat) * 1.305;
-
-    const y =
-      Math.sin(lat) * 1.305;
-
-    for (let i = 0; i <= 128; i++) {
-      const angle =
-        (i / 128) * Math.PI * 2;
-
-      points.push(
-        new THREE.Vector3(
-          Math.cos(angle) * radius,
-          y,
-          Math.sin(angle) * radius
-        )
-      );
-    }
-
-    const geometry =
-      new THREE.BufferGeometry()
-        .setFromPoints(points);
-
-    return new THREE.Line(
-      geometry,
-      gridMaterial
-    );
-  }
-
-  function criarLongitude(longitude) {
-    const points = [];
-
-    const lon =
-      THREE.MathUtils.degToRad(longitude);
-
-    for (let i = 0; i <= 64; i++) {
-      const lat =
-        -Math.PI / 2 +
-        (i / 64) * Math.PI;
-
-      const radius =
-        Math.cos(lat);
-
-      points.push(
-        new THREE.Vector3(
-          Math.cos(lon) *
-            radius *
-            1.305,
-
-          Math.sin(lat) *
-            1.305,
-
-          Math.sin(lon) *
-            radius *
-            1.305
-        )
-      );
-    }
-
-    const geometry =
-      new THREE.BufferGeometry()
-        .setFromPoints(points);
-
-    return new THREE.Line(
-      geometry,
-      gridMaterial
-    );
-  }
-
-  /*
-   * Linhas horizontais.
-   */
-  for (
-    let lat = -75;
-    lat <= 75;
-    lat += 15
-  ) {
-    earthGroup.add(
-      criarLatitude(lat)
-    );
-  }
-
-  /*
-   * Linhas verticais.
-   */
-  for (
-    let lon = 0;
-    lon < 180;
-    lon += 15
-  ) {
-    earthGroup.add(
-      criarLongitude(lon)
-    );
-  }
-
-  /* ================= PONTOS HOLOGRÁFICOS ================= */
-
-  /*
-   * Pequenos pontos luminosos espalhados pela superfície.
-   * Eles dão a sensação de que a Terra está sendo
-   * reconstruída por dados.
-   */
-
-  const pointCount = 1200;
-
-  const positions =
-    new Float32Array(
-      pointCount * 3
-    );
-
-  const pointColors =
-    new Float32Array(
-      pointCount * 3
-    );
-
-  for (
-    let i = 0;
-    i < pointCount;
-    i++
-  ) {
-    const phi =
-      Math.acos(
-        1 - 2 * Math.random()
-      );
-
-    const theta =
-      Math.random() *
-      Math.PI *
-      2;
-
-    const radius = 1.315;
-
-    const x =
-      radius *
-      Math.sin(phi) *
-      Math.cos(theta);
-
-    const y =
-      radius *
-      Math.cos(phi);
-
-    const z =
-      radius *
-      Math.sin(phi) *
-      Math.sin(theta);
-
-    positions[i * 3] = x;
-    positions[i * 3 + 1] = y;
-    positions[i * 3 + 2] = z;
-
-    const intensity =
-      0.35 +
-      Math.random() * 0.65;
-
-    pointColors[i * 3] =
-      0.36 * intensity;
-
-    pointColors[i * 3 + 1] =
-      0.89 * intensity;
-
-    pointColors[i * 3 + 2] =
-      1.0 * intensity;
-  }
-
-  const pointsGeometry =
-    new THREE.BufferGeometry();
-
-  pointsGeometry.setAttribute(
-    'position',
-    new THREE.BufferAttribute(
-      positions,
-      3
-    )
-  );
-
-  pointsGeometry.setAttribute(
-    'color',
-    new THREE.BufferAttribute(
-      pointColors,
-      3
-    )
-  );
-
-  const pointsMaterial =
-    new THREE.PointsMaterial({
-      size: 0.014,
-      vertexColors: true,
-      transparent: true,
-      opacity: 0.55,
-      blending: THREE.AdditiveBlending,
-      depthWrite: false
-    });
-
-  const earthPoints =
-    new THREE.Points(
-      pointsGeometry,
-      pointsMaterial
-    );
-
-  earthGroup.add(
-    earthPoints
-  );
-
-  /* ================= ATMOSFERA ================= */
-
-  const atmosphereGeometry =
-    new THREE.SphereGeometry(
-      1.39,
-      64,
-      64
-    );
-
-  const atmosphereMaterial =
-    new THREE.MeshBasicMaterial({
-      color: 0x5be3ff,
-      transparent: true,
-      opacity: 0.10,
-      side: THREE.BackSide,
-      blending: THREE.AdditiveBlending,
-      depthWrite: false
-    });
-
-  const atmosphere =
-    new THREE.Mesh(
-      atmosphereGeometry,
-      atmosphereMaterial
-    );
-
-  earthGroup.add(
-    atmosphere
-  );
-
-  /* ================= ANÉIS ORBITAIS ================= */
-
-  function criarAnel(
-    radius,
-    rotationX,
-    rotationY,
-    opacity
-  ) {
-    const geometry =
-      new THREE.RingGeometry(
-        radius,
-        radius + 0.006,
-        128
-      );
-
-    const material =
-      new THREE.MeshBasicMaterial({
-        color: 0x5be3ff,
-        transparent: true,
-        opacity,
-        side: THREE.DoubleSide,
-        blending: THREE.AdditiveBlending,
-        depthWrite: false
-      });
-
-    const ring =
-      new THREE.Mesh(
-        geometry,
-        material
-      );
-
-    ring.rotation.x =
-      rotationX;
-
-    ring.rotation.y =
-      rotationY;
-
-    earthGroup.add(ring);
-
-    return ring;
-  }
-
-  const ring1 =
-    criarAnel(
-      1.63,
-      Math.PI * 0.32,
-      0.2,
-      0.32
-    );
-
-  const ring2 =
-    criarAnel(
-      1.78,
-      Math.PI * 0.68,
-      -0.3,
-      0.15
-    );
-
-  /* ================= PONTOS DE TELEMETRIA ================= */
-
-  const markerGeometry =
-    new THREE.SphereGeometry(
-      0.024,
-      12,
-      12
-    );
-
-  const markerMaterial =
-    new THREE.MeshBasicMaterial({
-      color: 0xffffff,
-      transparent: true,
-      opacity: 0.9,
-      blending: THREE.AdditiveBlending
-    });
-
-  const markers = [];
-
-  for (
-    let i = 0;
-    i < 8;
-    i++
-  ) {
-    const marker =
-      new THREE.Mesh(
-        markerGeometry,
-        markerMaterial
-      );
-
-    const angle =
-      (i / 8) *
-      Math.PI *
-      2;
-
-    marker.position.set(
-      Math.cos(angle) * 1.63,
-      Math.sin(angle) * 0.45,
-      Math.sin(angle) * 1.63
-    );
-
-    earthGroup.add(
-      marker
-    );
-
-    markers.push(marker);
-  }
-
-  /* ================= CAMPO DE PARTÍCULAS ================= */
-
-  const starCount = 350;
-
-  const starPositions =
-    new Float32Array(
-      starCount * 3
-    );
-
-  for (
-    let i = 0;
-    i < starCount * 3;
-    i += 3
-  ) {
-    const radius =
-      2.1 +
-      Math.random() * 2.8;
-
-    const theta =
-      Math.random() *
-      Math.PI *
-      2;
-
-    const phi =
-      Math.acos(
-        2 * Math.random() - 1
-      );
-
-    starPositions[i] =
-      radius *
-      Math.sin(phi) *
-      Math.cos(theta);
-
-    starPositions[i + 1] =
-      radius *
-      Math.cos(phi);
-
-    starPositions[i + 2] =
-      radius *
-      Math.sin(phi) *
-      Math.sin(theta);
-  }
-
-  const starsGeometry =
-    new THREE.BufferGeometry();
-
-  starsGeometry.setAttribute(
-    'position',
-    new THREE.BufferAttribute(
-      starPositions,
-      3
-    )
-  );
-
-  const starsMaterial =
-    new THREE.PointsMaterial({
-      color: 0x5be3ff,
-      size: 0.012,
-      transparent: true,
-      opacity: 0.45,
-      blending: THREE.AdditiveBlending
-    });
-
-  const stars =
-    new THREE.Points(
-      starsGeometry,
-      starsMaterial
-    );
-
-  scene.add(stars);
-
-  /* ================= ANEL DE SCAN ================= */
-
-  const scanGeometry =
-    new THREE.RingGeometry(
-      1.315,
-      1.335,
-      128
-    );
-
-  const scanMaterial =
-    new THREE.MeshBasicMaterial({
-      color: 0x5be3ff,
-      transparent: true,
-      opacity: 0.5,
-      side: THREE.DoubleSide,
-      blending: THREE.AdditiveBlending,
-      depthWrite: false
-    });
-
-  const scanRing =
-    new THREE.Mesh(
-      scanGeometry,
-      scanMaterial
-    );
-
-  scanRing.rotation.x =
-    Math.PI / 2;
-
-  earthGroup.add(
-    scanRing
-  );
-
-  /* ================= PULSO ================= */
-
-  let pulse = 0;
-
-  /* ================= VISIBILIDADE ================= */
-
-  let ativo = true;
-
-  document.addEventListener(
-    'visibilitychange',
-    () => {
-      ativo = !document.hidden;
-    }
-  );
-
-  /* ================= ANIMAÇÃO ================= */
-
-  function animar() {
-    requestAnimationFrame(
-      animar
-    );
-
-    if (!ativo) return;
-
-    const speed =
-      0.0018 *
-      animSpeedMult;
-
-    /*
-     * Rotação da Terra.
-     */
-    earthGroup.rotation.y +=
-      speed;
-
-    /*
-     * Pequena rotação independente
-     * da malha holográfica.
-     */
-    wireEarth.rotation.y +=
-      speed * 0.35;
-
-    holoEarth.rotation.y -=
-      speed * 0.15;
-
-    earthPoints.rotation.y +=
-      speed * 0.5;
-
-    /*
-     * Anéis orbitais.
-     */
-    ring1.rotation.z +=
-      0.0025 *
-      animSpeedMult;
-
-    ring2.rotation.z -=
-      0.0012 *
-      animSpeedMult;
-
-    /*
-     * Partículas.
-     */
-    stars.rotation.y -=
-      0.0002 *
-      animSpeedMult;
-
-    /*
-     * Scan.
-     */
-    scanRing.rotation.z +=
-      0.008 *
-      animSpeedMult;
-
-    /*
-     * Pulso da atmosfera.
-     */
-    pulse +=
-      0.025 *
-      animSpeedMult;
-
-    atmosphereMaterial.opacity =
-      0.075 +
-      Math.sin(pulse) *
-      0.025;
-
-    /*
-     * Pulso dos pontos.
-     */
-    pointsMaterial.opacity =
-      0.48 +
-      Math.sin(pulse * 0.7) *
-      0.10;
-
-    /*
-     * Pequena oscilação nos marcadores.
-     */
-    markers.forEach(
-      (marker, index) => {
-        marker.scale.setScalar(
-          1 +
-            Math.sin(
-              pulse * 2 +
-              index
-            ) *
-            0.25
-        );
-      }
-    );
-
-    renderer.render(
-      scene,
-      camera
-    );
-  }
-
-  animar();
-
-  /* ================= RESIZE ================= */
-
-  window.addEventListener(
-    'resize',
-    () => {
-      const w =
-        container.clientWidth ||
-        300;
-
-      const h =
-        container.clientHeight ||
-        300;
-
-      camera.aspect =
-        w / h;
-
-      camera.updateProjectionMatrix();
-
-      renderer.setSize(
-        w,
-        h
-      );
-    }
-  );
-}
-
-/* ================= INICIALIZAÇÃO ================= */
-
-if (window.THREE) {
-  initEarth();
-} else {
-  window.addEventListener(
-    'load',
-    () => {
-      if (window.THREE) {
-        initEarth();
-      } else {
-        console.warn(
-          'Three.js não carregou.'
-        );
-      }
-    }
-  );
-}
-
-if (window.THREE) initEarth();
-else window.addEventListener('load', () => { if (window.THREE) initEarth(); else console.warn('three.js não carregou — verifique a conexão/CDN para exibir o globo 3D.'); });
-
-/* ================= comando (texto) ================= */
 const cmdInput = document.querySelector('.cmd-input');
 const cmdInputBaseHeight = cmdInput.scrollHeight;
 const sendBtn = document.getElementById('sendBtn');
 
-function resetCmdInput() { cmdInput.value = ''; cmdInput.style.height = cmdInputBaseHeight + 'px'; }
+function resetCmdInput() { cmdInput.value = ''; cmdInput.style.height = cmdInputBaseHeight + 'px'; cmdHistoryPos = -1; }
 function autoResizeCmdInput() { cmdInput.style.height = 'auto'; cmdInput.style.height = Math.min(cmdInput.scrollHeight, 120) + 'px'; }
 
-/* -- autocomplete de slash commands -- */
 const cmdAutocomplete = document.getElementById('cmdAutocomplete');
 let acItens = [];
 let acSelecionado = -1;
@@ -1501,6 +599,10 @@ function enviarComando(texto) {
 
   fecharAutocomplete();
 
+  if (!cmdHistory.length || cmdHistory[cmdHistory.length - 1] !== texto) cmdHistory.push(texto);
+  if (cmdHistory.length > 100) cmdHistory.shift();
+  cmdHistoryPos = -1;
+
   if (tratarSlashCommand(texto)) return;
 
   addTermLine('user', texto);
@@ -1537,6 +639,25 @@ cmdInput.addEventListener('keydown', (e) => {
   if (e.key === 'Enter' && !e.shiftKey) {
     e.preventDefault();
     enviarComando(cmdInput.value);
+    return;
+  }
+  if (e.key === 'ArrowUp' && !cmdInput.value.includes('\n')) {
+    if (!cmdHistory.length) return;
+    e.preventDefault();
+    cmdHistoryPos = cmdHistoryPos === -1 ? cmdHistory.length - 1 : Math.max(0, cmdHistoryPos - 1);
+    cmdInput.value = cmdHistory[cmdHistoryPos];
+    autoResizeCmdInput();
+    cmdInput.setSelectionRange(cmdInput.value.length, cmdInput.value.length);
+    return;
+  }
+  if (e.key === 'ArrowDown' && !cmdInput.value.includes('\n')) {
+    if (cmdHistoryPos === -1) return;
+    e.preventDefault();
+    cmdHistoryPos = cmdHistoryPos + 1;
+    if (cmdHistoryPos >= cmdHistory.length) { cmdHistoryPos = -1; cmdInput.value = ''; }
+    else cmdInput.value = cmdHistory[cmdHistoryPos];
+    autoResizeCmdInput();
+    cmdInput.setSelectionRange(cmdInput.value.length, cmdInput.value.length);
   }
 });
 
@@ -1548,14 +669,6 @@ document.addEventListener('click', (e) => {
   }
 });
 
-/* ================= simulação visual (show_simulation) =================
-   Recebe 'simulation_board' (abre o overlay), depois OU:
-     - 'simulation_scene' (modo física — cena única, o navegador anima
-       sozinho via requestAnimationFrame, calculando a posição de cada
-       objeto a partir do seu `movimento`), OU
-     - um ou mais 'simulation_frame' (modo cenas — igual ao quadro de
-       raciocínio: cada frame é o estado completo daquele instante,
-       narrado em sequência pelo backend). */
 const simOverlay = document.getElementById('simOverlay');
 const simTitle = document.getElementById('simTitle');
 const simSvg = document.getElementById('simSvg');
@@ -1594,9 +707,7 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && simOverlay.classList.contains('open')) fecharSimulacao();
 });
 
-/* ---- fórmulas de movimento (espaço normalizado 0-100, t em segundos) ---- */
 const SIM_FORMULAS = {
-  // params: x0, y0, v0, angulo (graus), g
   projetil(p, t) {
     const ang = (p.angulo ?? 45) * Math.PI / 180;
     const v0 = p.v0 ?? 30, g = p.g ?? 20;
@@ -1604,7 +715,6 @@ const SIM_FORMULAS = {
     const h = v0 * Math.sin(ang) * t - 0.5 * g * t * t;
     return { x, y: (p.y0 ?? 90) - Math.max(h, 0), ativo: h >= 0 };
   },
-  // params: x0, y0, vx, vy, quicar(bool), min, max
   linear(p, t) {
     let x = (p.x0 ?? 10) + (p.vx ?? 5) * t;
     const y = (p.y0 ?? 50) + (p.vy ?? 0) * t;
@@ -1615,24 +725,20 @@ const SIM_FORMULAS = {
     }
     return { x, y, ativo: true };
   },
-  // movimento harmônico simples — params: x0, y0, amplitude, periodo, fase, eixo('x'|'y')
   mhs(p, t) {
     const osc = (p.amplitude ?? 20) * Math.sin((2 * Math.PI * t / (p.periodo ?? 2)) + (p.fase ?? 0));
     const eixo = p.eixo || 'x';
     return { x: (p.x0 ?? 50) + (eixo === 'x' ? osc : 0), y: (p.y0 ?? 50) + (eixo === 'y' ? osc : 0), ativo: true };
   },
-  // pêndulo — params: pivoX, pivoY, comprimento, amplitude(graus), periodo, fase
   pendulo(p, t) {
     const ang = ((p.amplitude ?? 30) * Math.PI / 180) * Math.sin((2 * Math.PI * t / (p.periodo ?? 2)) + (p.fase ?? 0));
     const comp = p.comprimento ?? 35;
     return { x: (p.pivoX ?? 50) + comp * Math.sin(ang), y: (p.pivoY ?? 15) + comp * Math.cos(ang), ativo: true };
   },
-  // órbita circular — params: cx, cy, raio, periodo, fase
   orbital(p, t) {
     const ang = (2 * Math.PI * t / (p.periodo ?? 6)) + (p.fase ?? 0);
     return { x: (p.cx ?? 50) + (p.raio ?? 30) * Math.cos(ang), y: (p.cy ?? 50) + (p.raio ?? 30) * Math.sin(ang), ativo: true };
   },
-  // oscilação amortecida (mola) — params: x0, y0, amplitude, periodo, amortecimento, eixo
   mola(p, t) {
     const osc = (p.amplitude ?? 20) * Math.exp(-(p.amortecimento ?? 0.3) * t) * Math.sin(2 * Math.PI * t / (p.periodo ?? 1.2));
     const eixo = p.eixo || 'y';
@@ -1640,8 +746,6 @@ const SIM_FORMULAS = {
   },
 };
 
-// onda: gera uma polyline inteira (não é um ponto só) — params: x_inicio, x_fim, y_base,
-// amplitude, comprimento_onda, periodo, n_pontos
 function calcularOnda(p, t) {
   const n = p.n_pontos ?? 40;
   const xi = p.x_inicio ?? 5, xf = p.x_fim ?? 95;
@@ -1685,10 +789,7 @@ function construirElementoSVG(obj) {
       el.setAttribute('stroke', cor);
       el.setAttribute('stroke-width', 0.6);
       break;
-    case 'browser_screenshot':
-        atualizarNavegacaoAoVivo(evento.titulo, evento.url, evento.imagem_base64);
-        break;
-      case 'texto':
+    case 'texto':
       el = document.createElementNS(ns, 'text');
       el.setAttribute('text-anchor', 'middle');
       el.setAttribute('font-size', obj.tamanhoFonte ?? 3);
@@ -1724,7 +825,6 @@ function posicionarElementoEstatico(el, obj) {
   else if (el.tagName === 'text') { el.setAttribute('x', obj.x); el.setAttribute('y', obj.y); }
 }
 
-/* ---- MODO CENAS: um frame estático por vez (backend narra e manda cada passo) ---- */
 function renderQuadroSimEstatico(objetos, anotacao) {
   cancelAnimationFrame(simState.rafId);
   simSvg.innerHTML = '';
@@ -1736,7 +836,6 @@ function renderQuadroSimEstatico(objetos, anotacao) {
   });
 }
 
-/* ---- MODO FÍSICA: animação contínua calculada no navegador ---- */
 function iniciarCenaFisica(dados) {
   cancelAnimationFrame(simState.rafId);
   simSvg.innerHTML = '';
@@ -1753,7 +852,6 @@ function iniciarCenaFisica(dados) {
     trilhas: {},
   };
 
-  // rastros primeiro, pra ficarem atrás dos objetos
   simState.objetos.forEach(obj => {
     if (obj.rastro) {
       const trilha = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
@@ -1806,7 +904,6 @@ function loopSimulacao(agora) {
   if (simState.pausadoEm === null) simState.rafId = requestAnimationFrame(loopSimulacao);
 }
 
-/* ---- controles ---- */
 simPlayBtn.addEventListener('click', () => {
   if (simState.pausadoEm === null) {
     simState.pausadoEm = performance.now();
@@ -1825,13 +922,7 @@ simRestartBtn.addEventListener('click', () => {
 });
 simSpeedRange.addEventListener('input', () => { simState.velocidade = parseFloat(simSpeedRange.value); });
 
-/* ================= microfone real (sincronizado com o backend) =================
-   O botão não usa mais a SpeechRecognition do navegador — ele liga/desliga
-   o microfone FÍSICO que o backend escuta continuamente (mic_listener.py +
-   Whisper). O visual só muda quando o servidor confirma via 'mic_state'
-   (seja por clique no botão, por outra aba, ou pela tool toggle_microphone
-   chamada por voz/texto), então nunca fica dessincronizado do hardware. */
-let microfoneAtivo = true; // valor otimista até chegar o primeiro 'mic_state'
+let microfoneAtivo = true;
 
 function aplicarEstadoMicrofone(ativo) {
   microfoneAtivo = ativo;
@@ -1848,13 +939,11 @@ micBtn.addEventListener('click', () => {
   if (!ws || ws.readyState !== WebSocket.OPEN) { setEstado('offline'); return; }
   ws.send(JSON.stringify({ type: 'mic_toggle', ativo: !microfoneAtivo }));
 });
-/* ================= websocket ================= */
+
 let ws = null; let primeiraConexao = true;
 function conectar() {
-  const t0 = Date.now();
   ws = new WebSocket(`ws://${location.host}/ws`);
   ws.onopen = () => {
-    tagLink.textContent = (Date.now() - t0) + 'ms';
     setEstado('idle'); setSubsystem('websocket', true, false);
     if (!primeiraConexao) tocarSom('online');
     primeiraConexao = false;
@@ -1864,37 +953,21 @@ function conectar() {
   ws.onmessage = (msg) => {
     let evento; try { evento = JSON.parse(msg.data); } catch { return; }
     switch (evento.type) {
-      case 'log': addTermLine(evento.role, evento.text); if (evento.confidence) tagConf.textContent = evento.confidence.toUpperCase(); break;
+      case 'log': addTermLine(evento.role, evento.text); break;
       case 'status': setEstado(evento.state); if (evento.state === 'thinking') setSubsystem('processamento', true, true); break;
       case 'memory': setSubsystem('memoria', true, true); break;
-      case 'stats':
-        if (evento.ctx_pct !== undefined) tagCtx.textContent = Math.round(evento.ctx_pct) + '%';
-        break;
-      
-        case 'mic_state':
+      case 'mic_state':
         aplicarEstadoMicrofone(evento.ativo);
         addLogEvent('info', evento.ativo ? 'Microfone ativado' : 'Microfone desativado');
         break;
       case 'voice_stats':
         setSubsystem('voz', true, true);
         break;
-      case 'weather':
-        // opcional: se o backend também chamar get_weather (ex: via comando de voz),
-        // o painel de clima é atualizado com o resultado dela também.
-        aplicarClima({
-          temp: evento.temp,
-          sensacao: evento.sensacao,
-          umidade: evento.umidade,
-          vento: evento.vento,
-          min: evento.min,
-          max: evento.max,
-          condTexto: evento.condicao,
-          icone: ICON_POR_CATEGORIA[evento.icone] || 'thermometer',
-          local: evento.local,
-        });
-        break;
       case 'browser_navigate':
         abrirMedia(evento.url, evento.titulo, evento.url_externo, evento.bloqueado);
+        break;
+      case 'browser_screenshot':
+        atualizarNavegacaoAoVivo(evento.titulo, evento.url, evento.imagem_base64);
         break;
       case 'reasoning_board':
         abrirQuadroRaciocinio(evento.titulo);

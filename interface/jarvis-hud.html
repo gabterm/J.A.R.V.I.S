@@ -8,9 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700;800&family=Share+Tech+Mono&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/static/css/style.css">
-<link rel="stylesheet" href="/static/css/hud.css">
 <script src="qrc:///qtwebchannel/qwebchannel.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
 
@@ -50,10 +48,6 @@
   </div>
 </div>
 
-<!-- quadro de raciocínio (show_reasoning_board) — mesmo padrão visual do
-     media-overlay: overlay fixo que só aparece quando o backend manda o
-     evento 'reasoning_board'. Cada 'reasoning_frame' seguinte redesenha
-     o SVG inteiro (nós + conexões) em sincronia com a narração. -->
 <div class="reasoning-overlay" id="reasoningOverlay">
   <div class="reasoning-frame">
     <div class="reasoning-topbar">
@@ -95,12 +89,10 @@
       <span id="wordmark">JARVIS OS v1.0</span>
     </div>
     <div class="divider"></div>
-    <div class="tb-item"><span class="tb-label">OPERADOR:</span><span class="tb-value" id="operatorName">GABRIEL</span></div>
-    <div class="tb-item"><span class="tb-label">CANAL SEGURO:</span><span class="tb-value ok" id="secureLinkLabel">ONLINE</span><span class="tb-dot"></span></div>
+    <div class="tb-item"><span class="tb-label">USER:</span><span class="tb-value" id="operatorName">ARAUJO</span></div>
+    <div class="tb-item"><span class="tb-label">STATUS:</span><span class="tb-value ok" id="secureLinkLabel">ONLINE</span><span class="tb-dot"></span></div>
     <div class="tb-item"><span class="tb-label">UPTIME:</span><span class="tb-value" id="uptime">00:00:00</span></div>
-    <div class="tb-item"><span class="tb-label">REDE:</span><span class="tb-value" id="networkLabel">LOCALHOST</span></div>
     <div class="tb-spacer"></div>
-    <div class="tb-item"><span class="tb-value" id="clock">--:--:--</span></div>
     <div class="status-pill" id="statusPill"><div class="dot"></div><span id="statusPillText">SISTEMA ONLINE</span></div>
     <div class="settings-toggle" id="settingsToggle" title="Personalização">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
@@ -123,7 +115,6 @@
     </div>
   </div>
 
-  <!-- SVG defs compartilhados (gradiente do sweep dos compasses) -->
   <svg width="0" height="0" style="position:absolute">
     <defs>
       <radialGradient id="sweepGrad" cx="50%" cy="50%" r="50%">
@@ -135,7 +126,6 @@
 
   <div class="main">
 
-    <!-- TERMINAL (ampliado — ocupa o espaço que antes era VOZ + DESEMPENHO) -->
     <div class="panel terminal-panel">
       <div class="panel-title">TERMINAL <span class="accent">registro de interação · /help para ferramentas</span></div>
       <div class="terminal-body" id="terminalBody">
@@ -143,32 +133,46 @@
       </div>
     </div>
 
-    <!-- NÚCLEO -->
-    <div class="panel core-panel">
-      <div class="panel-title" style="align-self:flex-start;">NÚCLEO <span class="accent" id="coreAccent">v1.0</span></div>
-      <div class="core-flex">
-        <div class="core-tags-col">
-          <div class="core-tag-block"><div class="ctb-label">MODO</div><div class="ctb-value" id="tagMode">AUTO</div></div>
-          <div class="core-tag-block"><div class="ctb-label">CTX</div><div class="ctb-value" id="tagCtx">0%</div></div>
-          <div class="core-tag-block"><div class="ctb-label">CONF.</div><div class="ctb-value" id="tagConf">--</div></div>
-        </div>
-        <div class="core-stage mode-idle" id="coreStage">
-          <div class="core-ring-outer"></div>
-          <div class="core-ring-ticks"></div>
-          <div class="core-sweep"></div>
-          <div class="core-ring-mid"></div>
-          <div class="core-center"><div class="core-glyph">J.A.R.V.I.S</div></div>
-          <div class="voice-wave"><span></span><span></span><span></span><span></span><span></span></div>
-        </div>
-        <div class="core-tags-col">
-          <div class="core-tag-block"><div class="ctb-label">LINK</div><div class="ctb-value" id="tagLink">--ms</div></div>
-          <div class="core-tag-block"><div class="ctb-label">NODE</div><div class="ctb-value" id="tagNode">0x0000</div></div>
-          <div class="core-tag-block"><div class="ctb-label">SYS</div><div class="ctb-value" id="tagSys">OK</div></div>
-        </div>
+    <div class="panel clock-panel">
+      <div class="panel-title">
+        core
+        <span class="clock-format-toggle" id="clockFormatToggle" title="Alternar formato">24H</span>
       </div>
-      <div class="core-status-row">
-        <div class="core-status" id="coreStatus">CONECTANDO<b id="dots">.</b></div>
+      <div class="clock-stage mode-idle" id="clockStage">
+        <div class="clock-pulse-ring p1"></div>
+        <div class="clock-pulse-ring p2"></div>
+        <div class="clock-outer-dash"></div>
+        <div class="clock-ring-outer"></div>
+        <div class="clock-ring-ticks"></div>
+        <div class="clock-ring-ticks-major"></div>
+        <div class="clock-ring-mid"></div>
+        <svg class="clock-arc-label" viewBox="0 0 200 200">
+          <defs>
+            <path id="clockArcPath" d="M 100,100 m -70,0 a 70,70 0 1,1 140,0 a 70,70 0 1,1 -140,0"/>
+          </defs>
+          <text class="arc-text">
+            <textPath href="#clockArcPath" startOffset="0%">J · A · R · V · I · S · N Ú C L E O · A T I V O ·</textPath>
+          </text>
+        </svg>
+        <div class="clock-minute-mark n">00</div>
+        <div class="clock-minute-mark e">15</div>
+        <div class="clock-minute-mark s">30</div>
+        <div class="clock-minute-mark w">45</div>
+        <div class="clock-orbit orbit-a"><div class="orbit-dot"></div></div>
+        <div class="clock-orbit orbit-b"><div class="orbit-dot"></div></div>
+        <div class="clock-sweep"></div>
+        <div class="clock-second-hand" id="clockSecondHand"><div class="hand-tip"></div></div>
+        <div class="clock-center">
+          <div class="voice-wave" id="voiceWave"><span></span><span></span><span></span><span></span><span></span></div>
+          <div class="clock-time" id="clockTime">--:--:--</div>
+          <div class="clock-date" id="clockDate">--</div>
+        </div>
+        <div class="clock-bracket tl"></div>
+        <div class="clock-bracket tr"></div>
+        <div class="clock-bracket bl"></div>
+        <div class="clock-bracket br"></div>
       </div>
+      <div class="clock-status-row" id="clockStatus">CONECTANDO<b id="dots">.</b></div>
       <div class="subsys-row" id="subsysRow">
         <div class="subsys" data-sys="voz"><div class="sdot"></div>VOZ</div>
         <div class="subsys" data-sys="memoria"><div class="sdot"></div>MEMÓRIA</div>
@@ -178,146 +182,16 @@
       </div>
     </div>
 
-    <div class="panel weather-panel">
-      <div class="panel-title">
-        CLIMA
-        <span class="accent" id="weatherAccent">--:--</span>
-    </div>
-
-  <div class="weather-body">
-
-    <div class="weather-hud">
-
-      <!-- scanner circular -->
-      <div class="weather-orbit">
-        <div class="weather-orbit-ring ring-a"></div>
-        <div class="weather-orbit-ring ring-b"></div>
-        <div class="weather-orbit-dot"></div>
-
-        <div class="weather-icon" id="weatherIcon">
-          🌡️
-        </div>
+    <div class="panel logs-panel">
+      <div class="panel-title">SYSTEM LOGS <span class="panel-count" id="logsCount">0</span></div>
+      <div class="logs-toolbar" id="logsToolbar">
+        <button class="logs-filter-btn active" data-level="all">TODOS</button>
+        <button class="logs-filter-btn" data-level="info">INFO</button>
+        <button class="logs-filter-btn" data-level="warn">AVISO</button>
+        <button class="logs-filter-btn" data-level="error">ERRO</button>
       </div>
-
-      <div class="weather-main-data">
-
-        <div
-          class="weather-temp"
-          id="weatherTemp"
-        >
-          --°
-        </div>
-
-        <div
-          class="weather-cond"
-          id="weatherCond"
-        >
-          carregando...
-        </div>
-
-        <div
-          class="weather-loc"
-          id="weatherLoc"
-        >
-          --
-        </div>
-
-      </div>
-
-    </div>
-
-    <div class="weather-divider"></div>
-
-    <div class="weather-grid">
-
-      <div class="weather-stat">
-        <span class="ws-label">
-          SENSAÇÃO
-        </span>
-
-        <span
-          class="ws-value"
-          id="weatherFeels"
-        >
-          --°
-        </span>
-      </div>
-
-      <div class="weather-stat">
-        <span class="ws-label">
-          MÍN / MÁX
-        </span>
-
-        <span
-          class="ws-value"
-          id="weatherMinMax"
-        >
-          --° / --°
-        </span>
-      </div>
-
-      <div class="weather-stat">
-        <span class="ws-label">
-          UMIDADE
-        </span>
-
-        <span
-          class="ws-value"
-          id="weatherHumidity"
-        >
-          --%
-        </span>
-      </div>
-
-      <div class="weather-stat">
-        <span class="ws-label">
-          VENTO
-        </span>
-
-        <span
-          class="ws-value"
-          id="weatherWind"
-        >
-          -- km/h
-        </span>
-      </div>
-
-    </div>
-
-    <div class="weather-status">
-      <span class="weather-status-dot"></span>
-
-      <span>
-        WEATHER NODE
-      </span>
-
-      <span class="weather-status-value">
-        ONLINE
-      </span>
-    </div>
-
-  </div>
-    </div>
-
-    <!-- LINHA INFERIOR -->
-    <div class="bottom-row">
-      <div class="panel activity-panel">
-        <div class="panel-title">ATIVIDADE <span class="accent">msgs / min</span></div>
-        <div class="activity-value" id="activityValue">0</div>
-        <div class="activity-sub">mensagens no último minuto</div>
-        <div class="activity-row">
-          <div class="activity-graph"><svg viewBox="0 0 100 40" preserveAspectRatio="none" id="activitySvg"></svg></div>
-        </div>
-        <div class="activity-legend">
-          <span><span class="lg-dot down"></span>ENTRADA</span>
-          <span><span class="lg-dot up"></span>RESPOSTA</span>
-        </div>
-      </div>
-      <div class="panel logs-panel">
-        <div class="panel-title">SYSTEM LOGS <span class="panel-count" id="logsCount">0</span></div>
-        <div class="logs-body" id="logsBody">
-          <div class="log-empty" id="logsEmpty">nenhum evento registrado</div>
-        </div>
+      <div class="logs-body" id="logsBody">
+        <div class="log-empty" id="logsEmpty">nenhum evento registrado</div>
       </div>
     </div>
 

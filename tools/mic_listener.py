@@ -33,7 +33,7 @@ from faster_whisper import WhisperModel
 import tools.ui_bridge as ui_bridge
 
  
-INPUT_DEVICE = None
+INPUT_DEVICE = "Microfone (MacBook Pro)"
 
 
 _VAD_RATES_VALIDAS = (8000, 16000, 32000, 48000)

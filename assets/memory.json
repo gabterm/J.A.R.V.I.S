@@ -1,5 +1,5 @@
 {
-    "nome": "Jervis",
+    "nome": "Matheus",
     "idade": 21,
     "formacao": {
         "curso": "Ciência da Computação",
@@ -267,7 +267,10 @@
         "Resetei o socket",
         "ficar na frente de um computador programando, trabalhando ou desenvolvendo tecnologia",
         "Está fazendo uma receita de estrogonofe com carne",
-        "Tentou ler a conversa com a Tia Ana"
+        "Tentou ler a conversa com a Tia Ana",
+        "Está em uma reunião semanal do projeto CNAB até as 4:30",
+        "vai chegar um pouco mais tarde hoje",
+        "não vai jantar com eles hoje"
     ],
     "preferencias": [
         "Não gosta muito de frases de efeito",
@@ -340,51 +343,59 @@
         "YouTube Music",
         "Prefere que as análises de código expliquem apenas o que o código faz e por que faz isso.",
         "Prefere que as análises de código não se aprofundem muito por enquanto.",
-        "não ler quando não houver mensagens novas"
+        "não ler quando não houver mensagens novas",
+        "prefere mensagens mais diretas",
+        "“Sinistro” já resolve",
+        "qualquer coisa com queijo e molho",
+        "não enviar nada por enquanto",
+        "Ser referido como \"senhor Araujo\"",
+        "Não ser chamado de \"senhor Araujo\"",
+        "Usar sempre o padrão de resposta fornecido quando responder pelo usuário",
+        "Apenas a segunda parte da mensagem já basta"
     ],
     "historico_recente": [
         {
-            "usuario": "pode tnerar de novo?",
-            "jarvis": "Mensagem enviada para a Tia Ana, senhor."
+            "usuario": "pode",
+            "jarvis": "Mensagem enviada para Matheus, senhor."
         },
         {
-            "usuario": "Tchau tchau tchau",
-            "jarvis": "Até mais, senhor."
+            "usuario": "envie uma mensagem para o meu tio dizendo que eu vou chegar um pouco mais tarde hoje e que é para jantarem sem mim",
+            "jarvis": "Qual é o nome do seu tio exatamente como aparece no WhatsApp?"
         },
         {
-            "usuario": "Tchau, tchau!",
-            "jarvis": "Até mais, senhor."
+            "usuario": "\"Tio\"",
+            "jarvis": "Rascunho para Tio: “Vou chegar um pouco mais tarde hoje. Podem jantar sem mim.”\n\nPosso enviar?"
         },
         {
-            "usuario": "Então, até o próximo vídeo!",
-            "jarvis": "Até o próximo vídeo, senhor."
+            "usuario": "\"",
+            "jarvis": "Fico no aguardo da sua confirmação, senhor."
         },
         {
-            "usuario": "Um, dois, três, quatro.",
-            "jarvis": "Cinco, senhor. Os testes de microfone continuam funcionando."
+            "usuario": "sim, mas sem o .",
+            "jarvis": "Mensagem enviada para Tio, senhor."
         },
         {
-            "usuario": "[NOTIFICAÇÃO AUTOMÁTICA DE WHATSAPP] Chegou uma mensagem nova de Tia Ana. Prévia: \"legal\". Use read_whatsapp_chat para ler a conversa completa com Tia Ana. Avise o usuário sobre a mensagem, resuma o conteúdo dela em fala natural, e já sugira um rascunho de resposta chamando send_whatsapp_message com confirmado=false. Fale o rascunho sugerido e pergunte se pode enviar. Não chame send_whatsapp_message com confirmado=true nesta mesma resposta, mesmo que o rascunho pareça óbvio — a aprovação só vem em uma mensagem seguinte do usuário.",
-            "jarvis": "Senhor, não consegui abrir a conversa com a Tia Ana. A prévia da nova mensagem diz apenas “legal”, então não há contexto suficiente para preparar uma resposta adequada. Quer que eu tente novamente?"
+            "usuario": "[NOTIFICAÇÃO AUTOMÁTICA DE WHATSAPP] Chegou uma mensagem nova de Tio. Prévia: \"Blz\". Use read_whatsapp_chat para ler a conversa completa com Tio. Avise o usuário sobre a mensagem, resuma o conteúdo dela em fala natural, e já sugira um rascunho de resposta chamando send_whatsapp_message com confirmado=false. Fale o rascunho sugerido e pergunte se pode enviar. Não chame send_whatsapp_message com confirmado=true nesta mesma resposta, mesmo que o rascunho pareça óbvio — a aprovação só vem em uma mensagem seguinte do usuário.",
+            "jarvis": "Não consegui ler a conversa com Tio porque o WhatsApp apresentou um erro. A prévia recebida foi “Blz”, indicando que ele confirmou ou entendeu a mensagem.\n\nPosso preparar a resposta, mas preciso que me diga o que deseja enviar."
         },
         {
-            "usuario": "que horas são agora?",
-            "jarvis": "São dez e trinta e nove da manhã, senhor.\n\nTambém tentei ler a conversa com a Tia Ana, mas o WhatsApp não respondeu a tempo."
+            "usuario": "jarvis",
+            "jarvis": "À disposição, senhor."
         },
         {
-            "usuario": "não precisa tenrar ler quando nao hovere memsage novas",
-            "jarvis": "Entendido, senhor. Só vou abrir a conversa quando houver uma mensagem nova ou quando o senhor pedir diretamente."
+            "usuario": "jarvis",
+            "jarvis": "À disposição, senhor."
         },
         {
-            "usuario": "ok",
-            "jarvis": "Certo, senhor."
+            "usuario": "jarvis",
+            "jarvis": "À disposição, senhor."
         },
         {
-            "usuario": "qual a previsao do tempo hoje em curitiba>",
-            "jarvis": "Em Curitiba, senhor, a previsão indica 17,8 graus e pancadas de chuva hoje. Melhor sair com guarda chuva."
+            "usuario": "eu recebi alguma mensagem?",
+            "jarvis": "Não há mensagens novas no WhatsApp, senhor."
         }
     ],
-    "resumo_contexto": "Gabriel pediu o envio da orientação sobre o fone da Tia Ana, mas JARVIS não conseguiu enviar porque o WhatsApp estava bloqueado por uma janela sobreposta antes da seleção da conversa. A mensagem permanece pronta para nova tentativa.",
+    "resumo_contexto": "Gabriel esclareceu que o contato do irmão se chama Matheus. JARVIS preparou a mensagem “Salve.” para Matheus e aguardou autorização para enviá-la.",
     "timeline": [
         {
             "id": "277740a4-92e9-496a-978e-0f4c024d414a",
@@ -990,6 +1001,72 @@
             "id": "469556cb-6d34-4a7e-a191-e698186884e7",
             "tipo": "preferencia",
             "text": "não ler quando não houver mensagens novas",
+            "pinned": false
+        },
+        {
+            "id": "24068768-46ce-45ab-b347-0e6bcfd17cfc",
+            "tipo": "preferencia",
+            "text": "prefere mensagens mais diretas",
+            "pinned": false
+        },
+        {
+            "id": "dbe2e51b-7212-4548-a11a-79230e869b5f",
+            "tipo": "preferencia",
+            "text": "“Sinistro” já resolve",
+            "pinned": false
+        },
+        {
+            "id": "57491f3e-200c-4838-af1a-8dc5f876094e",
+            "tipo": "preferencia",
+            "text": "qualquer coisa com queijo e molho",
+            "pinned": false
+        },
+        {
+            "id": "61f9dcf7-1f57-4d1a-b32e-c7b2fecafbed",
+            "tipo": "preferencia",
+            "text": "não enviar nada por enquanto",
+            "pinned": false
+        },
+        {
+            "id": "af259e15-bd10-498f-b48d-3e87be968f73",
+            "tipo": "rotina",
+            "text": "Está em uma reunião semanal do projeto CNAB até as 4:30",
+            "pinned": false
+        },
+        {
+            "id": "d5337f63-3f36-45b2-9e09-94f8d3deb40c",
+            "tipo": "preferencia",
+            "text": "Ser referido como \"senhor Araujo\"",
+            "pinned": false
+        },
+        {
+            "id": "2bd4584d-c95e-45c1-af58-ccba303992e5",
+            "tipo": "preferencia",
+            "text": "Não ser chamado de \"senhor Araujo\"",
+            "pinned": false
+        },
+        {
+            "id": "dfeaa517-a250-4a33-85eb-ab4f0d66e104",
+            "tipo": "preferencia",
+            "text": "Usar sempre o padrão de resposta fornecido quando responder pelo usuário",
+            "pinned": false
+        },
+        {
+            "id": "feb0a9fa-abe5-466e-9ebd-724ae0e904c2",
+            "tipo": "preferencia",
+            "text": "Apenas a segunda parte da mensagem já basta",
+            "pinned": false
+        },
+        {
+            "id": "ca01eb21-d614-4f2c-a0f0-d0f443e5b967",
+            "tipo": "rotina",
+            "text": "vai chegar um pouco mais tarde hoje",
+            "pinned": false
+        },
+        {
+            "id": "84a8425c-183b-48a2-9df8-3bea38d481f5",
+            "tipo": "rotina",
+            "text": "não vai jantar com eles hoje",
             "pinned": false
         }
     ]
