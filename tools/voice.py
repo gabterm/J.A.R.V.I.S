@@ -6,6 +6,7 @@ import pygame
 from fish_audio_sdk import Session, TTSRequest
 from pathlib import Path
 import os
+import subprocess
 
 from dotenv import load_dotenv
 from fish_audio_sdk import Session, TTSRequest
@@ -26,6 +27,8 @@ print(
 
 fish_session = Session(FISH_AUDIO_API_KEY)
 
+
+
 FISH_AUDIO_VOICE_ID = os.getenv(
     "FISH_AUDIO_VOICE_ID",
     "a9558d6bc0ab45068843698477fe84f5",
@@ -41,6 +44,30 @@ ASSETS_DIR = BASE_DIR / "assets"
 
 AUDIO_FILE = ASSETS_DIR / "jarvis_voice.mp3"
 
+OUTPUT_DEVICE = "FN-B21B"
+
+
+def _listar_dispositivos_saida():
+    try:
+        import pygame._sdl2.audio as sdl2_audio
+        pygame.init()
+        return list(sdl2_audio.get_audio_device_names(False))
+    except Exception as error:
+        print(f"⚠️  Não foi possível listar dispositivos de áudio de saída: {error}")
+        return []
+
+
+_dispositivos_saida = _listar_dispositivos_saida()
+if _dispositivos_saida:
+    print("🔊 Dispositivos de saída de áudio disponíveis:")
+    for nome in _dispositivos_saida:
+        marcador = " <- em uso (OUTPUT_DEVICE)" if nome == OUTPUT_DEVICE else ""
+        print(f"    - {nome}{marcador}")
+    if OUTPUT_DEVICE is None:
+        print(
+            "    (OUTPUT_DEVICE=None -> usando o default do sistema; "
+            "copie um nome acima pra tools/voice.py se quiser forçar)"
+        )
 
 
 ABREVIACOES = {
@@ -144,6 +171,43 @@ def detectar_idioma_simples(texto):
     return "pt" if tem_acento_pt else "en"
 
 
+def aplicar_efeito_jarvis(input_file, output_file):
+    filtro = (
+    # Corpo
+    "equalizer=f=160:t=q:w=1:g=1.2,"
+
+    # Presença
+    "equalizer=f=3000:t=q:w=1:g=1.0,"
+
+    # Controle de brilho/chiado
+    "equalizer=f=7500:t=q:w=1:g=-2.5,"
+    "lowpass=f=10000,"
+
+    # Eco mais longo, mas ainda discreto
+    "aecho=0.90:0.40:180:0.12,"
+
+    # Textura robótica leve
+    "chorus=0.18:0.45:40:0.18:0.10:1.4,"
+
+    # Volume
+    "loudnorm=I=-16:TP=-1.5:LRA=7"
+)
+
+    subprocess.run(
+        [
+            "ffmpeg",
+            "-y",
+            "-i",
+            str(input_file),
+            "-af",
+            filtro,
+            str(output_file),
+        ],
+        check=True,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    )
+
 def aplicar_siglas(texto):
     for regex, substituto in SIGLAS_SOLETRADAS_COMPILADAS:
         texto = regex.sub(substituto, texto)
@@ -194,6 +258,82 @@ DEZENAS_EN = {
     20: "twenty", 30: "thirty", 40: "forty", 50: "fifty",
 }
 
+PRONUNCIAS_TTS = {
+    # Linguagens / frameworks
+    "Python": "Páiton",
+    "JavaScript": "Java Script",
+    "TypeScript": "Taip Script",
+    "Elixir": "Elixir",
+    "Phoenix": "Fênix",
+    "Phoenix LiveView": "Fênix Laive View",
+    "LiveView": "Laive View",
+    "PySide": "Pai Side",
+    "PySide6": "Pai Side seis",
+
+    # Ferramentas
+    "Docker": "Dóquer",
+    "GitHub": "Git Ráb",
+    "GitLab": "Git Láb",
+    "Git": "Git",
+    "npm": "N P M",
+    "pip": "pip",
+    "FFmpeg": "F F Mpeg",
+
+    # Tecnologias
+    "OpenAI": "Open A I",
+    "ChatGPT": "Chat G P T",
+    "GPT": "G P T",
+    "API": "A P I",
+    "SDK": "S D K",
+    "JSON": "Jason",
+    "HTTP": "H T T P",
+    "HTTPS": "H T T P S",
+    "HTML": "H T M L",
+    "CSS": "C S S",
+    "SQL": "S Q L",
+    "UUID": "U U I D",
+    "URL": "U R L",
+
+    # Termos técnicos
+    "frontend": "front end",
+    "backend": "back end",
+    "fullstack": "full stack",
+    "framework": "framework",
+    "software": "software",
+    "hardware": "hardware",
+    "database": "database",
+    "debug": "debug",
+    "debugging": "debugging",
+    "deploy": "deploy",
+    "deployment": "deployment",
+    "commit": "commit",
+    "branch": "branch",
+    "merge": "merge",
+    "pull request": "pull request",
+
+    # Formatos
+    ".json": " ponto Jason",
+    ".csv": " ponto C S V",
+    ".txt": " ponto T X T",
+    ".pdf": " ponto P D F",
+    ".py": " ponto P Y",
+    ".ex": " ponto E X",
+    ".exs": " ponto E X S",
+    ".js": " ponto J S",
+    ".ts": " ponto T S",
+    ".html": " ponto H T M L",
+    ".css": " ponto C S S",
+
+    # Comandos
+    "mix phx.server": "mix fênix ponto server",
+    "mix deps.get": "mix deps get",
+    "npm install": "N P M install",
+    "pip install": "pip install",
+    "git checkout": "git checkout",
+    "git commit": "git commit",
+    "git push": "git push",
+    "git pull": "git pull",
+}
 
 def numero_por_extenso(n, idioma="pt", genero="masc"):
 
@@ -286,9 +426,17 @@ def limpar_para_fala(texto):
     texto = REGEX_EMAIL.sub(placeholder_email, texto)
     texto = REGEX_EMOJI.sub("", texto)
 
+    texto = aplicar_siglas(texto)
+
+    idioma = detectar_idioma_simples(texto)
+    texto = aplicar_simbolos(texto, idioma)
+
+
     texto = ler_horas(texto, idioma_preliminar)
 
     texto = aplicar_siglas(texto)
+
+    texto = aplicar_pronuncias_tts(texto)
 
     idioma = detectar_idioma_simples(texto)
     texto = aplicar_simbolos(texto, idioma)
@@ -299,6 +447,18 @@ def limpar_para_fala(texto):
 
     return texto.strip()
 
+def aplicar_pronuncias_tts(texto):
+    for termo in sorted(PRONUNCIAS_TTS, key=len, reverse=True):
+        substituto = PRONUNCIAS_TTS[termo]
+
+        padrao = re.compile(
+            rf"(?<!\w){re.escape(termo)}(?!\w)",
+            flags=re.IGNORECASE,
+        )
+
+        texto = padrao.sub(substituto, texto)
+
+    return texto
 
 def extrair_proxima_frase(buffer):
 
@@ -330,10 +490,12 @@ def extrair_proxima_frase(buffer):
 
 
 def speak(text):
-    """Gera o áudio via Fish Audio e toca, bloqueando até o fim da fala."""
+    """Gera o áudio via Fish Audio, aplica efeitos e toca."""
 
     if not text or not text.strip():
         return
+
+    raw_audio = ASSETS_DIR / "jarvis_raw.mp3"
 
     request = TTSRequest(
         text=text,
@@ -342,14 +504,22 @@ def speak(text):
         speed=1.1,
     )
 
-    with AUDIO_FILE.open("wb") as file:
+    with raw_audio.open("wb") as file:
         for chunk in fish_session.tts(
             request,
             backend=FISH_AUDIO_MODEL,
         ):
             file.write(chunk)
 
-    pygame.mixer.init()
+    aplicar_efeito_jarvis(
+        raw_audio,
+        AUDIO_FILE,
+    )
+
+    if OUTPUT_DEVICE:
+        pygame.mixer.init(devicename="FN-B21B")
+    else:
+        pygame.mixer.init()
     pygame.mixer.music.load(AUDIO_FILE)
     pygame.mixer.music.play()
 

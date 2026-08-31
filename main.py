@@ -9,6 +9,7 @@ from openai import OpenAI
 from tools.jarvis_sounds import sounds
 from tools.voice import speak, limpar_para_fala, extrair_proxima_frase
 import tools.ui_bridge as ui_bridge
+import tools.whatsapp_agent as whatsapp_agent
 from pathlib import Path
 
 load_dotenv()
@@ -23,9 +24,6 @@ ASSETS_DIR = BASE_DIR / "assets"
 MEMORY_FILE = ASSETS_DIR / "memory.json"
 PROMPT_FILE = ASSETS_DIR / "prompt.txt"
 
-# Protege memory.json e o dict `memory` em memória: a thread principal
-# (conversa) e a thread de ações de timeline (pin/unpin/remove) escrevem
-# nele de forma concorrente.
 memory_lock = threading.Lock()
 
 
@@ -40,8 +38,9 @@ def default_memory():
         "objetivos": [],
         "resumo_contexto": "",
         "historico_recente": [],
-        "timeline": [],  # [{id, tipo, text, pinned}, ...]
+        "timeline": [],
     }
+
 
 
 def load_memory():
@@ -59,7 +58,6 @@ def load_memory():
 
         memory = json.loads(content)
 
-    # Migração leve para memory.json criados antes do campo timeline existir.
     memory.setdefault("timeline", [])
     return memory
 
@@ -302,7 +300,7 @@ def ask_jarvis(message, memory):
         "type": "status",
         "state": "thinking"
     })
-    sounds.play("thinking")
+    sounds.play("working")
 
     while True:
         response = client.chat.completions.create(
@@ -418,6 +416,8 @@ def ask_jarvis(message, memory):
 def falar_resposta(full_response):
     print("JARVIS:", full_response)
 
+    ui_bridge.jarvis_falando.set()  
+
     ui_bridge.broadcast({
         "type": "status",
         "state": "speaking"
@@ -446,6 +446,7 @@ def falar_resposta(full_response):
         frase_falada = limpar_para_fala(restante)
         if frase_falada:
             speak(frase_falada)
+    ui_bridge.jarvis_falando.clear()  
 
 
 def escutar_terminal():
@@ -520,10 +521,15 @@ Não faça várias perguntas.
         with memory_lock:
             save_memory(memory)
 
-    threading.Thread(target=escutar_terminal, daemon=True).start()
+    from tools.mic_listener import escutar_microfone
+    threading.Thread(target=escutar_microfone, daemon=True).start()
     threading.Thread(
         target=escutar_acoes_timeline,
         args=(memory,),
+        daemon=True,
+    ).start()
+    threading.Thread(
+        target=whatsapp_agent.start_whatsapp_session,
         daemon=True,
     ).start()
 
@@ -534,8 +540,6 @@ Não faça várias perguntas.
             sounds.play("shutdown", block=True)
             print("\nJARVIS desligado.")
             break
-
-        ui_bridge.broadcast({"type": "log", "role": "user", "text": user_input})
 
         response = ask_jarvis(user_input, memory)
 

@@ -8,43 +8,102 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700;800&family=Share+Tech+Mono&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/static/css/style.css">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="/static/css/hud.css">
+<script src="qrc:///qtwebchannel/qwebchannel.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
 
 <canvas id="bgCanvas"></canvas>
-<div class="bg-glow"></div>
-<div class="scan-sweep"></div>
+<div class="bg-grid"></div>
 <div class="scanlines"></div>
 <div class="noise"></div>
 <div class="vignette"></div>
 <div id="notifications"></div>
-<div class="test-mode-badge"><div class="tmb-dot"></div>MODO TESTE</div>
+
+<div class="media-overlay" id="mediaOverlay">
+  <div class="media-frame">
+    <div class="media-topbar">
+      <span class="media-title" id="mediaTitle">—</span>
+      <div class="media-actions">
+        <button class="icon-btn" id="mediaOpenExternal" title="Abrir no navegador do sistema">EXTERNO</button>
+        <button class="icon-btn" id="mediaClose" title="Fechar">FECHAR ✕</button>
+      </div>
+    </div>
+    <iframe id="mediaIframe" class="media-iframe"
+            allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>
+    <div class="media-blocked" id="mediaBlocked" style="display:none;">
+      Este site bloqueia exibição embutida (X-Frame-Options).
+      <button class="icon-btn" id="mediaBlockedOpen">ABRIR EXTERNAMENTE</button>
+    </div>
+  </div>
+</div>
+
+<div class="browser-overlay" id="browserOverlay">
+  <div class="browser-frame">
+    <div class="browser-topbar">
+      <span class="browser-title" id="browserTitle">—</span>
+      <span class="browser-url" id="browserUrl"></span>
+      <button class="icon-btn" id="browserClose" title="Fechar">FECHAR ✕</button>
+    </div>
+    <img id="browserScreenshot" class="browser-screenshot" alt="Navegação ao vivo" />
+  </div>
+</div>
+
+<!-- quadro de raciocínio (show_reasoning_board) — mesmo padrão visual do
+     media-overlay: overlay fixo que só aparece quando o backend manda o
+     evento 'reasoning_board'. Cada 'reasoning_frame' seguinte redesenha
+     o SVG inteiro (nós + conexões) em sincronia com a narração. -->
+<div class="reasoning-overlay" id="reasoningOverlay">
+  <div class="reasoning-frame">
+    <div class="reasoning-topbar">
+      <span class="reasoning-title" id="reasoningTitle">—</span>
+      <button class="icon-btn" id="reasoningClose" title="Fechar">FECHAR ✕</button>
+    </div>
+    <svg id="reasoningSvg" class="reasoning-svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet"></svg>
+    <div class="reasoning-caption" id="reasoningCaption"></div>
+  </div>
+</div>
+
+<div class="simulation-overlay" id="simOverlay">
+  <div class="simulation-frame">
+    <div class="simulation-topbar">
+      <span class="simulation-title" id="simTitle">—</span>
+      <div class="simulation-controls">
+        <button class="icon-btn" id="simPlayBtn" title="Pausar/retomar">PAUSAR</button>
+        <button class="icon-btn" id="simRestartBtn" title="Reiniciar do início">REINICIAR</button>
+        <input type="range" id="simSpeedRange" min="0.25" max="3" step="0.25" value="1" title="Velocidade da simulação">
+        <button class="icon-btn" id="simClose" title="Fechar">FECHAR ✕</button>
+      </div>
+    </div>
+    <svg id="simSvg" class="simulation-svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet"></svg>
+    <div class="simulation-caption" id="simCaption"></div>
+  </div>
+</div>
 
 <div class="boot-overlay" id="bootOverlay">
   <div class="boot-logo">J·A·R·V·I·S</div>
-  <div class="boot-line" id="bootLine"><span id="bootText"></span><span class="cursor"></span></div>
+  <div class="boot-line"><span id="bootText"></span><span class="cursor"></span></div>
   <div class="boot-bar"><div class="boot-bar-fill" id="bootBarFill"></div></div>
 </div>
 
 <div class="app">
+
   <div class="topbar">
-    <div class="brand">
-      <div class="wordmark" id="wordmark">J·A·R·V·I·S</div>
+    <div class="tb-brand">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <span id="wordmark">JARVIS OS v1.0</span>
     </div>
-    <div class="status-cluster">
-      <div class="status-chip toggle on" id="soundToggle" title="Ativar/desativar sons de interface">
-        <span class="chip-label">SOM</span><span class="chip-value" id="soundValue">ON</span>
-      </div>
-      <div class="status-chip"><span class="chip-label">HORA</span><span class="chip-value" id="clock">--:--:--</span></div>
-      <div class="status-chip"><span class="chip-label">UPTIME</span><span class="chip-value" id="uptime">00:00:00</span></div>
-      <div class="status-pill" id="statusPill"><div class="dot"></div> <span id="statusPillText">SISTEMA ONLINE</span></div>
-      <div class="settings-toggle" id="settingsToggle" title="Personalização visual">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="12" r="3"/>
-          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-        </svg>
-      </div>
+    <div class="divider"></div>
+    <div class="tb-item"><span class="tb-label">OPERADOR:</span><span class="tb-value" id="operatorName">GABRIEL</span></div>
+    <div class="tb-item"><span class="tb-label">CANAL SEGURO:</span><span class="tb-value ok" id="secureLinkLabel">ONLINE</span><span class="tb-dot"></span></div>
+    <div class="tb-item"><span class="tb-label">UPTIME:</span><span class="tb-value" id="uptime">00:00:00</span></div>
+    <div class="tb-item"><span class="tb-label">REDE:</span><span class="tb-value" id="networkLabel">LOCALHOST</span></div>
+    <div class="tb-spacer"></div>
+    <div class="tb-item"><span class="tb-value" id="clock">--:--:--</span></div>
+    <div class="status-pill" id="statusPill"><div class="dot"></div><span id="statusPillText">SISTEMA ONLINE</span></div>
+    <div class="settings-toggle" id="settingsToggle" title="Personalização">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
     </div>
   </div>
 
@@ -58,234 +117,224 @@
         <div class="swatch" data-theme="red" title="Vermelho"></div>
       </div>
     </div>
-    <div>
-      <div class="settings-section-title">INTENSIDADE DAS ANIMAÇÕES</div>
-      <div class="segmented" id="animSegmented">
-        <button data-anim="low">REDUZIDA</button>
-        <button data-anim="normal" class="active">PADRÃO</button>
-        <button data-anim="high">INTENSA</button>
-      </div>
-    </div>
-    <div>
-      <div class="settings-section-title">DENSIDADE DE INFORMAÇÃO</div>
-      <div class="segmented" id="densitySegmented">
-        <button data-density="compact">COMPACTA</button>
-        <button data-density="normal" class="active">PADRÃO</button>
-        <button data-density="detailed">DETALHADA</button>
-      </div>
-    </div>
     <div class="settings-row">
-      <span class="settings-label">Modo minimalista</span>
-      <div class="mini-switch" id="minimalSwitch"><div class="knob"></div></div>
-    </div>
-    <div class="settings-row">
-      <span class="settings-label">Modo teste<span class="settings-label-sub">simula eventos sem o servidor</span></span>
-      <div class="mini-switch" id="testModeSwitch"><div class="knob"></div></div>
+      <span class="settings-label">Som de interface</span>
+      <div class="mini-switch on" id="soundSwitch"><div class="knob"></div></div>
     </div>
   </div>
 
+  <!-- SVG defs compartilhados (gradiente do sweep dos compasses) -->
+  <svg width="0" height="0" style="position:absolute">
+    <defs>
+      <radialGradient id="sweepGrad" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="var(--cyan)" stop-opacity="0"/>
+        <stop offset="100%" stop-color="var(--cyan)" stop-opacity=".35"/>
+      </radialGradient>
+    </defs>
+  </svg>
+
   <div class="main">
 
-    <!-- SIDEBAR ESQUERDA -->
-    <div class="sidebar">
-      <div class="panel core-panel">
+    <!-- TERMINAL (ampliado — ocupa o espaço que antes era VOZ + DESEMPENHO) -->
+    <div class="panel terminal-panel">
+      <div class="panel-title">TERMINAL <span class="accent">registro de interação · /help para ferramentas</span></div>
+      <div class="terminal-body" id="terminalBody">
+        <div class="term-empty" id="terminalEmpty"></div>
+      </div>
+    </div>
+
+    <!-- NÚCLEO -->
+    <div class="panel core-panel">
+      <div class="panel-title" style="align-self:flex-start;">NÚCLEO <span class="accent" id="coreAccent">v1.0</span></div>
+      <div class="core-flex">
+        <div class="core-tags-col">
+          <div class="core-tag-block"><div class="ctb-label">MODO</div><div class="ctb-value" id="tagMode">AUTO</div></div>
+          <div class="core-tag-block"><div class="ctb-label">CTX</div><div class="ctb-value" id="tagCtx">0%</div></div>
+          <div class="core-tag-block"><div class="ctb-label">CONF.</div><div class="ctb-value" id="tagConf">--</div></div>
+        </div>
         <div class="core-stage mode-idle" id="coreStage">
-          <canvas id="coreParticles"></canvas>
-          <div class="ring ring1"></div>
-          <div class="ring-ticks"></div>
-          <div class="sweep"></div>
-          <div class="ring ring2"></div>
-          <div class="ring ring3"></div>
-          <div class="pulse-ring"></div>
-          <div class="core"><div class="core-glyph">J.A.R.V.I.S<br>v3.0</div></div>
+          <div class="core-ring-outer"></div>
+          <div class="core-ring-ticks"></div>
+          <div class="core-sweep"></div>
+          <div class="core-ring-mid"></div>
+          <div class="core-center"><div class="core-glyph">J.A.R.V.I.S</div></div>
           <div class="voice-wave"><span></span><span></span><span></span><span></span><span></span></div>
         </div>
+        <div class="core-tags-col">
+          <div class="core-tag-block"><div class="ctb-label">LINK</div><div class="ctb-value" id="tagLink">--ms</div></div>
+          <div class="core-tag-block"><div class="ctb-label">NODE</div><div class="ctb-value" id="tagNode">0x0000</div></div>
+          <div class="core-tag-block"><div class="ctb-label">SYS</div><div class="ctb-value" id="tagSys">OK</div></div>
+        </div>
+      </div>
+      <div class="core-status-row">
         <div class="core-status" id="coreStatus">CONECTANDO<b id="dots">.</b></div>
-        <div class="core-telemetry">
-          <span>SYNC <b id="telSync">00.0</b></span>
-          <span>NODE <b id="telNode">0x0000</b></span>
-        </div>
-        <div class="minimal-info-row" id="minimalInfoRow">
-          <div class="mini-circle mini-clock">
-            <span class="mini-circle-label">HORA</span>
-            <span class="mini-circle-value" id="minimalClockValue">--:--</span>
-          </div>
-          <div class="mini-circle mini-weather">
-            <svg class="mini-weather-icon" id="minimalWeatherIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="5"/></svg>
-            <span class="mini-circle-value" id="minimalWeatherValue">--°</span>
-          </div>
-        </div>
       </div>
-
-      <div class="panel non-minimal-panel">
-        <div class="panel-title">RECURSOS</div>
-        <div class="stat-row"><div class="stat-label">CPU <b id="cpuVal">8%</b></div><div class="bar-track"><div class="bar-fill" id="cpuBar" style="width:8%"></div></div></div>
-        <div class="stat-row"><div class="stat-label">MEMÓRIA <b id="memVal">44%</b></div><div class="bar-track"><div class="bar-fill" id="memBar" style="width:44%"></div></div></div>
-        <div class="stat-row"><div class="stat-label">DISCO <b id="diskVal">62%</b></div><div class="bar-track"><div class="bar-fill" id="diskBar" style="width:62%"></div></div></div>
-      </div>
-
-      <div class="panel non-minimal-panel">
-        <div class="panel-title">SUBSISTEMAS</div>
-        <div class="minimap-grid" id="minimap">
-          <div class="subsys" data-sys="voz"><div class="sdot"></div><div class="slabel">VOZ</div></div>
-          <div class="subsys" data-sys="memoria"><div class="sdot"></div><div class="slabel">MEMÓRIA</div></div>
-          <div class="subsys" data-sys="websocket"><div class="sdot"></div><div class="slabel">SOCKET</div></div>
-          <div class="subsys" data-sys="ferramentas"><div class="sdot"></div><div class="slabel">FERRAM.</div></div>
-          <div class="subsys" data-sys="banco"><div class="sdot"></div><div class="slabel">BANCO</div></div>
-          <div class="subsys" data-sys="processamento"><div class="sdot"></div><div class="slabel">PROC.</div></div>
-        </div>
+      <div class="subsys-row" id="subsysRow">
+        <div class="subsys" data-sys="voz"><div class="sdot"></div>VOZ</div>
+        <div class="subsys" data-sys="memoria"><div class="sdot"></div>MEMÓRIA</div>
+        <div class="subsys" data-sys="websocket"><div class="sdot"></div>SOCKET</div>
+        <div class="subsys" data-sys="processamento"><div class="sdot"></div>PROC.</div>
+        <div class="subsys" data-sys="ferramentas"><div class="sdot"></div>FERRAM.</div>
       </div>
     </div>
 
-    <div class="conversation">
-      <div class="tabbar">
-        <button class="tab-btn active" id="tabRegistro">REGISTRO</button>
-        <button class="tab-btn" id="tabInvestigacao">INVESTIGAÇÃO<span class="tab-alert-dot" id="invAlertDot" style="display:none"></span></button>
-        <button class="tab-btn" id="tabTatica">TÁTICA<span class="tab-alert-dot" id="tacticalAlertDot" style="display:none"></span></button>
-        <button class="tab-btn" id="tabMapa">MAPA<span class="tab-alert-dot" id="mapAlertDot" style="display:none"></span></button>
-      </div>
-
-      <div class="panel log-panel" id="logPanel">
-        <div class="log-body" id="log">
-          <div class="log-empty" id="logEmpty">NENHUMA INTERAÇÃO REGISTRADA AINDA</div>
-        </div>
-      </div>
-
-      <div class="panel investigation-panel" id="investigationPanel">
-        <div class="panel-title">MODO DE INVESTIGAÇÃO <span class="accent" id="invMeta"></span></div>
-        <div class="inv-empty" id="invEmpty">NENHUMA INVESTIGAÇÃO EM ANDAMENTO</div>
-        <div class="inv-grid" id="invGrid" style="display:none">
-          <div class="inv-quad q-questao"><div class="inv-quad-title">QUESTÃO</div><div class="inv-quad-body" id="invQuestao"></div></div>
-          <div class="inv-quad q-evidencias"><div class="inv-quad-title">EVIDÊNCIAS</div><div class="inv-quad-body" id="invEvidencias"></div></div>
-          <div class="inv-quad q-hipoteses"><div class="inv-quad-title">HIPÓTESES</div><div class="inv-quad-body" id="invHipoteses"></div></div>
-          <div class="inv-quad q-conclusao"><div class="inv-quad-title">CONCLUSÃO</div><div class="inv-quad-body" id="invConclusao"></div></div>
-        </div>
-      </div>
-
-      <div class="panel tactical-panel" id="tacticalPanel">
-        <div class="panel-title">QUADRO TÁTICO <span class="accent" id="tacticalFormacoes"></span></div>
-        <div class="tactical-empty" id="tacticalEmpty">NENHUM QUADRO TÁTICO EXIBIDO</div>
-        <div class="tactical-board" id="tacticalBoard" style="display:none">
-          <div class="tactical-header">
-            <span class="tactical-title" id="tacticalTitle"></span>
-          </div>
-
-          <svg viewBox="0 0 100 64" class="pitch-svg" id="pitchSvg">
-            <defs>
-              <marker id="arrowHead" markerWidth="4" markerHeight="4" refX="3" refY="2" orient="auto">
-                <path d="M0,0 L4,2 L0,4 z" class="arrow-head-fill"/>
-              </marker>
-            </defs>
-            <rect x="0.5" y="0.5" width="99" height="63" class="pitch-turf"/>
-            <line x1="50" y1="0.5" x2="50" y2="63.5" class="pitch-line"/>
-            <circle cx="50" cy="32" r="8" class="pitch-line-outline"/>
-            <circle cx="50" cy="32" r="0.5" class="pitch-line-dot"/>
-            <rect x="0.5" y="14" width="15" height="36" class="pitch-line-outline"/>
-            <rect x="84.5" y="14" width="15" height="36" class="pitch-line-outline"/>
-            <rect x="0.5" y="24" width="5" height="16" class="pitch-line-outline"/>
-            <rect x="94.5" y="24" width="5" height="16" class="pitch-line-outline"/>
-            <g id="tacticalArrows"></g>
-            <g id="tacticalPlayers"></g>
-            <g id="tacticalBall">
-              <circle cx="0" cy="0" r="1.15" fill="#fff" stroke="#222" stroke-width="0.1"/>
-              <polygon points="0,-0.55 0.52,-0.17 0.32,0.44 -0.32,0.44 -0.52,-0.17" fill="#1a1a1a"/>
-              <polygon points="0,-1.15 0.36,-0.85 0.18,-0.5 -0.18,-0.5 -0.36,-0.85" fill="#1a1a1a" opacity="0.85"/>
-              <polygon points="1.0,-0.35 1.15,0.1 0.75,0.35 0.5,-0.05 0.75,-0.35" fill="#1a1a1a" opacity="0.85"/>
-              <polygon points="-1.0,-0.35 -0.75,-0.35 -0.5,-0.05 -0.75,0.35 -1.15,0.1" fill="#1a1a1a" opacity="0.85"/>
-            </g>
-          </svg>
-
-          <div class="tactical-annotation" id="tacticalAnnotation"></div>
-
-          <div class="tactical-controls">
-            <button class="icon-btn" id="tacticalPrevBtn">◀</button>
-            <button class="icon-btn" id="tacticalPlayBtn">▶</button>
-            <button class="icon-btn" id="tacticalNextBtn">▶|</button>
-            <span class="tactical-frame-counter" id="tacticalFrameCounter"></span>
-          </div>
-
-          <div class="tactical-commentary" id="tacticalCommentary" style="display:none">
-            <div class="tag-row"><span class="tag">JARVIS</span></div>
-            <span class="tc-text"></span>
-          </div>
-        </div>
-      </div>
-
-      <div class="panel map-panel" id="mapPanel">
-        <div class="panel-title">ROTA <span class="accent" id="mapModoLabel"></span></div>
-        <div class="map-empty" id="mapEmpty">NENHUMA ROTA CALCULADA</div>
-        <div id="mapContainer" style="display:none; height:340px; border-radius:6px; overflow:hidden;"></div>
-        <div class="map-info" id="mapInfo" style="display:none">
-          <div class="map-info-row"><span>DE</span><b id="mapOrigin"></b></div>
-          <div class="map-info-row"><span>PARA</span><b id="mapDest"></b></div>
-          <div class="map-info-row"><span>DISTÂNCIA</span><b id="mapDistance"></b></div>
-          <div class="map-info-row"><span>TEMPO</span><b id="mapDuration"></b></div>
-        </div>
-      </div>
+    <div class="panel weather-panel">
+      <div class="panel-title">
+        CLIMA
+        <span class="accent" id="weatherAccent">--:--</span>
     </div>
 
-    <!-- SIDEBAR DIREITA -->
-    <div class="sidebar-right">
-      <div class="panel weather-panel">
-        <div class="panel-title">CLIMA ATUAL <span class="accent" id="weatherUpdatedLabel"></span></div>
-        <div class="weather-empty" id="weatherEmpty">AGUARDANDO DADOS DO CLIMA</div>
-        <div id="weatherBody" style="display:none">
-          <div class="weather-main">
-            <svg class="weather-icon" id="weatherIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="5"/></svg>
-            <div>
-              <div class="weather-temp" id="weatherTemp">--<span>°C</span></div>
-              <div class="weather-cond" id="weatherCond">—</div>
-            </div>
-          </div>
-          <div class="weather-detail-grid">
-            <div class="weather-detail"><span class="wd-label">SENSAÇÃO</span><span class="wd-value" id="weatherFeels">--°</span></div>
-            <div class="weather-detail"><span class="wd-label">UMIDADE</span><span class="wd-value" id="weatherHumidity">--%</span></div>
-            <div class="weather-detail"><span class="wd-label">VENTO</span><span class="wd-value" id="weatherWind">-- km/h</span></div>
-            <div class="weather-detail"><span class="wd-label">MÍN/MÁX</span><span class="wd-value" id="weatherMinMax">--/--°</span></div>
-          </div>
-          <div class="weather-loc"><span id="weatherLoc">—</span><span id="weatherUpdated"></span></div>
+  <div class="weather-body">
+
+    <div class="weather-hud">
+
+      <!-- scanner circular -->
+      <div class="weather-orbit">
+        <div class="weather-orbit-ring ring-a"></div>
+        <div class="weather-orbit-ring ring-b"></div>
+        <div class="weather-orbit-dot"></div>
+
+        <div class="weather-icon" id="weatherIcon">
+          🌡️
         </div>
       </div>
 
-      <div class="panel reminders-panel">
-        <div class="panel-title">LEMBRETES <span class="panel-count" id="remindersCount">0</span></div>
-        <div class="reminders-list" id="remindersList"><div class="reminders-empty">nenhum lembrete ativo</div></div>
+      <div class="weather-main-data">
+
+        <div
+          class="weather-temp"
+          id="weatherTemp"
+        >
+          --°
+        </div>
+
+        <div
+          class="weather-cond"
+          id="weatherCond"
+        >
+          carregando...
+        </div>
+
+        <div
+          class="weather-loc"
+          id="weatherLoc"
+        >
+          --
+        </div>
+
       </div>
 
-      <div class="panel feed-panel" style="flex:1;">
-        <div class="panel-title">FERRAMENTAS EXECUTADAS <span class="panel-count" id="toolsCount">0</span></div>
-        <div class="feed-list" id="toolsList"><div class="feed-empty">nenhuma ferramenta usada</div></div>
+    </div>
+
+    <div class="weather-divider"></div>
+
+    <div class="weather-grid">
+
+      <div class="weather-stat">
+        <span class="ws-label">
+          SENSAÇÃO
+        </span>
+
+        <span
+          class="ws-value"
+          id="weatherFeels"
+        >
+          --°
+        </span>
       </div>
 
-      <div class="panel timeline-panel">
-        <div class="panel-title">LINHA DO TEMPO <span class="panel-count" id="timelineCount">0</span></div>
-        <div class="timeline-list" id="timelineList"><div class="feed-empty">sem eventos de contexto</div></div>
+      <div class="weather-stat">
+        <span class="ws-label">
+          MÍN / MÁX
+        </span>
+
+        <span
+          class="ws-value"
+          id="weatherMinMax"
+        >
+          --° / --°
+        </span>
+      </div>
+
+      <div class="weather-stat">
+        <span class="ws-label">
+          UMIDADE
+        </span>
+
+        <span
+          class="ws-value"
+          id="weatherHumidity"
+        >
+          --%
+        </span>
+      </div>
+
+      <div class="weather-stat">
+        <span class="ws-label">
+          VENTO
+        </span>
+
+        <span
+          class="ws-value"
+          id="weatherWind"
+        >
+          -- km/h
+        </span>
+      </div>
+
+    </div>
+
+    <div class="weather-status">
+      <span class="weather-status-dot"></span>
+
+      <span>
+        WEATHER NODE
+      </span>
+
+      <span class="weather-status-value">
+        ONLINE
+      </span>
+    </div>
+
+  </div>
+    </div>
+
+    <!-- LINHA INFERIOR -->
+    <div class="bottom-row">
+      <div class="panel activity-panel">
+        <div class="panel-title">ATIVIDADE <span class="accent">msgs / min</span></div>
+        <div class="activity-value" id="activityValue">0</div>
+        <div class="activity-sub">mensagens no último minuto</div>
+        <div class="activity-row">
+          <div class="activity-graph"><svg viewBox="0 0 100 40" preserveAspectRatio="none" id="activitySvg"></svg></div>
+        </div>
+        <div class="activity-legend">
+          <span><span class="lg-dot down"></span>ENTRADA</span>
+          <span><span class="lg-dot up"></span>RESPOSTA</span>
+        </div>
+      </div>
+      <div class="panel logs-panel">
+        <div class="panel-title">SYSTEM LOGS <span class="panel-count" id="logsCount">0</span></div>
+        <div class="logs-body" id="logsBody">
+          <div class="log-empty" id="logsEmpty">nenhum evento registrado</div>
+        </div>
       </div>
     </div>
 
   </div>
 
   <div class="cmdbar">
+    <div class="cmd-autocomplete" id="cmdAutocomplete"></div>
     <div class="mic-btn" id="micBtn" title="Ativar escuta">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/>
-      </svg>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
     </div>
-    <textarea class="cmd-input" placeholder="Digite um comando ou fale com o JARVIS…" rows="1"></textarea>
-    <div class="minimal-exit-btn" id="minimalExitBtn" title="Voltar para o modo normal">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <circle cx="12" cy="12" r="3"/>
-        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-      </svg>
-    </div>
+    <textarea class="cmd-input" placeholder="Digite um comando, fale com o JARVIS, ou use /help para ferramentas diretas…" rows="1"></textarea>
     <button class="icon-btn" id="exportBtn" title="Exportar registro">EXPORTAR</button>
     <button class="send-btn" id="sendBtn">ENVIAR</button>
   </div>
 
 </div>
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script type="module" src="/static/js/main.js"></script>
-
 </body>
 </html>

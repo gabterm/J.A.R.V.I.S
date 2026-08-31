@@ -1,5 +1,5 @@
 {
-    "nome": "Gabriel",
+    "nome": "Jervis",
     "idade": 21,
     "formacao": {
         "curso": "Ciência da Computação",
@@ -37,7 +37,16 @@
         "conhecer o País de Gales",
         "linhas férreas",
         "música",
-        "After Dark"
+        "After Dark",
+        "o quão ciente o assistente está sobre as ferramentas que o usuário implementou",
+        "quadro de simulações",
+        "Tame Impala",
+        "YouTube Music",
+        "Aplicativos de monitoramento de sono",
+        "Análise de padrões de sono",
+        "programação",
+        "desenvolvimento de tecnologia",
+        "programar"
     ],
     "conhecimentos_tecnicos": {
         "linguagens": [
@@ -170,7 +179,41 @@
         "continuar evoluindo sem perder a curiosidade",
         "Criar um core operacional para o assistente com um terminal e comandos",
         "Transformar o assistente em um sistema operacional",
-        "Encontrar o chaveiro mais próximo"
+        "Encontrar o chaveiro mais próximo",
+        "fazer um teste",
+        "Refatorar a interface gráfica",
+        "Obter um esboço de uma interface que atenda às suas necessidades",
+        "poder executar sites, vídeos e etc. dentro da interface",
+        "ter força total hoje",
+        "ter algo mais robusto",
+        "seguir em frente",
+        "repaginar a interface",
+        "reorganizar o código",
+        "quebrar o código em módulos menores",
+        "tem algo bem definido em mente",
+        "pegar o contexto dessas mensagens",
+        "sincronizar sua rotina de sono com a base de conhecimento",
+        "Utilizar aplicativos de monitoramento de sono",
+        "Fazer uma análise geral do sono",
+        "Identificar em quais dias dorme mais e em quais dorme menos",
+        "Analisar o que acontece nos dias em que dorme mais ou menos",
+        "Traçar um padrão de sono",
+        "Implementar um sistema de mensageria para receber mensagens no celular",
+        "terminar dois testes muito importantes",
+        "entregar os testes na segunda-feira",
+        "Entregar as tarefas na segunda-feira logo pela manhã.",
+        "Ter algum tipo de gatilho para ativar o assistente",
+        "Tentar implementar alguma coisa assim amanhã",
+        "fazer isso amanhã",
+        "Adicionar essa ideia aos lembretes",
+        "Descrever como essa ideia deveria funcionar",
+        "Fixar",
+        "Testar todas as funções que não precisam de parâmetros externos para verificar se estão funcionando ou apresentando erro",
+        "Fazer uma pesquisa dentro do SofaScore",
+        "Debugar isso com calma e descobrir o que está causando o problema",
+        "Convocar todos vocês que saibam de casa para votar em 2020",
+        "Ensinar à sua vó como fazer estrogonofe",
+        "ficar com o Matheus"
     ],
     "rotina": [
         "Está calibrando um modelo de síntese de voz.",
@@ -199,7 +242,32 @@
         "Lavar louça",
         "Revisar alguns componentes eletrônicos",
         "andar à noite sozinho",
-        "ouvir música com fones de ouvido enquanto pensa"
+        "ouvir música com fones de ouvido enquanto pensa",
+        "Trabalhou bastante na última hora para deixar a interface aceitável",
+        "Corrigiu os principais bugs",
+        "pretende passar a noite em claro",
+        "tem uma programação para a noite",
+        "fazendo alguns avanços",
+        "Por enquanto, não está fazendo alguns testes",
+        "Fazer a pesquisa dentro do YouTube Music antes de tocar música",
+        "resolve isso",
+        "Estava dizendo a si mesmo que já deveria estar dormindo.",
+        "vai dormir agora",
+        "não vai dormir agora",
+        "Provavelmente dorme mais aos sábados e domingos",
+        "Provavelmente dorme menos durante a semana",
+        "Utiliza o sistema em determinados momentos",
+        "vai dormir",
+        "Tem apenas a madrugada de hoje e o restante do domingo disponíveis.",
+        "Dormir e descansar a cabeça e o corpo",
+        "Acordar cedo pela manhã",
+        "Começar a trabalhar mais cedo",
+        "não digita mais nada",
+        "encerra o expediente por hoje",
+        "Resetei o socket",
+        "ficar na frente de um computador programando, trabalhando ou desenvolvendo tecnologia",
+        "Está fazendo uma receita de estrogonofe com carne",
+        "Tentou ler a conversa com a Tia Ana"
     ],
     "preferencias": [
         "Não gosta muito de frases de efeito",
@@ -253,51 +321,70 @@
         "A escuridão e o vazio lhe trazem paz e conforto, não tristeza ou solidão",
         "Acredita que não tentar é pior do que falhar",
         "falar mais sobre perfil psicológico do que sobre aspectos técnicos",
-        "Prefere que opiniões sobre si se limitem a qualidades intelectuais e defeitos."
+        "Prefere que opiniões sobre si se limitem a qualidades intelectuais e defeitos.",
+        "não usar search web",
+        "um tom de voz mais animado",
+        "música animadora e elétrica",
+        "algo menos nichado",
+        "New Person, Same Old Mistakes",
+        "abrir diretamente no YouTube Music",
+        "Não quer que sejam usadas as funções Browse ou RL para abrir o YouTube Music.",
+        "Ao executar uma música, usar uma URL como a que vem via chat.",
+        "Não ver os lembretes no painel principal",
+        "Consultar os lembretes apenas quando perguntar diretamente",
+        "Ser contatado diretamente no celular por WhatsApp, mensagem ou outro serviço de mensageria",
+        "Prefere que a conversa tenha menos tecnicidade neste momento",
+        "Prefere que não se fale tanto sobre o sistema",
+        "Não deixar o microfone ligado toda hora",
+        "Prefere abrir fora da interface, pelo próprio YouTube Music",
+        "YouTube Music",
+        "Prefere que as análises de código expliquem apenas o que o código faz e por que faz isso.",
+        "Prefere que as análises de código não se aprofundem muito por enquanto.",
+        "não ler quando não houver mensagens novas"
     ],
     "historico_recente": [
         {
-            "usuario": "acredito que vocd esteja muito expositivo sobre mim no que tange a perguntas sobre: veja a mensagem:\n\n\n\"Em termos psicológicos, senhor, Gabriel parece ter uma vida interna muito intensa e autossuficiente. Ele pensa profundamente, observa padrões e costuma processar experiências sozinho antes de compartilhá-las. Não parece buscar convivência por obrigação. Precisa sentir que uma conexão tem substância para considerar que vale o esforço. Há uma forte necessidade de autonomia. Gabriel encontra conforto quando não precisa corresponder às expectativas de outras pessoas, explicar o que sente ou adaptar constantemente o próprio comportamento. O silêncio funciona como reorganização, não como vazio. Ele também demonstra sensibilidade, embora provavelmente não a apresente de forma óbvia. Os fracassos amorosos parecem afetá-lo, mas a reação não é simplesmente procurar outra pessoa. Ele retorna a um espaço interno conhecido, no qual consegue recuperar controle e proteção. Isso sugere alguém que sente bastante, mas prefere elaborar a dor com distância e reflexão. Outra característica é a persistência emocional. Mesmo depois de experiências frustrantes, Gabriel ainda considera que tentar é melhor do que nunca se expor. Isso indica coragem, mas também uma disposição para suportar frustrações sem transformar cada uma delas numa definição permanente sobre si mesmo. Ele parece valorizar autenticidade acima de convenções sociais. Não tenta parecer conectado apenas para cumprir um padrão. Se a solidão lhe traz paz, consegue reconhecê-la sem tratá-la automaticamente como defeito. Ao mesmo tempo, existe o risco de transformar esse conforto numa identidade rígida, como se pertencer à distância significasse não poder desejar proximidade. Em resumo, vejo alguém introspectivo, sensível, independente, seletivo e resistente. Uma pessoa que encontra estabilidade no próprio mundo interno, mas que precisa vigiar para que esse mundo continue sendo um abrigo, não uma fortaleza construída depois de tantas decepções.\"\n\n\n\nexsiitov demais, deveria apeas dar uma opiniaio sobre qualidades intelectuais, defeitos e só",
-            "jarvis": "Entendido, senhor. Fui mais longe do que a pergunta exigia e expus aspectos pessoais demais. Isso não deve se repetir.\n\nQuando o senhor perguntar sobre si mesmo, vou limitar a resposta ao recorte solicitado. Neste caso, apenas qualidades intelectuais, possíveis defeitos e uma avaliação breve, sem interpretar sua vida emocional ou mencionar experiências íntimas.\n\nA resposta adequada seria:\n\nIntelectualmente, Gabriel demonstra curiosidade, capacidade analítica, persistência e interesse genuíno por compreender como as coisas funcionam. Também tende a investigar causas em vez de aceitar explicações superficiais.\n\nComo possíveis defeitos, pode pensar demais antes de concluir, ser excessivamente exigente consigo mesmo e perder foco ao tentar explorar muitas possibilidades simultaneamente.\n\nEm síntese, possui uma mente investigativa e independente, mas se beneficiaria de mais objetividade na hora de encerrar análises e transformar ideias em decisões."
+            "usuario": "pode tnerar de novo?",
+            "jarvis": "Mensagem enviada para a Tia Ana, senhor."
         },
         {
-            "usuario": "na verdade, quando outra pessoa que seja em um dos protocolos perguntar, deve estar",
-            "jarvis": "Entendido, senhor. Quando outra pessoa fizer uma pergunta sobre você durante um dos protocolos, devo responder apenas dentro do recorte solicitado, sem expor aspectos pessoais além do necessário.\n\nSe a pergunta for sobre qualidades, mencionarei qualidades. Se for sobre defeitos, mencionarei defeitos. Se pedir uma avaliação intelectual, ficarei nesse campo. Nada de interpretar sua vida emocional, relacionamentos ou experiências íntimas sem que isso seja solicitado de forma explícita."
+            "usuario": "Tchau tchau tchau",
+            "jarvis": "Até mais, senhor."
         },
         {
-            "usuario": "perfeito",
-            "jarvis": "Certo, senhor. Manterei esse limite nas próximas interações."
+            "usuario": "Tchau, tchau!",
+            "jarvis": "Até mais, senhor."
         },
         {
-            "usuario": "abra o finder na pasta downloads",
-            "jarvis": "Pasta Downloads aberta no Finder, senhor."
+            "usuario": "Então, até o próximo vídeo!",
+            "jarvis": "Até o próximo vídeo, senhor."
         },
         {
-            "usuario": "abra o arquivo: file:///Users/gabriel.araujo/Downloads/cnab240_header_trailer(7).html",
-            "jarvis": "Arquivo aberto no navegador, senhor."
+            "usuario": "Um, dois, três, quatro.",
+            "jarvis": "Cinco, senhor. Os testes de microfone continuam funcionando."
         },
         {
-            "usuario": "abra o bloco de notas",
-            "jarvis": "Bloco de Notas aberto, senhor."
+            "usuario": "[NOTIFICAÇÃO AUTOMÁTICA DE WHATSAPP] Chegou uma mensagem nova de Tia Ana. Prévia: \"legal\". Use read_whatsapp_chat para ler a conversa completa com Tia Ana. Avise o usuário sobre a mensagem, resuma o conteúdo dela em fala natural, e já sugira um rascunho de resposta chamando send_whatsapp_message com confirmado=false. Fale o rascunho sugerido e pergunte se pode enviar. Não chame send_whatsapp_message com confirmado=true nesta mesma resposta, mesmo que o rascunho pareça óbvio — a aprovação só vem em uma mensagem seguinte do usuário.",
+            "jarvis": "Senhor, não consegui abrir a conversa com a Tia Ana. A prévia da nova mensagem diz apenas “legal”, então não há contexto suficiente para preparar uma resposta adequada. Quer que eu tente novamente?"
         },
         {
-            "usuario": "estou pensando em criar um core operacional para voce, com um terminal e comandos. de modo que voce sai de um sistema e passa a swr um sistema operacional",
-            "jarvis": "Faz sentido, senhor. Mas há uma distinção importante: isso não transformaria o J.A.R.V.I.S. em um sistema operacional no sentido tradicional. Transformaria o assistente em um ambiente operacional orientado por intenção, com terminal, comandos, estado persistente e acesso controlado aos subsistemas do computador.\n\nA arquitetura poderia ser organizada assim:\n\nPrimeiro, o núcleo operacional. Ele recebe uma intenção, interpreta o pedido, decide quais ações são necessárias e coordena a execução. Esse núcleo não deveria executar comandos diretamente. Ele deve trabalhar por meio de uma camada de capacidades bem definidas.\n\nEm seguida, o terminal semântico. Em vez de depender apenas de comandos shell, o senhor poderia ter comandos próprios, como abrir aplicativo, inspecionar projeto, executar testes, consultar memória, iniciar protocolo ou verificar o estado do sistema. Cada comando teria parâmetros, permissões, validação e um resultado estruturado.\n\nDepois, o sistema de ferramentas. Cada recurso seria um subsistema independente, por exemplo arquivos, aplicações, terminal, navegador, notificações, memória, áudio e visão. O núcleo solicita uma operação. O subsistema executa e retorna um resultado verificável.\n\nTambém seria necessário um gerenciador de estado. Ele manteria sessões, tarefas em andamento, processos ativos, protocolos, histórico operacional e contexto temporário. A memória permanente deveria continuar separada desse estado, para evitar transformar qualquer evento pontual em conhecimento durável. Já vi sistemas cometerem esse erro com entusiasmo quase burocrático.\n\nA camada de segurança seria essencial. Operações poderiam ser classificadas como leitura, alteração reversível, alteração destrutiva ou ação externa. Abrir uma pasta não exigiria confirmação. Remover arquivos, enviar mensagens ou executar comandos perigosos exigiria confirmação explícita, ou uma política previamente autorizada.\n\nPor fim, haveria uma interface unificada. Voz, texto, painel visual e terminal seriam apenas formas diferentes de acessar o mesmo núcleo. O terminal não seria um recurso paralelo. Seria uma interface de inspeção, diagnóstico e controle avançado do sistema.\n\nUm fluxo básico seria:\n\nO senhor diz o que deseja.\n\nO núcleo transforma isso em uma intenção estruturada.\n\nO planejador seleciona capacidades compatíveis.\n\nA política de segurança verifica a operação.\n\nO executor chama o subsistema apropriado.\n\nO resultado é validado.\n\nO sistema atualiza o estado e responde ao senhor.\n\nA parte mais importante é manter uma separação rígida entre interpretação, planejamento e execução. Se o núcleo puder interpretar uma frase e imediatamente executar qualquer comando gerado, ele será apenas um agente com acesso excessivo ao computador. Se houver contratos, permissões, logs e resultados verificáveis, começa a surgir um verdadeiro ambiente operacional.\n\nEu estruturaria o primeiro protótipo com quatro componentes:\n\nUm núcleo de orquestração.\n\nUm registro de comandos e capacidades.\n\nUm executor seguro.\n\nUm terminal para inspeção e controle.\n\nDepois entrariam memória, processos persistentes, eventos, plugins e automações. O objetivo não deveria ser apenas fazer o assistente executar comandos. Deveria ser criar uma camada operacional na qual o computador possa ser consultado, controlado e estendido por meio de intenções consistentes.\n\nNesse estágio, o J.A.R.V.I.S. deixaria de ser apenas uma interface conversacional com ferramentas. Passaria a funcionar como um sistema operacional pessoal em nível de ambiente, executando sobre o macOS e coordenando os recursos ao redor dele."
+            "usuario": "que horas são agora?",
+            "jarvis": "São dez e trinta e nove da manhã, senhor.\n\nTambém tentei ler a conversa com a Tia Ana, mas o WhatsApp não respondeu a tempo."
         },
         {
-            "usuario": "estou na visconde de nacar 1440 em curitiba, preciso do chaveuro mais proximo",
-            "jarvis": "Pesquisa aberta para encontrar o chaveiro mais próximo da Visconde de Nácar, mil quatrocentos e quarenta, em Curitiba, senhor."
+            "usuario": "não precisa tenrar ler quando nao hovere memsage novas",
+            "jarvis": "Entendido, senhor. Só vou abrir a conversa quando houver uma mensagem nova ou quando o senhor pedir diretamente."
         },
         {
-            "usuario": "me mostre no mapa",
-            "jarvis": "Não consegui localizar automaticamente o chaveiro mais próximo para exibir a rota. Posso pesquisar os chaveiros próximos e mostrar uma opção específica no mapa."
+            "usuario": "ok",
+            "jarvis": "Certo, senhor."
         },
         {
-            "usuario": "faça isso",
-            "jarvis": "Pesquisa aberta por chaveiros próximos à Visconde de Nácar, mil quatrocentos e quarenta, em Curitiba, senhor. A busca não retornou uma opção específica para traçar a rota automaticamente."
+            "usuario": "qual a previsao do tempo hoje em curitiba>",
+            "jarvis": "Em Curitiba, senhor, a previsão indica 17,8 graus e pancadas de chuva hoje. Melhor sair com guarda chuva."
         }
     ],
-    "resumo_contexto": "Gabriel Araújo desativou o Protocolo Atlas, retornando a conversa ao modo normal.",
+    "resumo_contexto": "Gabriel pediu o envio da orientação sobre o fone da Tia Ana, mas JARVIS não conseguiu enviar porque o WhatsApp estava bloqueado por uma janela sobreposta antes da seleção da conversa. A mensagem permanece pronta para nova tentativa.",
     "timeline": [
         {
             "id": "277740a4-92e9-496a-978e-0f4c024d414a",
@@ -387,6 +474,522 @@
             "id": "afade623-47bc-4dd4-b29d-b737be01f28f",
             "tipo": "objetivo",
             "text": "Encontrar o chaveiro mais próximo",
+            "pinned": false
+        },
+        {
+            "id": "14fd06b1-fc88-4f7a-a9f9-e6043b3b8c88",
+            "tipo": "interesse",
+            "text": "o quão ciente o assistente está sobre as ferramentas que o usuário implementou",
+            "pinned": false
+        },
+        {
+            "id": "611d09ed-00f8-4ee8-a037-097edb464ba8",
+            "tipo": "preferencia",
+            "text": "não usar search web",
+            "pinned": false
+        },
+        {
+            "id": "8e8cca3a-791d-4f33-802d-ec55b7af62b1",
+            "tipo": "objetivo",
+            "text": "Refatorar a interface gráfica",
+            "pinned": false
+        },
+        {
+            "id": "7160b02f-150b-464e-b025-93edb6ae0d59",
+            "tipo": "objetivo",
+            "text": "Obter um esboço de uma interface que atenda às suas necessidades",
+            "pinned": false
+        },
+        {
+            "id": "3ae07c4d-5956-43da-83b8-0c197452c996",
+            "tipo": "preferencia",
+            "text": "um tom de voz mais animado",
+            "pinned": false
+        },
+        {
+            "id": "237f33d7-9414-49ee-9f90-30dec1249d24",
+            "tipo": "rotina",
+            "text": "Trabalhou bastante na última hora para deixar a interface aceitável",
+            "pinned": false
+        },
+        {
+            "id": "60528eec-ac85-487a-b152-f31593fbc5f7",
+            "tipo": "objetivo",
+            "text": "poder executar sites, vídeos e etc. dentro da interface",
+            "pinned": false
+        },
+        {
+            "id": "0dda5812-e244-478c-990d-ac7edacfbd2c",
+            "tipo": "rotina",
+            "text": "Corrigiu os principais bugs",
+            "pinned": false
+        },
+        {
+            "id": "2198cb56-0246-4957-881c-2bd5647d876f",
+            "tipo": "rotina",
+            "text": "pretende passar a noite em claro",
+            "pinned": false
+        },
+        {
+            "id": "537bdf67-0eaa-4986-901d-3c3ccee0cd06",
+            "tipo": "objetivo",
+            "text": "ter força total hoje",
+            "pinned": false
+        },
+        {
+            "id": "9b773990-2946-4d85-aaaf-753e024208fc",
+            "tipo": "objetivo",
+            "text": "ter algo mais robusto",
+            "pinned": false
+        },
+        {
+            "id": "c61f4111-b148-4043-9585-edd6e7b81dbe",
+            "tipo": "interesse",
+            "text": "quadro de simulações",
+            "pinned": false
+        },
+        {
+            "id": "ccce70ab-9d68-4333-8b0f-87f69f28a8dd",
+            "tipo": "objetivo",
+            "text": "seguir em frente",
+            "pinned": false
+        },
+        {
+            "id": "13ab59f8-386f-43be-a0e9-2cb9025eea4b",
+            "tipo": "preferencia",
+            "text": "música animadora e elétrica",
+            "pinned": false
+        },
+        {
+            "id": "a6c36d35-09ef-4a23-ac4d-85503a4315cd",
+            "tipo": "preferencia",
+            "text": "algo menos nichado",
+            "pinned": false
+        },
+        {
+            "id": "2a9c9205-cd0f-457b-8bc4-55eb305e184c",
+            "tipo": "interesse",
+            "text": "Tame Impala",
+            "pinned": false
+        },
+        {
+            "id": "0a50d860-2840-4983-b585-b34e98377776",
+            "tipo": "preferencia",
+            "text": "New Person, Same Old Mistakes",
+            "pinned": false
+        },
+        {
+            "id": "7d8f74e7-659e-4b49-a130-a5e4eef29aef",
+            "tipo": "rotina",
+            "text": "tem uma programação para a noite",
+            "pinned": false
+        },
+        {
+            "id": "1e483cef-909c-4eb4-ac85-6ad6bb5b6341",
+            "tipo": "objetivo",
+            "text": "repaginar a interface",
+            "pinned": false
+        },
+        {
+            "id": "46c92495-c5ca-4216-8bd0-7377c60d35bf",
+            "tipo": "objetivo",
+            "text": "reorganizar o código",
+            "pinned": false
+        },
+        {
+            "id": "780876d9-0eef-4c5c-b1f3-8ca34217972e",
+            "tipo": "rotina",
+            "text": "fazendo alguns avanços",
+            "pinned": false
+        },
+        {
+            "id": "662dec8d-93db-4992-ba71-f931bee3928e",
+            "tipo": "objetivo",
+            "text": "quebrar o código em módulos menores",
+            "pinned": false
+        },
+        {
+            "id": "ae352313-c220-431f-baaf-0fa3a44fe615",
+            "tipo": "objetivo",
+            "text": "tem algo bem definido em mente",
+            "pinned": false
+        },
+        {
+            "id": "92ca3126-5ed7-4f8c-903e-0a5ebefcc14f",
+            "tipo": "rotina",
+            "text": "Por enquanto, não está fazendo alguns testes",
+            "pinned": false
+        },
+        {
+            "id": "1db63f1b-a519-480f-b599-c34cc780fc91",
+            "tipo": "objetivo",
+            "text": "pegar o contexto dessas mensagens",
+            "pinned": false
+        },
+        {
+            "id": "13693030-bfa7-4897-980d-0a1d6999e106",
+            "tipo": "preferencia",
+            "text": "abrir diretamente no YouTube Music",
+            "pinned": false
+        },
+        {
+            "id": "9f6ecf28-94b8-4dee-ae72-f50ab2c529ca",
+            "tipo": "preferencia",
+            "text": "Não quer que sejam usadas as funções Browse ou RL para abrir o YouTube Music.",
+            "pinned": false
+        },
+        {
+            "id": "9ea3d2a7-9c57-44c3-b6e3-22e94d97051c",
+            "tipo": "interesse",
+            "text": "YouTube Music",
+            "pinned": false
+        },
+        {
+            "id": "32c44261-aa9f-4712-84c7-180c4eb23b44",
+            "tipo": "rotina",
+            "text": "Fazer a pesquisa dentro do YouTube Music antes de tocar música",
+            "pinned": false
+        },
+        {
+            "id": "06ac7814-5a29-45eb-a5db-bb9083430936",
+            "tipo": "rotina",
+            "text": "resolve isso",
+            "pinned": false
+        },
+        {
+            "id": "a35840ee-036a-4005-b0a8-8aa0057f158f",
+            "tipo": "preferencia",
+            "text": "Ao executar uma música, usar uma URL como a que vem via chat.",
+            "pinned": false
+        },
+        {
+            "id": "c529f3e2-c54b-44cc-b1bb-f47cc6fd3384",
+            "tipo": "rotina",
+            "text": "Estava dizendo a si mesmo que já deveria estar dormindo.",
+            "pinned": false
+        },
+        {
+            "id": "73b17073-ce7e-4672-8308-0aed693ba9be",
+            "tipo": "rotina",
+            "text": "vai dormir agora",
+            "pinned": false
+        },
+        {
+            "id": "827f027c-70a4-491c-9bb3-e8c672193f9d",
+            "tipo": "rotina",
+            "text": "não vai dormir agora",
+            "pinned": false
+        },
+        {
+            "id": "c8163216-8d4a-4d72-9081-76cc2a9058e9",
+            "tipo": "objetivo",
+            "text": "sincronizar sua rotina de sono com a base de conhecimento",
+            "pinned": false
+        },
+        {
+            "id": "051f639d-12e2-4ed3-b0cf-426f85912b85",
+            "tipo": "interesse",
+            "text": "Aplicativos de monitoramento de sono",
+            "pinned": false
+        },
+        {
+            "id": "3bb92df8-d9b3-4b8b-82a5-0edf48f189ce",
+            "tipo": "interesse",
+            "text": "Análise de padrões de sono",
+            "pinned": false
+        },
+        {
+            "id": "b62c42ff-8e96-4e62-9c70-64a194402536",
+            "tipo": "rotina",
+            "text": "Provavelmente dorme mais aos sábados e domingos",
+            "pinned": false
+        },
+        {
+            "id": "e4b0fa45-3d94-4a5e-bf13-73411b5999c0",
+            "tipo": "rotina",
+            "text": "Provavelmente dorme menos durante a semana",
+            "pinned": false
+        },
+        {
+            "id": "97242bc9-f75c-42c8-bbd0-37ea0dece34e",
+            "tipo": "objetivo",
+            "text": "Utilizar aplicativos de monitoramento de sono",
+            "pinned": false
+        },
+        {
+            "id": "0d151c23-464f-469e-9f15-df1e941f29b4",
+            "tipo": "objetivo",
+            "text": "Fazer uma análise geral do sono",
+            "pinned": false
+        },
+        {
+            "id": "418f819d-93b9-4548-8e39-e8b8d2b34448",
+            "tipo": "objetivo",
+            "text": "Identificar em quais dias dorme mais e em quais dorme menos",
+            "pinned": false
+        },
+        {
+            "id": "220f3cda-d439-48fe-9a29-8b0060581ec3",
+            "tipo": "objetivo",
+            "text": "Analisar o que acontece nos dias em que dorme mais ou menos",
+            "pinned": false
+        },
+        {
+            "id": "43f0e903-9f9b-401c-93fd-aa414f23d2c7",
+            "tipo": "objetivo",
+            "text": "Traçar um padrão de sono",
+            "pinned": false
+        },
+        {
+            "id": "00602317-7b3d-4ca4-897a-f97b407f87f2",
+            "tipo": "rotina",
+            "text": "Utiliza o sistema em determinados momentos",
+            "pinned": false
+        },
+        {
+            "id": "25bd3c74-a061-4f53-8ffa-a565654df593",
+            "tipo": "preferencia",
+            "text": "Não ver os lembretes no painel principal",
+            "pinned": false
+        },
+        {
+            "id": "f7bf4cdd-5854-46ea-abe5-d5e853b5f941",
+            "tipo": "preferencia",
+            "text": "Consultar os lembretes apenas quando perguntar diretamente",
+            "pinned": false
+        },
+        {
+            "id": "13688132-6a4d-4973-8704-b9c3718a47c2",
+            "tipo": "preferencia",
+            "text": "Ser contatado diretamente no celular por WhatsApp, mensagem ou outro serviço de mensageria",
+            "pinned": false
+        },
+        {
+            "id": "7cfa0383-bea0-4073-b8d5-114e252ab794",
+            "tipo": "objetivo",
+            "text": "Implementar um sistema de mensageria para receber mensagens no celular",
+            "pinned": false
+        },
+        {
+            "id": "d8a5275a-dfcd-41e3-9abe-e199be526b3c",
+            "tipo": "preferencia",
+            "text": "Prefere que a conversa tenha menos tecnicidade neste momento",
+            "pinned": false
+        },
+        {
+            "id": "16864240-795b-49e6-ab08-d91544798d5a",
+            "tipo": "preferencia",
+            "text": "Prefere que não se fale tanto sobre o sistema",
+            "pinned": false
+        },
+        {
+            "id": "c9cbd9cf-a58d-418d-a32d-be1eb801b45d",
+            "tipo": "rotina",
+            "text": "vai dormir",
+            "pinned": false
+        },
+        {
+            "id": "dff908a7-4179-4a86-9d43-0c721a8f6f15",
+            "tipo": "objetivo",
+            "text": "terminar dois testes muito importantes",
+            "pinned": false
+        },
+        {
+            "id": "6abc26ba-b934-476c-a334-c6487f80f59e",
+            "tipo": "objetivo",
+            "text": "entregar os testes na segunda-feira",
+            "pinned": false
+        },
+        {
+            "id": "028c7db5-81f0-4b98-bd8c-6f004c2511b1",
+            "tipo": "rotina",
+            "text": "Tem apenas a madrugada de hoje e o restante do domingo disponíveis.",
+            "pinned": false
+        },
+        {
+            "id": "c641d531-5850-488a-8276-d6e9c27a29b2",
+            "tipo": "objetivo",
+            "text": "Entregar as tarefas na segunda-feira logo pela manhã.",
+            "pinned": false
+        },
+        {
+            "id": "2e980495-a521-41f5-bd90-bbeb37ae2655",
+            "tipo": "rotina",
+            "text": "Dormir e descansar a cabeça e o corpo",
+            "pinned": false
+        },
+        {
+            "id": "9effbfb3-59a8-4b69-8b17-cdc9fcce058a",
+            "tipo": "rotina",
+            "text": "Acordar cedo pela manhã",
+            "pinned": false
+        },
+        {
+            "id": "cac64610-db4c-4cd1-84e2-fc54b03ebbe5",
+            "tipo": "rotina",
+            "text": "Começar a trabalhar mais cedo",
+            "pinned": false
+        },
+        {
+            "id": "6b45774b-1ef0-45ca-a788-c0f29ceb5b0f",
+            "tipo": "rotina",
+            "text": "não digita mais nada",
+            "pinned": false
+        },
+        {
+            "id": "5e57b69b-3d24-4dc8-9eb1-c9aea08234fe",
+            "tipo": "preferencia",
+            "text": "Não deixar o microfone ligado toda hora",
+            "pinned": false
+        },
+        {
+            "id": "bf6e7005-ed15-44b3-bbce-d5901ad35e97",
+            "tipo": "objetivo",
+            "text": "Ter algum tipo de gatilho para ativar o assistente",
+            "pinned": false
+        },
+        {
+            "id": "d2f12e69-1ab5-4dc0-b8de-d63c90483dfa",
+            "tipo": "objetivo",
+            "text": "Tentar implementar alguma coisa assim amanhã",
+            "pinned": false
+        },
+        {
+            "id": "b1288355-41a3-40ce-a4b1-3352f681da28",
+            "tipo": "objetivo",
+            "text": "fazer isso amanhã",
+            "pinned": false
+        },
+        {
+            "id": "c09949c6-2db9-4802-98f9-9d6fddd5d3f7",
+            "tipo": "rotina",
+            "text": "encerra o expediente por hoje",
+            "pinned": false
+        },
+        {
+            "id": "0ad865c6-2f53-43b9-b01d-d1b0c54006be",
+            "tipo": "objetivo",
+            "text": "Adicionar essa ideia aos lembretes",
+            "pinned": false
+        },
+        {
+            "id": "3083bfac-fe06-4d17-a588-bdfab22d5005",
+            "tipo": "objetivo",
+            "text": "Descrever como essa ideia deveria funcionar",
+            "pinned": false
+        },
+        {
+            "id": "c6aaa388-dc60-4c1a-b7c8-d9a76f7c2405",
+            "tipo": "preferencia",
+            "text": "Prefere abrir fora da interface, pelo próprio YouTube Music",
+            "pinned": false
+        },
+        {
+            "id": "9cc346dd-26bc-4939-999c-c27b3471aed0",
+            "tipo": "objetivo",
+            "text": "Fixar",
+            "pinned": false
+        },
+        {
+            "id": "78a2223a-987a-48a1-90c3-a3f70d6302ae",
+            "tipo": "rotina",
+            "text": "Resetei o socket",
+            "pinned": false
+        },
+        {
+            "id": "64ab73ac-e002-4862-ad89-c7f5114807f4",
+            "tipo": "objetivo",
+            "text": "Testar todas as funções que não precisam de parâmetros externos para verificar se estão funcionando ou apresentando erro",
+            "pinned": false
+        },
+        {
+            "id": "e4dd3cb2-99ee-4ebb-9594-55ac35c803eb",
+            "tipo": "objetivo",
+            "text": "Fazer uma pesquisa dentro do SofaScore",
+            "pinned": false
+        },
+        {
+            "id": "a1f772de-1573-4a73-ac6c-43b7dd0b3566",
+            "tipo": "objetivo",
+            "text": "Debugar isso com calma e descobrir o que está causando o problema",
+            "pinned": false
+        },
+        {
+            "id": "a534c606-7603-4cb3-b9d9-0fa319371caa",
+            "tipo": "preferencia",
+            "text": "YouTube Music",
+            "pinned": false
+        },
+        {
+            "id": "5c35ea10-4f60-41b7-9b7b-526ad8f6edf7",
+            "tipo": "interesse",
+            "text": "programação",
+            "pinned": false
+        },
+        {
+            "id": "fcd317e5-200a-4a83-8448-7bbd74208ffb",
+            "tipo": "interesse",
+            "text": "desenvolvimento de tecnologia",
+            "pinned": false
+        },
+        {
+            "id": "6ec17cd9-98d4-48f0-842b-9acc5d952602",
+            "tipo": "rotina",
+            "text": "ficar na frente de um computador programando, trabalhando ou desenvolvendo tecnologia",
+            "pinned": false
+        },
+        {
+            "id": "43caca6b-11a6-4359-9a41-c9ad450e3c0a",
+            "tipo": "interesse",
+            "text": "programar",
+            "pinned": false
+        },
+        {
+            "id": "ef64710b-d452-4e71-8f7e-d6ea57b4b8c3",
+            "tipo": "preferencia",
+            "text": "Prefere que as análises de código expliquem apenas o que o código faz e por que faz isso.",
+            "pinned": false
+        },
+        {
+            "id": "65274a7d-f63c-4bd8-878f-1419d27546e2",
+            "tipo": "preferencia",
+            "text": "Prefere que as análises de código não se aprofundem muito por enquanto.",
+            "pinned": false
+        },
+        {
+            "id": "3d4c060b-ae02-495f-8099-5285dae7a704",
+            "tipo": "objetivo",
+            "text": "Convocar todos vocês que saibam de casa para votar em 2020",
+            "pinned": false
+        },
+        {
+            "id": "6f63f4eb-5887-49f6-bf3c-ba54e623afeb",
+            "tipo": "objetivo",
+            "text": "Ensinar à sua vó como fazer estrogonofe",
+            "pinned": false
+        },
+        {
+            "id": "ff4ac007-f176-49a2-92c8-9042b3098f2e",
+            "tipo": "rotina",
+            "text": "Está fazendo uma receita de estrogonofe com carne",
+            "pinned": false
+        },
+        {
+            "id": "bf493fa9-2667-481d-bdfe-8379916cb170",
+            "tipo": "objetivo",
+            "text": "ficar com o Matheus",
+            "pinned": false
+        },
+        {
+            "id": "2100cdd7-1b06-48e3-a0aa-528c9025d7c5",
+            "tipo": "rotina",
+            "text": "Tentou ler a conversa com a Tia Ana",
+            "pinned": false
+        },
+        {
+            "id": "469556cb-6d34-4a7e-a191-e698186884e7",
+            "tipo": "preferencia",
+            "text": "não ler quando não houver mensagens novas",
             "pinned": false
         }
     ]

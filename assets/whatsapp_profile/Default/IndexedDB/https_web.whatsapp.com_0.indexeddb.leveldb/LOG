@@ -1,0 +1,43 @@
+2026/08/31-10:43:24.670 197c63c Reusing MANIFEST /Users/gabriel.araujo/jvs/J.A.R.V.I.S/assets/whatsapp_profile/Default/IndexedDB/https_web.whatsapp.com_0.indexeddb.leveldb/MANIFEST-000001
+2026/08/31-10:43:24.672 197c63c Recovering log #1527
+2026/08/31-10:43:24.683 197c63c Reusing old log /Users/gabriel.araujo/jvs/J.A.R.V.I.S/assets/whatsapp_profile/Default/IndexedDB/https_web.whatsapp.com_0.indexeddb.leveldb/001527.log 
+2026/08/31-10:43:29.006 197c63d Level-0 table #1554: started
+2026/08/31-10:43:29.029 197c63d Level-0 table #1554: 1143614 bytes OK
+2026/08/31-10:43:29.032 197c63d Delete type=0 #1527
+2026/08/31-10:43:31.006 197c63c Compacting 1@0 + 0@1 files
+2026/08/31-10:43:31.024 197c63c Generated table #1555@0: 29327 keys, 572387 bytes
+2026/08/31-10:43:31.026 197c63c Generated table #1556@0: 42 keys, 3793 bytes
+2026/08/31-10:43:31.026 197c63c Compacted 1@0 + 0@1 files => 576180 bytes
+2026/08/31-10:43:31.027 197c63c compacted to: files[ 0 2 22 0 0 0 0 ]
+2026/08/31-10:43:31.027 197c63c Delete type=2 #1554
+2026/08/31-10:43:33.179 197c63d Compacting 1@1 + 3@2 files
+2026/08/31-10:43:33.231 197c63d Generated table #1557@1: 95688 keys, 2247390 bytes
+2026/08/31-10:43:33.265 197c63d Generated table #1558@1: 103008 keys, 2256468 bytes
+2026/08/31-10:43:33.300 197c63d Generated table #1559@1: 53625 keys, 2300004 bytes
+2026/08/31-10:43:33.305 197c63d Generated table #1560@1: 2303 keys, 110824 bytes
+2026/08/31-10:43:33.305 197c63d Compacted 1@1 + 3@2 files => 6914686 bytes
+2026/08/31-10:43:33.306 197c63d compacted to: files[ 0 1 23 0 0 0 0 ]
+2026/08/31-10:43:33.307 197c63d Delete type=2 #1541
+2026/08/31-10:43:33.307 197c63d Delete type=2 #1555
+2026/08/31-10:43:33.307 197c63d Delete type=2 #1543
+2026/08/31-10:43:33.307 197c63d Delete type=2 #1542
+2026/08/31-10:48:26.565 197c63d Compacting 1@1 + 8@2 files
+2026/08/31-10:48:26.595 197c63d Generated table #1561@1: 23295 keys, 2255102 bytes
+2026/08/31-10:48:26.642 197c63d Generated table #1562@1: 11157 keys, 2138501 bytes
+2026/08/31-10:48:26.660 197c63d Generated table #1563@1: 15624 keys, 2141926 bytes
+2026/08/31-10:48:26.697 197c63d Generated table #1564@1: 109614 keys, 2262624 bytes
+2026/08/31-10:48:26.733 197c63d Generated table #1565@1: 99961 keys, 2248790 bytes
+2026/08/31-10:48:26.766 197c63d Generated table #1566@1: 100238 keys, 2250347 bytes
+2026/08/31-10:48:26.798 197c63d Generated table #1567@1: 100155 keys, 2250503 bytes
+2026/08/31-10:48:26.808 197c63d Generated table #1568@1: 5782 keys, 340867 bytes
+2026/08/31-10:48:26.808 197c63d Compacted 1@1 + 8@2 files => 15888660 bytes
+2026/08/31-10:48:26.809 197c63d compacted to: files[ 0 0 23 0 0 0 0 ]
+2026/08/31-10:48:26.809 197c63d Delete type=2 #1540
+2026/08/31-10:48:26.809 197c63d Delete type=2 #1556
+2026/08/31-10:48:26.809 197c63d Delete type=2 #1533
+2026/08/31-10:48:26.810 197c63d Delete type=2 #1537
+2026/08/31-10:48:26.810 197c63d Delete type=2 #1536
+2026/08/31-10:48:26.810 197c63d Delete type=2 #1534
+2026/08/31-10:48:26.810 197c63d Delete type=2 #1535
+2026/08/31-10:48:26.810 197c63d Delete type=2 #1538
+2026/08/31-10:48:26.810 197c63d Delete type=2 #1539
