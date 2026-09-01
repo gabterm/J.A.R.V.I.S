@@ -19,6 +19,11 @@
 <div class="vignette"></div>
 <div id="notifications"></div>
 
+<div class="hud-frame hud-frame-tl"></div>
+<div class="hud-frame hud-frame-tr"></div>
+<div class="hud-frame hud-frame-bl"></div>
+<div class="hud-frame hud-frame-br"></div>
+
 <div class="media-overlay" id="mediaOverlay">
   <div class="media-frame">
     <div class="media-topbar">
@@ -92,6 +97,9 @@
     <div class="tb-item"><span class="tb-label">USER:</span><span class="tb-value" id="operatorName">ARAUJO</span></div>
     <div class="tb-item"><span class="tb-label">STATUS:</span><span class="tb-value ok" id="secureLinkLabel">ONLINE</span><span class="tb-dot"></span></div>
     <div class="tb-item"><span class="tb-label">UPTIME:</span><span class="tb-value" id="uptime">00:00:00</span></div>
+    <div class="divider"></div>
+    <div class="tb-item tb-item-muted"><span class="tb-label">LAN</span><span class="tb-value" id="tbLan">192.168.1.103</span></div>
+    <div class="tb-item tb-item-muted"><span class="tb-label">PWR</span><span class="tb-value" id="tbPwr">98%</span></div>
     <div class="tb-spacer"></div>
     <div class="status-pill" id="statusPill"><div class="dot"></div><span id="statusPillText">SISTEMA ONLINE</span></div>
     <div class="settings-toggle" id="settingsToggle" title="Personalização">
@@ -115,6 +123,21 @@
     </div>
   </div>
 
+  <!-- Dock vertical de apps — hoje: Terminal e Logs. Futuro: mais apps aqui. -->
+  <div class="app-dock" id="appDock">
+    <button class="dock-btn active" id="dockTerminalBtn" type="button" data-app="terminal" title="Fechar Direct Access">
+      <svg class="terminal-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <polyline points="4 6 10 12 4 18"></polyline>
+        <line x1="12" y1="18" x2="20" y2="18"></line>
+      </svg>
+    </button>
+    <button class="dock-btn active" id="dockLogsBtn" type="button" data-app="logs" title="Fechar System Logs">
+      <svg class="terminal-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+      </svg>
+    </button>
+  </div>
+
   <svg width="0" height="0" style="position:absolute">
     <defs>
       <radialGradient id="sweepGrad" cx="50%" cy="50%" r="50%">
@@ -126,64 +149,129 @@
 
   <div class="main">
 
-    <div class="panel terminal-panel">
-      <div class="panel-title">TERMINAL <span class="accent">registro de interação · /help para ferramentas</span></div>
-      <div class="terminal-body" id="terminalBody">
-        <div class="term-empty" id="terminalEmpty"></div>
-      </div>
-    </div>
-
     <div class="panel clock-panel">
-      <div class="panel-title">
-        core
-        <span class="clock-format-toggle" id="clockFormatToggle" title="Alternar formato">24H</span>
-      </div>
+      <span class="clock-format-toggle" id="clockFormatToggle" title="Alternar formato">24H</span>
       <div class="clock-stage mode-idle" id="clockStage">
+        <div class="clock-halo"></div>
         <div class="clock-pulse-ring p1"></div>
         <div class="clock-pulse-ring p2"></div>
-        <div class="clock-outer-dash"></div>
         <div class="clock-ring-outer"></div>
+        <div class="clock-ring-thick"></div>
         <div class="clock-ring-ticks"></div>
         <div class="clock-ring-ticks-major"></div>
         <div class="clock-ring-mid"></div>
-        <svg class="clock-arc-label" viewBox="0 0 200 200">
-          <defs>
-            <path id="clockArcPath" d="M 100,100 m -70,0 a 70,70 0 1,1 140,0 a 70,70 0 1,1 -140,0"/>
-          </defs>
-          <text class="arc-text">
-            <textPath href="#clockArcPath" startOffset="0%">J · A · R · V · I · S · N Ú C L E O · A T I V O ·</textPath>
-          </text>
-        </svg>
-        <div class="clock-minute-mark n">00</div>
-        <div class="clock-minute-mark e">15</div>
-        <div class="clock-minute-mark s">30</div>
-        <div class="clock-minute-mark w">45</div>
+        <div class="clock-accent-arc"></div>
+        <div class="clock-notch-dots">
+          <span style="--a:260deg"></span>
+          <span style="--a:278deg"></span>
+          <span style="--a:296deg"></span>
+          <span style="--a:314deg"></span>
+        </div>
         <div class="clock-orbit orbit-a"><div class="orbit-dot"></div></div>
         <div class="clock-orbit orbit-b"><div class="orbit-dot"></div></div>
         <div class="clock-sweep"></div>
         <div class="clock-second-hand" id="clockSecondHand"><div class="hand-tip"></div></div>
         <div class="clock-center">
+          <div class="clock-center-texture"></div>
           <div class="voice-wave" id="voiceWave"><span></span><span></span><span></span><span></span><span></span></div>
           <div class="clock-time" id="clockTime">--:--:--</div>
           <div class="clock-date" id="clockDate">--</div>
+          <div class="clock-brand">J.A.R.V.I.S.</div>
         </div>
-        <div class="clock-bracket tl"></div>
-        <div class="clock-bracket tr"></div>
-        <div class="clock-bracket bl"></div>
-        <div class="clock-bracket br"></div>
       </div>
-      <div class="clock-status-row" id="clockStatus">CONECTANDO<b id="dots">.</b></div>
+
+      <!-- Mobile compact HUD (radar/compass style) -->
+      <svg class="mobile-radar" id="mobileRadar" viewBox="0 0 200 200" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+        <defs>
+          <radialGradient id="mobileRadarGlow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="var(--cyan)" stop-opacity=".18"/>
+            <stop offset="100%" stop-color="var(--cyan)" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+        <circle cx="100" cy="100" r="96" fill="url(#mobileRadarGlow)"/>
+        <circle class="mr-ring" cx="100" cy="100" r="90"/>
+        <circle class="mr-ring" cx="100" cy="100" r="70"/>
+        <circle class="mr-ring" cx="100" cy="100" r="48"/>
+        <g class="mr-fan">
+          <line x1="100" y1="100" x2="24" y2="60"/>
+          <line x1="100" y1="100" x2="18" y2="100"/>
+          <line x1="100" y1="100" x2="24" y2="140"/>
+          <line x1="100" y1="100" x2="176" y2="60"/>
+          <line x1="100" y1="100" x2="182" y2="100"/>
+          <line x1="100" y1="100" x2="176" y2="140"/>
+        </g>
+        <g class="mr-nodes">
+          <circle cx="46" cy="76" r="2.4"/>
+          <circle cx="66" cy="64" r="2.4"/>
+          <circle cx="92" cy="60" r="2.4"/>
+          <circle cx="122" cy="64" r="2.4"/>
+          <circle cx="148" cy="78" r="2.4"/>
+          <circle cx="60" cy="128" r="2.4"/>
+          <circle cx="140" cy="126" r="2.4"/>
+          <polyline points="46,76 66,64 92,60 122,64 148,78" fill="none"/>
+        </g>
+        <g class="mr-sweep-wrap">
+          <path class="mr-sweep" d="M100,100 L100,10 A90,90 0 0,1 163,37 Z"/>
+        </g>
+        <g class="mr-bearings">
+          <text x="100" y="16" text-anchor="middle">000</text>
+          <text x="184" y="103" text-anchor="middle">090</text>
+          <text x="100" y="192" text-anchor="middle">180</text>
+          <text x="16" y="103" text-anchor="middle">270</text>
+        </g>
+        <circle class="mr-center-dot" cx="100" cy="100" r="3"/>
+        <text class="mr-brand" x="100" y="182" text-anchor="middle">J.A.R.V.I.S.</text>
+      </svg>
+
+      <div class="clock-status-row" id="clockStatus"><b id="dots">.</b></div>
       <div class="subsys-row" id="subsysRow">
-        <div class="subsys" data-sys="voz"><div class="sdot"></div>VOZ</div>
-        <div class="subsys" data-sys="memoria"><div class="sdot"></div>MEMÓRIA</div>
-        <div class="subsys" data-sys="websocket"><div class="sdot"></div>SOCKET</div>
-        <div class="subsys" data-sys="processamento"><div class="sdot"></div>PROC.</div>
-        <div class="subsys" data-sys="ferramentas"><div class="sdot"></div>FERRAM.</div>
+        
+      </div>
+    </div>
+
+    <div class="panel terminal-panel">
+      <div class="panel-title">
+        <div class="panel-title-main">
+          <svg
+            class="terminal-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            aria-hidden="true"
+          >
+            <polyline points="4 6 10 12 4 18"></polyline>
+            <line x1="12" y1="18" x2="20" y2="18"></line>
+          </svg>
+          <span>Direct access</span>
+        </div>
+
+        <span class="accent">registro de interação · /help para ferramentas</span>
+      </div>
+
+      <div class="terminal-body" id="terminalBody">
+        <div class="term-empty" id="terminalEmpty"></div>
       </div>
     </div>
 
     <div class="panel logs-panel">
-      <div class="panel-title">SYSTEM LOGS <span class="panel-count" id="logsCount">0</span></div>
+      <div class="panel-title">
+        <div class="panel-title-main">
+          <svg
+            class="terminal-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.7"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+          </svg>
+          <span>SYSTEM LOGS</span>
+        </div>
+        <span class="panel-count" id="logsCount">0</span>
+      </div>
       <div class="logs-toolbar" id="logsToolbar">
         <button class="logs-filter-btn active" data-level="all">TODOS</button>
         <button class="logs-filter-btn" data-level="info">INFO</button>

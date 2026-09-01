@@ -31,7 +31,7 @@ function resizeCanvas() {
 }
 window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
-function getCyanRgb() { return getComputedStyle(document.body).getPropertyValue('--cyan-rgb').trim() || '91, 227, 255'; }
+function getCyanRgb() { return getComputedStyle(document.body).getPropertyValue('--cyan-rgb').trim() || '127, 217, 255'; }
 function drawBg() {
   ctx2d.clearRect(0, 0, canvas.width, canvas.height);
   const rgb = getCyanRgb();
@@ -243,7 +243,7 @@ function renderQuadroRaciocinio(nos, conexoes, anotacao) {
     const linhas = quebrarTextoNo(n.texto, 16);
 
     partes.push(`<g class="reasoning-node${ativo ? ' active' : ''}" opacity="${opacidade}">
-      <circle cx="${n.x}" cy="${n.y}" r="${raio}" fill="rgba(5,12,16,0.85)" stroke="${cor}" stroke-width="${ativo ? 0.6 : 0.35}"/>
+      <circle cx="${n.x}" cy="${n.y}" r="${raio}" fill="rgba(4,12,17,0.85)" stroke="${cor}" stroke-width="${ativo ? 0.6 : 0.35}"/>
       ${linhas.map((linha, i) => `<text x="${n.x}" y="${n.y - (linhas.length - 1) * 1.6 + i * 3.2}" text-anchor="middle" font-size="2.4" fill="${cor}" font-family="var(--mono)">${escapeXml(linha)}</text>`).join('')}
     </g>`);
   });
@@ -263,7 +263,14 @@ const micBtn = document.getElementById('micBtn');
 const clockStage = document.getElementById('clockStage');
 const clockStatus = document.getElementById('clockStatus');
 const statusPillText = document.getElementById('statusPillText');
-const ESTADOS = { idle: 'AGUARDANDO COMANDO', thinking: 'PROCESSANDO', speaking: 'FALANDO', listening: 'OUVINDO', alert: 'ALERTA', offline: 'DESCONECTADO' };
+const ESTADOS = {
+  idle: 'aguardando comando',
+  thinking: 'processando',
+  speaking: 'falando',
+  listening: 'ouvindo',
+  alert: 'alerta',
+  offline: 'desconectado'
+};
 
 function setEstado(estado) {
   const label = ESTADOS[estado] || estado.toUpperCase();
@@ -330,6 +337,42 @@ clockFormatToggle.addEventListener('click', () => {
 });
 
 const terminalBody = document.getElementById('terminalBody');
+
+/* ---- Dock de apps: abre/fecha os painéis Terminal e Logs ---- */
+const mainGrid = document.querySelector('.main');
+const dockTerminalBtn = document.getElementById('dockTerminalBtn');
+const dockLogsBtn = document.getElementById('dockLogsBtn');
+
+function alternarApp(nomeApp, botao, classeOculta) {
+  const agoraOculto = mainGrid.classList.toggle(classeOculta);
+  botao.classList.toggle('active', !agoraOculto);
+  botao.title = agoraOculto ? `Abrir ${nomeApp}` : `Fechar ${nomeApp}`;
+  tocarSom('toggle');
+  addLogEvent('info', `Painel "${nomeApp}" ${agoraOculto ? 'fechado' : 'aberto'}`);
+}
+
+dockTerminalBtn.addEventListener('click', () => {
+  alternarApp('Direct Access', dockTerminalBtn, 'hide-terminal');
+});
+
+dockLogsBtn.addEventListener('click', () => {
+  alternarApp('System Logs', dockLogsBtn, 'hide-logs');
+});
+
+function limparTerminal() {
+  terminalBody.replaceChildren();
+
+  const empty = document.createElement('div');
+  empty.className = 'term-empty';
+  empty.id = 'terminalEmpty';
+
+  terminalBody.appendChild(empty);
+
+  terminalBody.scrollTop = 0;
+
+  tocarSom('toggle');
+}
+
 function addTermLine(role, text, opts) {
   const empty = document.getElementById('terminalEmpty'); if (empty) empty.remove();
   const div = document.createElement('div');
@@ -417,38 +460,90 @@ let cmdHistoryPos = -1;
 
 function tratarSlashCommand(texto) {
   if (!texto.startsWith('/')) return false;
-  const semBarra = texto.slice(1).trim();
-  const primeiroEspaco = semBarra.search(/\s/);
-  const nome = primeiroEspaco === -1 ? semBarra : semBarra.slice(0, primeiroEspaco);
-  const resto = primeiroEspaco === -1 ? '' : semBarra.slice(primeiroEspaco + 1);
 
+  const semBarra = texto.slice(1).trim();
+
+  const primeiroEspaco = semBarra.search(/\s/);
+
+  const nome = primeiroEspaco === -1
+    ? semBarra
+    : semBarra.slice(0, primeiroEspaco);
+
+  const resto = primeiroEspaco === -1
+    ? ''
+    : semBarra.slice(primeiroEspaco + 1);
+
+  // Comandos locais do terminal
+  if (nome === 'clear' || nome === 'limpar') {
+    resetCmdInput();
+    limparTerminal();
+    addLogEvent('info', 'Histórico do terminal limpo');
+    return true;
+  }
+
+  // A partir daqui, comandos normais aparecem no terminal
   addTermLine('user', texto);
   resetCmdInput();
 
-  if (nome === 'help' || nome === 'ajuda') { listarFerramentas(); return true; }
-  if (nome === 'clear' || nome === 'limpar') { terminalBody.innerHTML = '<div class="term-empty" id="terminalEmpty"></div>'; return true; }
+  // Ajuda
+  if (nome === 'help' || nome === 'ajuda') {
+    listarFerramentas();
+    return true;
+  }
 
+  // Verifica se a ferramenta existe
   const meta = TOOLS_META[nome];
+
   if (!meta) {
-    addTermLine('system', `Ferramenta desconhecida: "${nome}". Digite /help para ver a lista.`);
+    addTermLine(
+      'system',
+      `Ferramenta desconhecida: "${nome}". Digite /help para ver a lista.`
+    );
+
     return true;
   }
 
+  // Processa os argumentos
   const args = tokenizarArgs(resto);
-  const faltando = meta.params.filter(p => p.req && !(p.n in args)).map(p => p.n);
+
+  // Verifica argumentos obrigatórios
+  const faltando = meta.params
+    .filter(p => p.req && !(p.n in args))
+    .map(p => p.n);
+
   if (faltando.length) {
-    addTermLine('system', `Faltam argumentos obrigatórios para /${nome}: ${faltando.join(', ')}`);
+    addTermLine(
+      'system',
+      `Faltam argumentos obrigatórios para /${nome}: ${faltando.join(', ')}`
+    );
+
     return true;
   }
 
+  // Verifica conexão com o backend
   if (!ws || ws.readyState !== WebSocket.OPEN) {
-    addTermLine('system', `Sem conexão com o servidor — /${nome} não pôde ser enviado.`);
+    addTermLine(
+      'system',
+      `Sem conexão com o servidor — /${nome} não pôde ser enviado.`
+    );
+
     setEstado('offline');
+
     return true;
   }
-  setEstado('thinking'); setSubsystem('ferramentas', true, true);
+
+  // Executa a ferramenta
+  setEstado('thinking');
+  setSubsystem('ferramentas', true, true);
+
   addLogEvent('info', `Chamando ferramenta: ${nome}`);
-  ws.send(JSON.stringify({ type: 'tool_call', name: nome, args }));
+
+  ws.send(JSON.stringify({
+    type: 'tool_call',
+    name: nome,
+    args
+  }));
+
   return true;
 }
 
@@ -777,7 +872,7 @@ function construirElementoSVG(obj) {
     case 'circulo':
       el = document.createElementNS(ns, 'circle');
       el.setAttribute('r', obj.raio ?? 3);
-      el.setAttribute('fill', 'rgba(5,12,16,0.85)');
+      el.setAttribute('fill', 'rgba(4,12,17,0.85)');
       el.setAttribute('stroke', cor);
       el.setAttribute('stroke-width', 0.6);
       break;
@@ -785,7 +880,7 @@ function construirElementoSVG(obj) {
       el = document.createElementNS(ns, 'rect');
       el.setAttribute('width', obj.largura ?? 8);
       el.setAttribute('height', obj.altura ?? 8);
-      el.setAttribute('fill', 'rgba(5,12,16,0.85)');
+      el.setAttribute('fill', 'rgba(4,12,17,0.85)');
       el.setAttribute('stroke', cor);
       el.setAttribute('stroke-width', 0.6);
       break;
@@ -1002,3 +1097,98 @@ function conectar() {
   };
 }
 conectar();
+
+/* ==========================================================================
+   TELEMETRIA DECORATIVA DAS RÉGUAS LATERAIS (estilo Rainmeter, ref. imgs 1-3)
+   Puramente cosmético — não depende do backend. Se um backend real enviar
+   métricas reais (evento.type === 'system_stats'), basta preencher
+   `atualizarTelemetria(dados)` com os valores recebidos.
+   ========================================================================== */
+
+function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
+
+function setBar(fillId, valId, pct, label) {
+  const fill = document.getElementById(fillId);
+  const val = document.getElementById(valId);
+  if (fill) fill.style.width = pct + '%';
+  if (val) val.textContent = label ?? Math.round(pct) + '%';
+}
+
+function setRing(id, pct) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const circunferencia = 100.5;
+  el.style.strokeDashoffset = circunferencia - (circunferencia * clamp(pct, 0, 100) / 100);
+}
+
+let telemetria = { cpu: 32, mem: 48, disk: 61, netUp: 18, netDown: 9, pwr: 98, wifi: 99 };
+
+function passoAleatorio(valor, min, max, variacao) {
+  const novo = valor + (Math.random() - 0.5) * variacao;
+  return clamp(novo, min, max);
+}
+
+function atualizarTelemetria() {
+  telemetria.cpu = passoAleatorio(telemetria.cpu, 8, 92, 10);
+  telemetria.mem = passoAleatorio(telemetria.mem, 20, 85, 4);
+  telemetria.disk = passoAleatorio(telemetria.disk, 40, 90, 1.5);
+  telemetria.netUp = passoAleatorio(telemetria.netUp, 2, 70, 14);
+  telemetria.netDown = passoAleatorio(telemetria.netDown, 2, 55, 10);
+  telemetria.pwr = clamp(telemetria.pwr - 0.02, 40, 100);
+  telemetria.wifi = passoAleatorio(telemetria.wifi, 88, 100, 3);
+
+  setBar('statCpu', 'statCpuVal', telemetria.cpu);
+  setBar('statMem', 'statMemVal', telemetria.mem);
+  setBar('statDisk', 'statDiskVal', telemetria.disk);
+  setBar('statNetUp', 'statNetUpVal', telemetria.netUp, Math.round(telemetria.netUp * 32) + ' K');
+  setBar('statNetDown', 'statNetDownVal', telemetria.netDown, Math.round(telemetria.netDown * 1.8) + ' K');
+
+  setRing('ringPwr', telemetria.pwr);
+  setRing('ringWifi', telemetria.wifi);
+
+  const tbPwr = document.getElementById('tbPwr');
+  if (tbPwr) tbPwr.textContent = Math.round(telemetria.pwr) + '%';
+}
+
+setInterval(atualizarTelemetria, 1800);
+atualizarTelemetria();
+
+function popularRadar() {
+  const radar = document.getElementById('railRadar');
+  if (!radar) return;
+  const n = 5;
+  for (let i = 0; i < n; i++) {
+    const dot = document.createElement('div');
+    const ang = Math.random() * Math.PI * 2;
+    const raio = 18 + Math.random() * 16;
+    dot.style.position = 'absolute';
+    dot.style.left = `calc(50% + ${Math.cos(ang) * raio}px)`;
+    dot.style.top = `calc(50% + ${Math.sin(ang) * raio}px)`;
+    dot.style.width = '3px';
+    dot.style.height = '3px';
+    dot.style.borderRadius = '50%';
+    dot.style.background = 'var(--cyan)';
+    dot.style.boxShadow = '0 0 4px rgba(var(--cyan-rgb),.8)';
+    dot.style.opacity = String(0.4 + Math.random() * 0.5);
+    radar.appendChild(dot);
+  }
+}
+popularRadar();
+
+function popularSpark() {
+  const spark = document.getElementById('railSpark');
+  if (!spark) return;
+  const n = 22;
+  for (let i = 0; i < n; i++) {
+    const bar = document.createElement('span');
+    bar.style.height = (20 + Math.random() * 80) + '%';
+    spark.appendChild(bar);
+  }
+  setInterval(() => {
+    spark.querySelectorAll('span').forEach(bar => {
+      bar.style.height = (15 + Math.random() * 85) + '%';
+      bar.style.transition = 'height .5s ease';
+    });
+  }, 1200);
+}
+popularSpark();

@@ -213,7 +213,9 @@
         "Debugar isso com calma e descobrir o que está causando o problema",
         "Convocar todos vocês que saibam de casa para votar em 2020",
         "Ensinar à sua vó como fazer estrogonofe",
-        "ficar com o Matheus"
+        "ficar com o Matheus",
+        "Enviar uma mensagem teste para o grupo \"Código\"",
+        "criar a Beth M.Gamer"
     ],
     "rotina": [
         "Está calibrando um modelo de síntese de voz.",
@@ -270,7 +272,10 @@
         "Tentou ler a conversa com a Tia Ana",
         "Está em uma reunião semanal do projeto CNAB até as 4:30",
         "vai chegar um pouco mais tarde hoje",
-        "não vai jantar com eles hoje"
+        "não vai jantar com eles hoje",
+        "Ir dormir agora",
+        "chegou antes",
+        "está no centro"
     ],
     "preferencias": [
         "Não gosta muito de frases de efeito",
@@ -351,51 +356,53 @@
         "Ser referido como \"senhor Araujo\"",
         "Não ser chamado de \"senhor Araujo\"",
         "Usar sempre o padrão de resposta fornecido quando responder pelo usuário",
-        "Apenas a segunda parte da mensagem já basta"
+        "Apenas a segunda parte da mensagem já basta",
+        "linguagem mais informal",
+        "sem ponto final"
     ],
     "historico_recente": [
         {
+            "usuario": "mais infoirmal e sem ponto final",
+            "jarvis": "Cheguei antes sim, a chuva ainda não começou aqui no centro, posso enviar"
+        },
+        {
+            "usuario": "só mandar um \"pior q nem choveu aqui\"",
+            "jarvis": "Pior q nem choveu aqui, posso enviar"
+        },
+        {
             "usuario": "pode",
-            "jarvis": "Mensagem enviada para Matheus, senhor."
+            "jarvis": "Não consegui enviar. O WhatsApp mudou a estrutura da página e a ferramenta não encontrou o campo de mensagem."
         },
         {
-            "usuario": "envie uma mensagem para o meu tio dizendo que eu vou chegar um pouco mais tarde hoje e que é para jantarem sem mim",
-            "jarvis": "Qual é o nome do seu tio exatamente como aparece no WhatsApp?"
+            "usuario": "tente novamente",
+            "jarvis": "Não foi possível enviar novamente. Há uma janela sobreposta no WhatsApp bloqueando a interação com a busca. A mensagem continua não enviada."
         },
         {
-            "usuario": "\"Tio\"",
-            "jarvis": "Rascunho para Tio: “Vou chegar um pouco mais tarde hoje. Podem jantar sem mim.”\n\nPosso enviar?"
+            "usuario": "[NOTIFICAÇÃO AUTOMÁTICA DE WHATSAPP] Chegou uma mensagem nova de Tio. Prévia: \"A calçada tá molhada de volta aqui\". Use read_whatsapp_chat para ler a conversa completa com Tio. Avise o usuário sobre a mensagem, resuma o conteúdo dela em fala natural, e já sugira um rascunho de resposta chamando send_whatsapp_message com confirmado=false. Fale o rascunho sugerido e pergunte se pode enviar. Não chame send_whatsapp_message com confirmado=true nesta mesma resposta, mesmo que o rascunho pareça óbvio — a aprovação só vem em uma mensagem seguinte do usuário.",
+            "jarvis": "Senhor, chegou uma mensagem do Tio dizendo que a calçada voltou a ficar molhada. A leitura completa falhou por um erro técnico do WhatsApp, então não consigo confirmar mais contexto nem preparar um rascunho confiável. Quer que eu tente novamente?"
         },
         {
-            "usuario": "\"",
-            "jarvis": "Fico no aguardo da sua confirmação, senhor."
+            "usuario": "pode dizer algo como  'o céu tá voltando a escurecer aqui, não deve demorar pra começar a chover\"",
+            "jarvis": "O céu tá voltando a escurecer aqui, não deve demorar pra começar a chover. Posso enviar?"
         },
         {
-            "usuario": "sim, mas sem o .",
-            "jarvis": "Mensagem enviada para Tio, senhor."
+            "usuario": "sem o .",
+            "jarvis": "O céu tá voltando a escurecer aqui, não deve demorar pra começar a chover, posso enviar"
         },
         {
-            "usuario": "[NOTIFICAÇÃO AUTOMÁTICA DE WHATSAPP] Chegou uma mensagem nova de Tio. Prévia: \"Blz\". Use read_whatsapp_chat para ler a conversa completa com Tio. Avise o usuário sobre a mensagem, resuma o conteúdo dela em fala natural, e já sugira um rascunho de resposta chamando send_whatsapp_message com confirmado=false. Fale o rascunho sugerido e pergunte se pode enviar. Não chame send_whatsapp_message com confirmado=true nesta mesma resposta, mesmo que o rascunho pareça óbvio — a aprovação só vem em uma mensagem seguinte do usuário.",
-            "jarvis": "Não consegui ler a conversa com Tio porque o WhatsApp apresentou um erro. A prévia recebida foi “Blz”, indicando que ele confirmou ou entendeu a mensagem.\n\nPosso preparar a resposta, mas preciso que me diga o que deseja enviar."
+            "usuario": "troque o não deve por não vai",
+            "jarvis": "O céu tá voltando a escurecer aqui, não vai demorar pra começar a chover, posso enviar"
         },
         {
-            "usuario": "jarvis",
-            "jarvis": "À disposição, senhor."
+            "usuario": "pode enviar",
+            "jarvis": "Mensagem enviada para o Tio, senhor"
         },
         {
-            "usuario": "jarvis",
-            "jarvis": "À disposição, senhor."
-        },
-        {
-            "usuario": "jarvis",
-            "jarvis": "À disposição, senhor."
-        },
-        {
-            "usuario": "eu recebi alguma mensagem?",
-            "jarvis": "Não há mensagens novas no WhatsApp, senhor."
+            "usuario": "[NOTIFICAÇÃO AUTOMÁTICA DE WHATSAPP] Chegou uma mensagem nova de Matheus. Prévia: \"Pprt\". Use read_whatsapp_chat para ler a conversa completa com Matheus. Avise o usuário sobre a mensagem, resuma o conteúdo dela em fala natural, e já sugira um rascunho de resposta chamando send_whatsapp_message com confirmado=false. Fale o rascunho sugerido e pergunte se pode enviar. Não chame send_whatsapp_message com confirmado=true nesta mesma resposta, mesmo que o rascunho pareça óbvio — a aprovação só vem em uma mensagem seguinte do usuário.",
+            "jarvis": "Senhor, chegou uma mensagem de Matheus dizendo “Pprt”. A leitura completa falhou por um erro técnico do WhatsApp, então não consigo confirmar o contexto nem preparar um rascunho confiável. Quer que eu tente novamente?"
         }
     ],
-    "resumo_contexto": "Gabriel esclareceu que o contato do irmão se chama Matheus. JARVIS preparou a mensagem “Salve.” para Matheus e aguardou autorização para enviá-la.",
+    "resumo_contexto": "Matheus informou que chegou antes e que a chuva ainda não havia começado no centro; foi preparado um rascunho de resposta para o tio com essas informações, aguardando confirmação para envio.",
     "timeline": [
         {
             "id": "277740a4-92e9-496a-978e-0f4c024d414a",
@@ -1067,6 +1074,48 @@
             "id": "84a8425c-183b-48a2-9df8-3bea38d481f5",
             "tipo": "rotina",
             "text": "não vai jantar com eles hoje",
+            "pinned": false
+        },
+        {
+            "id": "5394ad61-e936-43dd-8811-0cc1510edefc",
+            "tipo": "objetivo",
+            "text": "Enviar uma mensagem teste para o grupo \"Código\"",
+            "pinned": false
+        },
+        {
+            "id": "9ea1488c-96b7-4c72-aea0-75f0c8efd997",
+            "tipo": "rotina",
+            "text": "Ir dormir agora",
+            "pinned": false
+        },
+        {
+            "id": "29edfede-cea1-4f9d-9e91-e6b53238f9a2",
+            "tipo": "objetivo",
+            "text": "criar a Beth M.Gamer",
+            "pinned": false
+        },
+        {
+            "id": "83e1442e-2af4-4eb5-97e7-3ada8de27ff0",
+            "tipo": "rotina",
+            "text": "chegou antes",
+            "pinned": false
+        },
+        {
+            "id": "6c41f1fa-5bbf-454d-a7a2-beaecd8707d3",
+            "tipo": "rotina",
+            "text": "está no centro",
+            "pinned": false
+        },
+        {
+            "id": "d681bc3d-914d-4f7f-82f2-a9954c949dfc",
+            "tipo": "preferencia",
+            "text": "linguagem mais informal",
+            "pinned": false
+        },
+        {
+            "id": "2718a1c4-f68d-47e9-8558-c3b6d470d35a",
+            "tipo": "preferencia",
+            "text": "sem ponto final",
             "pinned": false
         }
     ]

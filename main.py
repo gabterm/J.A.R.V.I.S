@@ -300,7 +300,7 @@ def ask_jarvis(message, memory):
         "type": "status",
         "state": "thinking"
     })
-    sounds.play("working")
+    sounds.play("thinking")
 
     while True:
         response = client.chat.completions.create(
@@ -377,7 +377,7 @@ def ask_jarvis(message, memory):
                     "name": tool_name,
                     "status": "running",
                 })
-                sounds.play("working")
+                sounds.play("processing")
 
                 try:
                     result = tool_function(**arguments)
@@ -422,7 +422,7 @@ def falar_resposta(full_response):
         "type": "status",
         "state": "speaking"
     })
-    sounds.play("speaking")
+    sounds.play("voice_start")
 
     ui_bridge.broadcast({
         "type": "log",
@@ -446,7 +446,8 @@ def falar_resposta(full_response):
         frase_falada = limpar_para_fala(restante)
         if frase_falada:
             speak(frase_falada)
-    ui_bridge.jarvis_falando.clear()  
+    ui_bridge.jarvis_falando.clear() 
+    sounds.play("voice_end") 
 
 
 def escutar_terminal():
@@ -503,7 +504,7 @@ def main():
     ui_bridge.broadcast({"type": "timeline", "items": memory.get("timeline", [])})
 
     print("\n🤖 JARVIS iniciado.\n")
-    sounds.play("startup")
+    sounds.play("system_ready")
 
     if memory.get("primeira_interacao"):
         response = ask_jarvis(
