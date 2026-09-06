@@ -92,7 +92,8 @@ soundSwitch.addEventListener('click', () => {
   if (somAtivo) tocarSom('toggle');
 });
 
-const mediaOverlay = document.getElementById('mediaOverlay');
+const mediaFrame = document.getElementById('mediaFrame');
+const mediaTopbar = document.getElementById('mediaTopbar');
 const mediaIframe = document.getElementById('mediaIframe');
 const mediaTitle = document.getElementById('mediaTitle');
 const mediaClose = document.getElementById('mediaClose');
@@ -103,9 +104,15 @@ let mediaExternalUrl = null;
 let mediaLoadTimeout = null;
 
 function abrirMedia(url, titulo, urlExterno, bloqueado) {
+  // recentraliza o painel (desfaz posição arrastada de uma abertura anterior)
+  mediaFrame.style.position = '';
+  mediaFrame.style.left = '';
+  mediaFrame.style.top = '';
+  mediaFrame.style.margin = '';
+
   mediaExternalUrl = urlExterno || url;
   mediaTitle.textContent = titulo || url;
-  mediaOverlay.classList.add('open');
+  mediaFrame.classList.add('open');
   tocarSom('toggle');
   addLogEvent('info', `Painel de mídia: ${titulo || url}`);
 
@@ -132,7 +139,7 @@ function mostrarMediaBloqueada() {
 }
 
 function fecharMedia() {
-  mediaOverlay.classList.remove('open');
+  mediaFrame.classList.remove('open');
   mediaIframe.src = 'about:blank';
   clearTimeout(mediaLoadTimeout);
 }
@@ -140,10 +147,12 @@ function fecharMedia() {
 mediaClose.addEventListener('click', fecharMedia);
 mediaBlockedOpen.addEventListener('click', () => { if (mediaExternalUrl) window.open(mediaExternalUrl, '_blank'); });
 mediaOpenExternal.addEventListener('click', () => { if (mediaExternalUrl) window.open(mediaExternalUrl, '_blank'); });
-mediaOverlay.addEventListener('click', (e) => { if (e.target === mediaOverlay) fecharMedia(); });
 document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape' && mediaOverlay.classList.contains('open')) fecharMedia();
+  if (e.key === 'Escape' && mediaFrame.classList.contains('open')) fecharMedia();
 });
+
+tornarPainelArrastavel(mediaFrame, mediaTopbar);
+
 
 const browserOverlay = document.getElementById('browserOverlay');
 const browserTitle = document.getElementById('browserTitle');
@@ -259,6 +268,143 @@ function renderQuadroRaciocinio(nos, conexoes, anotacao) {
   reasoningCaption.textContent = anotacao || '';
 }
 
+const newsFrame = document.getElementById('newsFrame');
+const newsTitle = document.getElementById('newsTitle');
+const newsTopbar = document.getElementById('newsTopbar');
+const newsBody = document.getElementById('newsBody');
+const newsClose = document.getElementById('newsClose');
+
+function abrirNoticias(titulo, news) {
+  // recentraliza o painel (desfaz posição arrastada de uma abertura anterior)
+  newsFrame.style.position = '';
+  newsFrame.style.left = '';
+  newsFrame.style.top = '';
+  newsFrame.style.margin = '';
+
+  newsTitle.textContent = titulo || 'Notícias';
+  newsBody.innerHTML = (news || []).map(item => {
+    const thumb = item.image
+      ? `<img class="news-item-thumb" src="${item.image}" alt="" loading="lazy" onerror="this.outerHTML='<div class=&quot;news-item-thumb news-item-thumb-empty&quot;></div>'">`
+      : `<div class="news-item-thumb news-item-thumb-empty"></div>`;
+    return `
+      <div class="news-item" data-url="${item.link || ''}">
+        ${thumb}
+        <div class="news-item-body">
+          <div class="news-item-title">${escapeXml(item.title)}</div>
+          <div class="news-item-meta">${escapeXml(item.source || '')} · ${escapeXml(item.published_at || '')}</div>
+        </div>
+      </div>
+    `;
+  }).join('') || '<div class="term-empty">Nenhuma notícia encontrada.</div>';
+
+  newsBody.querySelectorAll('.news-item').forEach(el => {
+    el.addEventListener('click', () => {
+      if (el.dataset.url) window.open(el.dataset.url, '_blank');
+    });
+  });
+
+  newsFrame.classList.add('open');
+  tocarSom('toggle');
+  addLogEvent('info', `Painel de notícias: ${titulo || ''}`);
+}
+
+function fecharNoticias() {
+  newsFrame.classList.remove('open');
+}
+
+newsClose.addEventListener('click', fecharNoticias);
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && newsFrame.classList.contains('open')) fecharNoticias();
+});
+
+// Torna um card flutuante arrastável pela sua barra de título. O clique
+// no botão "FECHAR" não inicia o arraste.
+function tornarPainelArrastavel(frame, topbar) {
+  let arrastando = false;
+  let startX = 0, startY = 0, origX = 0, origY = 0;
+
+  topbar.addEventListener('mousedown', (e) => {
+    if (e.target.closest('.icon-btn')) return;
+    arrastando = true;
+    const rect = frame.getBoundingClientRect();
+    frame.style.position = 'fixed';
+    frame.style.margin = '0';
+    frame.style.left = rect.left + 'px';
+    frame.style.top = rect.top + 'px';
+    frame.style.right = 'auto';
+    origX = rect.left; origY = rect.top;
+    startX = e.clientX; startY = e.clientY;
+    document.body.style.userSelect = 'none';
+  });
+
+  window.addEventListener('mousemove', (e) => {
+    if (!arrastando) return;
+    frame.style.left = (origX + (e.clientX - startX)) + 'px';
+    frame.style.top = (origY + (e.clientY - startY)) + 'px';
+  });
+
+  window.addEventListener('mouseup', () => {
+    arrastando = false;
+    document.body.style.userSelect = '';
+  });
+}
+
+tornarPainelArrastavel(newsFrame, newsTopbar);
+
+// ---- Painel de clima — mesmo card translúcido, sem overlay ----
+
+const weatherFrame = document.getElementById('weatherFrame');
+const weatherTopbar = document.getElementById('weatherTopbar');
+const weatherClose = document.getElementById('weatherClose');
+const weatherLocal = document.getElementById('weatherLocal');
+const weatherTemp = document.getElementById('weatherTemp');
+const weatherIcon = document.getElementById('weatherIcon');
+const weatherCondicao = document.getElementById('weatherCondicao');
+const weatherSensacao = document.getElementById('weatherSensacao');
+const weatherUmidade = document.getElementById('weatherUmidade');
+const weatherVento = document.getElementById('weatherVento');
+const weatherMinMax = document.getElementById('weatherMinMax');
+
+const WEATHER_ICON_LABEL = {
+  ceu_limpo: '☀',
+  nublado: '☁',
+  neblina: '≈',
+  chuva: '☂',
+  neve: '❄',
+  tempestade: '⚡',
+};
+
+function abrirClima(dados) {
+  weatherFrame.style.position = '';
+  weatherFrame.style.left = '';
+  weatherFrame.style.top = '';
+  weatherFrame.style.margin = '';
+
+  weatherLocal.textContent = dados.local || 'Clima';
+  weatherTemp.innerHTML = `${Math.round(dados.temp)}<sup>°C</sup>`;
+  weatherIcon.textContent = WEATHER_ICON_LABEL[dados.icone] || '—';
+  weatherCondicao.textContent = dados.condicao || '—';
+  weatherSensacao.textContent = `${Math.round(dados.sensacao)}°C`;
+  weatherUmidade.textContent = `${Math.round(dados.umidade)}%`;
+  weatherVento.textContent = `${Math.round(dados.vento)} km/h`;
+  weatherMinMax.textContent = `${Math.round(dados.min)}° / ${Math.round(dados.max)}°`;
+
+  weatherFrame.classList.add('open');
+  tocarSom('toggle');
+  addLogEvent('info', `Painel de clima: ${dados.local || ''}`);
+}
+
+function fecharClima() {
+  weatherFrame.classList.remove('open');
+}
+
+weatherClose.addEventListener('click', fecharClima);
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && weatherFrame.classList.contains('open')) fecharClima();
+});
+
+tornarPainelArrastavel(weatherFrame, weatherTopbar);
+
 const micBtn = document.getElementById('micBtn');
 const clockStage = document.getElementById('clockStage');
 const clockStatus = document.getElementById('clockStatus');
@@ -273,8 +419,8 @@ const ESTADOS = {
 };
 
 function setEstado(estado) {
-  const label = ESTADOS[estado] || estado.toUpperCase();
-  clockStatus.innerHTML = `${label}<b id="dots">.</b>`;
+  // const label = ESTADOS[estado] || estado.toUpperCase();
+  // clockStatus.innerHTML = `${label}<b id="dots">.</b>`;
   micBtn.classList.toggle('active', estado === 'speaking' || estado === 'thinking' || estado === 'listening');
   clockStage.className = 'clock-stage mode-' + (estado === 'offline' ? 'alert' : estado);
 
@@ -627,13 +773,6 @@ function tocarSom(tipo) {
 }
 document.addEventListener('click', () => { getAudioCtx(); }, { once: true });
 
-document.getElementById('exportBtn').addEventListener('click', () => {
-  tocarSom('toggle');
-  const linhas = Array.from(document.querySelectorAll('.term-line')).map(el => el.textContent.trim());
-  const blob = new Blob([linhas.join('\n')], { type: 'text/plain;charset=utf-8' });
-  const url = URL.createObjectURL(blob); const a = document.createElement('a');
-  a.href = url; a.download = `jarvis-registro-${Date.now()}.txt`; a.click(); URL.revokeObjectURL(url);
-});
 
 const cmdInput = document.querySelector('.cmd-input');
 const cmdInputBaseHeight = cmdInput.scrollHeight;
@@ -1079,6 +1218,12 @@ function conectar() {
       case 'simulation_frame':
         renderQuadroSimEstatico(evento.objetos, evento.anotacao);
         break;
+      case 'news_board':
+        abrirNoticias(evento.titulo, evento.news);
+        break;
+      case 'weather':
+        abrirClima(evento);
+        break;
       case 'event': addLogEvent(evento.level || 'info', evento.text); break;
       case 'notification': notify(evento.text, evento.level || 'info'); break;
       case 'subsystem': setSubsystem(evento.name, evento.active, !evento.persist); break;
@@ -1192,3 +1337,89 @@ function popularSpark() {
   }, 1200);
 }
 popularSpark();
+
+/* ==========================================================================
+   MORPH ORGÂNICO DO NÚCLEO (thinking / speaking)
+   Deforma a borda dos anéis reais (ring-outer, ring-mid, ring-ticks-major,
+   accent-arc) via border-radius animado, com o padrão de onda "viajando"
+   ao redor do anel (parâmetro travel) e um glow reativo no speaking.
+   Amplitudes baixas de propósito para manter o anel próximo do circular.
+   Não cria elementos novos nem depende de CSS adicional — só sobrescreve
+   border-radius/filter inline enquanto o modo estiver ativo.
+   ========================================================================== */
+
+function startCoreMorph() {
+  const stage = document.querySelector('.clock-stage');
+  const outer = document.querySelector('.clock-ring-outer');
+  const mid = document.querySelector('.clock-ring-mid');
+  const ticksMajor = document.querySelector('.clock-ring-ticks-major');
+  const arc = document.querySelector('.clock-accent-arc');
+  const halo = document.querySelector('.clock-halo');
+
+  if (!stage || !outer || !mid || !ticksMajor || !arc) return;
+
+  function currentMode() {
+    if (stage.classList.contains('mode-speaking')) return 'speaking';
+    if (stage.classList.contains('mode-thinking')) return 'thinking';
+    return 'static';
+  }
+
+  function resetVisuals() {
+    [outer, mid, ticksMajor, arc].forEach(el => {
+      el.style.borderRadius = '';
+      el.style.filter = '';
+    });
+    if (halo) halo.style.opacity = '';
+  }
+
+  // harmonics: 1 = mais uniforme/rítmico (thinking), 2 = mais orgânico (speaking)
+  // travel: velocidade com que o padrão de onda "viaja" ao redor do anel
+  // (fase do ruído se desloca com o tempo em vez de só respirar no lugar)
+  function blobRadius(t, phase, speed, amp, harmonics, travel) {
+    const v = [];
+    for (let i = 0; i < 8; i++) {
+      const ang = i * 0.9 + phase + t * 0.0006 * travel;
+      let n;
+      if (harmonics === 1) {
+        n = Math.sin(ang * 1.0 + t * 0.0016 * speed + phase);
+      } else {
+        n = Math.sin(ang * 1.1 + t * 0.0022 * speed) * 0.6
+          + Math.sin(ang * 1.9 - t * 0.0031 * speed + phase) * 0.4;
+      }
+      v.push((50 + n * amp).toFixed(1));
+    }
+    return `${v[0]}% ${v[1]}% ${v[2]}% ${v[3]}% / ${v[4]}% ${v[5]}% ${v[6]}% ${v[7]}%`;
+  }
+
+  let lastMode = null;
+
+  function frame(t) {
+    const mode = currentMode();
+
+    if (mode === 'speaking') {
+      const glow = 5 + Math.abs(Math.sin(t * 0.004)) * 5;
+      outer.style.borderRadius = blobRadius(t, 0, 2.2, 6, 2, 1.4);
+      mid.style.borderRadius = blobRadius(t, 2.5, 2.6, 5.5, 2, -1.1);
+      ticksMajor.style.borderRadius = blobRadius(t, 1.2, 1.9, 5, 2, 0.9);
+      arc.style.borderRadius = blobRadius(t, 4.0, 2.3, 4.5, 2, -1.3);
+      outer.style.filter = `drop-shadow(0 0 ${glow.toFixed(1)}px rgba(94,200,255,.4))`;
+      if (halo) halo.style.opacity = (0.85 + 0.2 * Math.sin(t * 0.004)).toFixed(2);
+    } else if (mode === 'thinking') {
+      outer.style.borderRadius = blobRadius(t, 0, 0.8, 2.5, 1, 0.4);
+      mid.style.borderRadius = blobRadius(t, 1.8, 1.0, 2.2, 1, -0.3);
+      ticksMajor.style.borderRadius = blobRadius(t, 3.4, 0.7, 2, 1, 0.35);
+      arc.style.borderRadius = blobRadius(t, 0.6, 0.9, 1.8, 1, -0.25);
+      outer.style.filter = 'drop-shadow(0 0 3px rgba(94,200,255,.25))';
+      if (halo) halo.style.opacity = '1';
+    } else if (lastMode === 'speaking' || lastMode === 'thinking') {
+      resetVisuals();
+    }
+
+    lastMode = mode;
+    requestAnimationFrame(frame);
+  }
+
+  requestAnimationFrame(frame);
+}
+
+startCoreMorph();

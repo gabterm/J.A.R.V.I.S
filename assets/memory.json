@@ -215,7 +215,13 @@
         "Ensinar à sua vó como fazer estrogonofe",
         "ficar com o Matheus",
         "Enviar uma mensagem teste para o grupo \"Código\"",
-        "criar a Beth M.Gamer"
+        "criar a Beth M.Gamer",
+        "Criar vários casos de teste para a listagem de arquivos de retorno e remessa de Knab",
+        "Criar um teste para cada arquivo de staging de retorno",
+        "Criar um lembrete para essa tarefa",
+        "Inserir manualmente os arquivos de retorno no ClickHouse",
+        "Criar cada arquivo para testar se o fluxo da tela de staging de arquivo está funcionando",
+        "ir para Guaratuba hoje"
     ],
     "rotina": [
         "Está calibrando um modelo de síntese de voz.",
@@ -358,51 +364,53 @@
         "Usar sempre o padrão de resposta fornecido quando responder pelo usuário",
         "Apenas a segunda parte da mensagem já basta",
         "linguagem mais informal",
-        "sem ponto final"
+        "sem ponto final",
+        "viajar de ônibus",
+        "Considerar Curitiba como cidade padrão quando a cidade não for informada"
     ],
     "historico_recente": [
         {
-            "usuario": "mais infoirmal e sem ponto final",
-            "jarvis": "Cheguei antes sim, a chuva ainda não começou aqui no centro, posso enviar"
+            "usuario": "execute: https://www.4devs.com.br/gerador_de_cnpj",
+            "jarvis": "Gerador de CNPJ aberto na interface, senhor."
         },
         {
-            "usuario": "só mandar um \"pior q nem choveu aqui\"",
-            "jarvis": "Pior q nem choveu aqui, posso enviar"
+            "usuario": "jarvis",
+            "jarvis": "À disposição, senhor."
         },
         {
-            "usuario": "pode",
-            "jarvis": "Não consegui enviar. O WhatsApp mudou a estrutura da página e a ferramenta não encontrou o campo de mensagem."
+            "usuario": "resuma as principais noticias da ultima hora",
+            "jarvis": "Senhor, as principais notícias encontradas são:\n\nPrimeiro, o conflito entre os ministros Alexandre de Moraes e André Mendonça ganhou novos desdobramentos. A cobertura destaca os próximos passos do pedido de Moraes e a análise de possíveis interferências em um relatório da Polícia Federal.\n\nEm seguida, um coordenador do governo Lula classificou como profunda a crise no Supremo Tribunal Federal e defendeu uma modernização da Corte.\n\nTambém ganhou destaque uma pesquisa no Ceará. O levantamento aponta Lula com cinquenta e um vírgula seis por cento no primeiro turno, contra vinte e cinco vírgula sete por cento de Flávio.\n\nPor fim, a Advocacia Geral da União afirmou que não tinha competência para questionar uma decisão de Mendonça.\n\nO noticiário da última hora está bastante concentrado na tensão institucional envolvendo o Supremo e no cenário eleitoral brasileiro."
         },
         {
-            "usuario": "tente novamente",
-            "jarvis": "Não foi possível enviar novamente. Há uma janela sobreposta no WhatsApp bloqueando a interação com a busca. A mensagem continua não enviada."
+            "usuario": "me mostre o clima de guaratuba",
+            "jarvis": "Em Guaratuba, estão dezessete graus, com garoa fraca, senhor."
         },
         {
-            "usuario": "[NOTIFICAÇÃO AUTOMÁTICA DE WHATSAPP] Chegou uma mensagem nova de Tio. Prévia: \"A calçada tá molhada de volta aqui\". Use read_whatsapp_chat para ler a conversa completa com Tio. Avise o usuário sobre a mensagem, resuma o conteúdo dela em fala natural, e já sugira um rascunho de resposta chamando send_whatsapp_message com confirmado=false. Fale o rascunho sugerido e pergunte se pode enviar. Não chame send_whatsapp_message com confirmado=true nesta mesma resposta, mesmo que o rascunho pareça óbvio — a aprovação só vem em uma mensagem seguinte do usuário.",
-            "jarvis": "Senhor, chegou uma mensagem do Tio dizendo que a calçada voltou a ficar molhada. A leitura completa falhou por um erro técnico do WhatsApp, então não consigo confirmar mais contexto nem preparar um rascunho confiável. Quer que eu tente novamente?"
+            "usuario": "jarvis",
+            "jarvis": "À disposição, senhor."
         },
         {
-            "usuario": "pode dizer algo como  'o céu tá voltando a escurecer aqui, não deve demorar pra começar a chover\"",
-            "jarvis": "O céu tá voltando a escurecer aqui, não deve demorar pra começar a chover. Posso enviar?"
+            "usuario": "envie uma mensagem para o meu irmao perguntando sobre como está o jogo ali",
+            "jarvis": "Senhor, não consegui abrir a conversa com “Irmão”. O WhatsApp alterou a estrutura da página.\n\nQual é o nome exato dele como aparece no WhatsApp? Aí preparo o rascunho: “Como está o jogo aí?”"
         },
         {
-            "usuario": "sem o .",
-            "jarvis": "O céu tá voltando a escurecer aqui, não deve demorar pra começar a chover, posso enviar"
-        },
-        {
-            "usuario": "troque o não deve por não vai",
-            "jarvis": "O céu tá voltando a escurecer aqui, não vai demorar pra começar a chover, posso enviar"
+            "usuario": "o nome do meu irmão é matheus",
+            "jarvis": "Entendido, senhor. O nome exato no WhatsApp é Matheus. Vou preparar o rascunho: “Como está o jogo aí?” Posso enviar?"
         },
         {
             "usuario": "pode enviar",
-            "jarvis": "Mensagem enviada para o Tio, senhor"
+            "jarvis": "Senhor, não consegui enviar. O WhatsApp mudou a estrutura da página e o campo de mensagem não foi localizado."
         },
         {
-            "usuario": "[NOTIFICAÇÃO AUTOMÁTICA DE WHATSAPP] Chegou uma mensagem nova de Matheus. Prévia: \"Pprt\". Use read_whatsapp_chat para ler a conversa completa com Matheus. Avise o usuário sobre a mensagem, resuma o conteúdo dela em fala natural, e já sugira um rascunho de resposta chamando send_whatsapp_message com confirmado=false. Fale o rascunho sugerido e pergunte se pode enviar. Não chame send_whatsapp_message com confirmado=true nesta mesma resposta, mesmo que o rascunho pareça óbvio — a aprovação só vem em uma mensagem seguinte do usuário.",
-            "jarvis": "Senhor, chegou uma mensagem de Matheus dizendo “Pprt”. A leitura completa falhou por um erro técnico do WhatsApp, então não consigo confirmar o contexto nem preparar um rascunho confiável. Quer que eu tente novamente?"
+            "usuario": "tente enviar a mensagem novaente",
+            "jarvis": "Mensagem enviada para Matheus, senhor."
+        },
+        {
+            "usuario": "[NOTIFICAÇÃO AUTOMÁTICA DE WHATSAPP] Chegou uma mensagem nova de Matheus. Prévia: \"\". Use read_whatsapp_chat para ler a conversa completa com Matheus. Avise o usuário sobre a mensagem, resuma o conteúdo dela em fala natural, e já sugira um rascunho de resposta chamando send_whatsapp_message com confirmado=false. Fale o rascunho sugerido e pergunte se pode enviar. Não chame send_whatsapp_message com confirmado=true nesta mesma resposta, mesmo que o rascunho pareça óbvio — a aprovação só vem em uma mensagem seguinte do usuário.",
+            "jarvis": "Senhor, chegou uma mensagem de Matheus, mas não consegui ler o conteúdo porque o WhatsApp retornou um erro técnico. Sem o texto, não vou inventar um resumo nem preparar uma resposta no escuro. Se o senhor colar a mensagem aqui, preparo o rascunho e peço sua confirmação antes de enviar."
         }
     ],
-    "resumo_contexto": "Matheus informou que chegou antes e que a chuva ainda não havia começado no centro; foi preparado um rascunho de resposta para o tio com essas informações, aguardando confirmação para envio.",
+    "resumo_contexto": "Matheus enviou uma nova mensagem no WhatsApp, mas JARVIS não conseguiu ler seu conteúdo devido a uma alteração na estrutura da página. JARVIS informou que não inventaria uma resposta e ofereceu tentar novamente ou receber o conteúdo para preparar um rascunho mediante aprovação. Também abriu o gerador de CNPJ do 4Devs a pedido de Matheus.",
     "timeline": [
         {
             "id": "277740a4-92e9-496a-978e-0f4c024d414a",
@@ -1116,6 +1124,54 @@
             "id": "2718a1c4-f68d-47e9-8558-c3b6d470d35a",
             "tipo": "preferencia",
             "text": "sem ponto final",
+            "pinned": false
+        },
+        {
+            "id": "9944c132-c8f2-4e8d-ab72-a887dc978269",
+            "tipo": "objetivo",
+            "text": "Criar vários casos de teste para a listagem de arquivos de retorno e remessa de Knab",
+            "pinned": false
+        },
+        {
+            "id": "db835d08-7931-4974-99e6-d91024832fb1",
+            "tipo": "objetivo",
+            "text": "Criar um teste para cada arquivo de staging de retorno",
+            "pinned": false
+        },
+        {
+            "id": "adc1cf75-68b2-4ac3-9790-56ac9bd2bc1d",
+            "tipo": "objetivo",
+            "text": "Criar um lembrete para essa tarefa",
+            "pinned": false
+        },
+        {
+            "id": "22330e4d-2c81-4a5e-8b34-e95d57a42652",
+            "tipo": "objetivo",
+            "text": "Inserir manualmente os arquivos de retorno no ClickHouse",
+            "pinned": false
+        },
+        {
+            "id": "3b4729e1-038d-4368-914a-6ccfb98f6834",
+            "tipo": "objetivo",
+            "text": "Criar cada arquivo para testar se o fluxo da tela de staging de arquivo está funcionando",
+            "pinned": false
+        },
+        {
+            "id": "c7ec99db-d2e8-4285-bce5-271350f21ea8",
+            "tipo": "objetivo",
+            "text": "ir para Guaratuba hoje",
+            "pinned": false
+        },
+        {
+            "id": "c51925c2-cc28-4429-910f-11407f638645",
+            "tipo": "preferencia",
+            "text": "viajar de ônibus",
+            "pinned": false
+        },
+        {
+            "id": "dd7f7e08-cf6a-4608-9309-c00dac7833f6",
+            "tipo": "preferencia",
+            "text": "Considerar Curitiba como cidade padrão quando a cidade não for informada",
             "pinned": false
         }
     ]

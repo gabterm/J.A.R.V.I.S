@@ -187,16 +187,6 @@ def remove_reminder(texto: str):
         }
 
 
-# ---------- alarmes ----------
-#
-# Segue o mesmo padrão dos lembretes (JSON persistente + broadcast pra
-# UI), mas com um scheduler em background que dispara o alarme (fala +
-# notificação nativa) exatamente no momento certo. Em vez de fazer o
-# parsing de horários em linguagem natural aqui no código (frágil e
-# ambíguo), quem resolve "em 20 minutos" ou "às 7h" é o próprio modelo,
-# que já tem get_current_time/get_current_date disponíveis — a
-# ferramenta só recebe o total de segundos até o alarme disparar.
-
 ALARMS_PATH = os.path.expanduser("~/.jarvis/alarms.json")
 _alarm_scheduler_lock = threading.Lock()
 _alarm_scheduler_started = False
@@ -1402,11 +1392,22 @@ def get_daily_news(query: str = "", limit: int = 5):
                 else None
             )
 
+            # A RSS do Google News não vem com imagem. Usamos o serviço
+            # gratuito de screenshot da WordPress (mshots), que gera uma
+            # miniatura da própria página da notícia a partir da URL —
+            # sem precisar de chave de API nem scraping adicional.
+            image_url = (
+                "https://s.wordpress.com/mshots/v1/"
+                f"{urllib.parse.quote(link, safe='')}?w=500&h=300"
+                if link else None
+            )
+
             news.append({
                 "title": title,
                 "link": link,
                 "source": source,
                 "published_at": pub_date,
+                "image": image_url,
             })
 
         if not news:
@@ -1414,6 +1415,12 @@ def get_daily_news(query: str = "", limit: int = 5):
                 "success": False,
                 "message": "Nenhuma notícia encontrada.",
             }
+
+        ui_bridge.broadcast({
+            "type": "news_board",
+            "titulo": query or "Principais notícias",
+            "news": news,
+        })
 
         return {
             "success": True,

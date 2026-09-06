@@ -173,21 +173,13 @@ def detectar_idioma_simples(texto):
 
 def aplicar_efeito_jarvis(input_file, output_file):
     filtro = (
-    # Corpo
     "equalizer=f=160:t=q:w=1:g=1.2,"
-
     # Presença
     "equalizer=f=3000:t=q:w=1:g=1.0,"
-
     # Controle de brilho/chiado
-    "equalizer=f=7500:t=q:w=1:g=-2.5,"
-    "lowpass=f=10000,"
 
     # Eco mais longo, mas ainda discreto
-    "aecho=0.90:0.40:180:0.12,"
-
     # Textura robótica leve
-    "chorus=0.18:0.45:40:0.18:0.10:1.4,"
 
     # Volume
     "loudnorm=I=-16:TP=-1.5:LRA=7"
@@ -501,7 +493,7 @@ def speak(text):
         text=text,
         reference_id=FISH_AUDIO_VOICE_ID,
         normalize=True,
-        speed=1.1,
+        speed=1.2,
     )
 
     with raw_audio.open("wb") as file:
