@@ -1,6 +1,0 @@
-2026/09/07-17:44:21.613 2159bda Reusing MANIFEST /Users/gabriel.araujo/jvs/J.A.R.V.I.S/assets/whatsapp_profile/Default/Local Storage/leveldb/MANIFEST-000001
-2026/09/07-17:44:21.622 2159bda Recovering log #107
-2026/09/07-17:44:21.622 2159bda Reusing old log /Users/gabriel.araujo/jvs/J.A.R.V.I.S/assets/whatsapp_profile/Default/Local Storage/leveldb/000107.log 
-2026/09/07-17:45:21.632 2159bdd Level-0 table #111: started
-2026/09/07-17:45:21.637 2159bdd Level-0 table #111: 17307 bytes OK
-2026/09/07-17:45:21.646 2159bdd Delete type=0 #107
