@@ -1,6 +1,7 @@
 import os
 import re
 import subprocess
+import ssl
 import urllib.parse
 import webbrowser
 import xml.etree.ElementTree as ET
@@ -13,12 +14,15 @@ from pathlib import Path
 from urllib.request import urlopen, Request
 from zoneinfo import ZoneInfo
 import uuid
+import certifi
 from ytmusicapi import YTMusic
 
 import tools.ui_bridge as ui_bridge
 import tools.web_agent as web_agent
 import tools.whatsapp_agent as whatsapp_agent
 from tools.voice import speak, limpar_para_fala
+
+_SSL_CONTEXT = ssl.create_default_context(cafile=certifi.where())
 
 
 WMO_CODE_MAP = {
@@ -383,7 +387,7 @@ def _geocode_local(local: str):
         f"q={urllib.parse.quote_plus(local)}&format=json&limit=1"
     )
     request = Request(url, headers={"User-Agent": "JARVIS/1.0 (assistente pessoal)"})
-    with urlopen(request, timeout=10) as response:
+    with urlopen(request, timeout=10, context=_SSL_CONTEXT) as response:
         data = json.loads(response.read())
 
     if not data:
@@ -404,78 +408,102 @@ def _osrm_route(origem_lat, origem_lon, destino_lat, destino_lon, profile="drivi
         "?overview=full&geometries=geojson"
     )
     request = Request(url, headers={"User-Agent": "JARVIS/1.0"})
-    with urlopen(request, timeout=10) as response:
+    with urlopen(request, timeout=10, context=_SSL_CONTEXT) as response:
         return json.loads(response.read())
 
 
 def get_distance(origem: str, destino: str, modo: str = "driving"):
+    # Cada etapa (geocode origem, geocode destino, rota) tem seu próprio
+    # try/except, em vez de um único try cobrindo a função inteira — assim,
+    # se algo falhar (rede, SSL, timeout), a mensagem de erro já diz
+    # exatamente em qual etapa foi, em vez de um erro genérico que obriga
+    # a adivinhar se foi o geocode ou o cálculo de rota.
     try:
         ponto_origem = _geocode_local(origem)
-        if not ponto_origem:
-            return {
-                "success": False,
-                "message": f"Local de origem não encontrado: {origem}",
-            }
+    except Exception as error:
+        return {
+            "success": False,
+            "message": (
+                f"Falha ao localizar a origem '{origem}' (geocodificação "
+                f"via Nominatim): {error}"
+            ),
+        }
 
-        # Nominatim pede no máximo 1 requisição por segundo
-        time.sleep(1)
+    if not ponto_origem:
+        return {
+            "success": False,
+            "message": f"Local de origem não encontrado: {origem}",
+        }
 
+    # Nominatim pede no máximo 1 requisição por segundo
+    time.sleep(1)
+
+    try:
         ponto_destino = _geocode_local(destino)
-        if not ponto_destino:
-            return {
-                "success": False,
-                "message": f"Local de destino não encontrado: {destino}",
-            }
+    except Exception as error:
+        return {
+            "success": False,
+            "message": (
+                f"Falha ao localizar o destino '{destino}' (geocodificação "
+                f"via Nominatim): {error}"
+            ),
+        }
 
-        perfil = modo if modo in ("driving", "walking", "cycling") else "driving"
+    if not ponto_destino:
+        return {
+            "success": False,
+            "message": f"Local de destino não encontrado: {destino}",
+        }
 
+    perfil = modo if modo in ("driving", "walking", "cycling") else "driving"
+
+    try:
         rota = _osrm_route(
             ponto_origem["lat"], ponto_origem["lon"],
             ponto_destino["lat"], ponto_destino["lon"],
             perfil,
         )
-
-        if rota.get("code") != "Ok" or not rota.get("routes"):
-            return {
-                "success": False,
-                "message": "Não foi possível calcular a rota entre os locais.",
-            }
-
-        trajeto = rota["routes"][0]
-        distancia_km = round(trajeto["distance"] / 1000, 1)
-        duracao_min = round(trajeto["duration"] / 60)
-
-        ui_bridge.broadcast({
-            "type": "map",
-            "origem": {"lat": ponto_origem["lat"], "lon": ponto_origem["lon"], "nome": origem},
-            "destino": {"lat": ponto_destino["lat"], "lon": ponto_destino["lon"], "nome": destino},
-            "distancia_km": distancia_km,
-            "duracao_min": duracao_min,
-            "modo": perfil,
-            "geometria": trajeto["geometry"],
-        })
-
-        horas, minutos = divmod(duracao_min, 60)
-        duracao_texto = f"{horas}h{minutos:02d}" if horas else f"{minutos} min"
-        modo_texto = {"driving": "de carro", "walking": "a pé", "cycling": "de bicicleta"}[perfil]
-
-        return {
-            "success": True,
-            "origem": origem,
-            "destino": destino,
-            "distancia_km": distancia_km,
-            "duracao_min": duracao_min,
-            "message": (
-                f"De {origem} até {destino}: {distancia_km} km, "
-                f"aproximadamente {duracao_texto} {modo_texto}."
-            ),
-        }
-
     except Exception as error:
         return {
             "success": False,
-            "message": f"Não foi possível calcular a distância: {error}",
+            "message": f"Falha ao calcular a rota (OSRM): {error}",
         }
+
+    if rota.get("code") != "Ok" or not rota.get("routes"):
+        return {
+            "success": False,
+            "message": "Não foi possível calcular a rota entre os locais.",
+        }
+
+    trajeto = rota["routes"][0]
+    distancia_km = round(trajeto["distance"] / 1000, 1)
+    duracao_min = round(trajeto["duration"] / 60)
+
+    ui_bridge.broadcast({
+        "type": "map",
+        "origem": {"lat": ponto_origem["lat"], "lon": ponto_origem["lon"], "nome": origem},
+        "destino": {"lat": ponto_destino["lat"], "lon": ponto_destino["lon"], "nome": destino},
+        "distancia_km": distancia_km,
+        "duracao_min": duracao_min,
+        "modo": perfil,
+        "geometria": trajeto["geometry"],
+    })
+
+    horas, minutos = divmod(duracao_min, 60)
+    duracao_texto = f"{horas}h{minutos:02d}" if horas else f"{minutos} min"
+    modo_texto = {"driving": "de carro", "walking": "a pé", "cycling": "de bicicleta"}[perfil]
+
+    return {
+        "success": True,
+        "origem": origem,
+        "destino": destino,
+        "distancia_km": distancia_km,
+        "duracao_min": duracao_min,
+        "message": (
+            f"De {origem} até {destino}: {distancia_km} km, "
+            f"aproximadamente {duracao_texto} {modo_texto}."
+        ),
+    }
 
 
 # ---------- busca de "lugar mais próximo por categoria", sem dicionário fixo ----------
@@ -539,7 +567,7 @@ def _overpass_request(query, tentativas_por_mirror=1):
                     data=urllib.parse.urlencode({"data": query}).encode("utf-8"),
                     headers={"User-Agent": "JARVIS/1.0 (assistente pessoal)"},
                 )
-                with urlopen(request, timeout=20) as response:
+                with urlopen(request, timeout=20, context=_SSL_CONTEXT) as response:
                     return json.loads(response.read())
             except Exception as error:
                 ultimo_erro = error
@@ -556,16 +584,28 @@ def _overpass_nearest(lat, lon, tags):
     qualquer lugar do planeta onde exista cobertura OSM (praticamente
     universal). Ordena por distância real (haversine), não por
     relevância textual.
+
+    Se TODAS as tentativas (todos os raios x todos os espelhos) falharem
+    por erro de rede/SSL/timeout — ou seja, nunca conseguimos nem uma
+    resposta válida do Overpass — a última exceção é relançada, para que
+    a função chamadora possa diferenciar "não achei nenhum lugar dessa
+    categoria" de "não consegui nem consultar o Overpass". Sem isso, um
+    problema de rede ficaria mascarado como resultado vazio.
     """
     tags_validas = [t for t in (_parse_osm_tag(tag) for tag in tags) if t]
     if not tags_validas:
         return None, None
 
+    ultimo_erro = None
+    alguma_resposta_recebida = False
+
     for raio in _RAIOS_BUSCA_METROS:
         query = _overpass_query_for_tags(tags_validas, lat, lon, raio)
         try:
             data = _overpass_request(query)
-        except Exception:
+            alguma_resposta_recebida = True
+        except Exception as error:
+            ultimo_erro = error
             continue
 
         elementos = data.get("elements", [])
@@ -588,6 +628,9 @@ def _overpass_nearest(lat, lon, tags):
             candidatos.sort(key=lambda c: c["distancia_km"])
             return candidatos[0], raio
 
+    if not alguma_resposta_recebida and ultimo_erro:
+        raise ultimo_erro
+
     return None, None
 
 
@@ -599,83 +642,104 @@ def find_nearest_place(origem: str, categoria: str, tags: list, modo: str = "dri
     categoria, em qualquer idioma, em qualquer lugar do planeta com
     cobertura OpenStreetMap.
     """
+    # Assim como em get_distance, cada etapa tem seu próprio try/except
+    # pra deixar claro em qual serviço externo (Nominatim, Overpass ou
+    # OSRM) uma eventual falha de rede/SSL aconteceu.
     try:
         ponto_origem = _geocode_local(origem)
-        if not ponto_origem:
-            return {
-                "success": False,
-                "message": f"Local de origem não encontrado: {origem}",
-            }
+    except Exception as error:
+        return {
+            "success": False,
+            "message": (
+                f"Falha ao localizar a origem '{origem}' (geocodificação "
+                f"via Nominatim): {error}"
+            ),
+        }
 
-        if not tags:
-            return {
-                "success": False,
-                "message": "Nenhuma tag OSM fornecida para a categoria buscada.",
-            }
+    if not ponto_origem:
+        return {
+            "success": False,
+            "message": f"Local de origem não encontrado: {origem}",
+        }
 
+    if not tags:
+        return {
+            "success": False,
+            "message": "Nenhuma tag OSM fornecida para a categoria buscada.",
+        }
+
+    try:
         mais_proximo, raio_usado = _overpass_nearest(
             ponto_origem["lat"], ponto_origem["lon"], tags
         )
+    except Exception as error:
+        return {
+            "success": False,
+            "message": f"Falha ao consultar o Overpass (busca de locais): {error}",
+        }
 
-        if not mais_proximo:
-            return {
-                "success": False,
-                "message": (
-                    f"Não encontrei nenhum lugar do tipo '{categoria}' "
-                    f"perto de {origem}, mesmo expandindo a busca."
-                ),
-            }
+    if not mais_proximo:
+        return {
+            "success": False,
+            "message": (
+                f"Não encontrei nenhum lugar do tipo '{categoria}' "
+                f"perto de {origem}, mesmo expandindo a busca."
+            ),
+        }
 
-        perfil = modo if modo in ("driving", "walking", "cycling") else "driving"
+    perfil = modo if modo in ("driving", "walking", "cycling") else "driving"
 
+    try:
         rota = _osrm_route(
             ponto_origem["lat"], ponto_origem["lon"],
             mais_proximo["lat"], mais_proximo["lon"],
             perfil,
         )
-
-        if rota.get("code") != "Ok" or not rota.get("routes"):
-            return {
-                "success": False,
-                "message": "Encontrei o lugar mas não consegui calcular a rota até ele.",
-            }
-
-        trajeto = rota["routes"][0]
-        distancia_km = round(trajeto["distance"] / 1000, 1)
-        duracao_min = round(trajeto["duration"] / 60)
-
-        ui_bridge.broadcast({
-            "type": "map",
-            "origem": {"lat": ponto_origem["lat"], "lon": ponto_origem["lon"], "nome": origem},
-            "destino": {"lat": mais_proximo["lat"], "lon": mais_proximo["lon"], "nome": mais_proximo["nome"]},
-            "distancia_km": distancia_km,
-            "duracao_min": duracao_min,
-            "modo": perfil,
-            "geometria": trajeto["geometry"],
-        })
-
-        horas, minutos = divmod(duracao_min, 60)
-        duracao_texto = f"{horas}h{minutos:02d}" if horas else f"{minutos} min"
-        modo_texto = {"driving": "de carro", "walking": "a pé", "cycling": "de bicicleta"}[perfil]
-
-        return {
-            "success": True,
-            "categoria": categoria,
-            "lugar_encontrado": mais_proximo["nome"],
-            "origem": origem,
-            "distancia_km": distancia_km,
-            "duracao_min": duracao_min,
-            "message": (
-                f"O {categoria} mais próximo de {origem} é {mais_proximo['nome']}, "
-                f"a {distancia_km} km ({duracao_texto} {modo_texto})."
-            ),
-        }
-
     except Exception as error:
         return {
             "success": False,
-            "message": f"Não foi possível encontrar o local mais próximo: {error}",
+            "message": (
+                f"Encontrei '{mais_proximo['nome']}' mas falhei ao "
+                f"calcular a rota até ele (OSRM): {error}"
+            ),
         }
+
+    if rota.get("code") != "Ok" or not rota.get("routes"):
+        return {
+            "success": False,
+            "message": "Encontrei o lugar mas não consegui calcular a rota até ele.",
+        }
+
+    trajeto = rota["routes"][0]
+    distancia_km = round(trajeto["distance"] / 1000, 1)
+    duracao_min = round(trajeto["duration"] / 60)
+
+    ui_bridge.broadcast({
+        "type": "map",
+        "origem": {"lat": ponto_origem["lat"], "lon": ponto_origem["lon"], "nome": origem},
+        "destino": {"lat": mais_proximo["lat"], "lon": mais_proximo["lon"], "nome": mais_proximo["nome"]},
+        "distancia_km": distancia_km,
+        "duracao_min": duracao_min,
+        "modo": perfil,
+        "geometria": trajeto["geometry"],
+    })
+
+    horas, minutos = divmod(duracao_min, 60)
+    duracao_texto = f"{horas}h{minutos:02d}" if horas else f"{minutos} min"
+    modo_texto = {"driving": "de carro", "walking": "a pé", "cycling": "de bicicleta"}[perfil]
+
+    return {
+        "success": True,
+        "categoria": categoria,
+        "lugar_encontrado": mais_proximo["nome"],
+        "origem": origem,
+        "distancia_km": distancia_km,
+        "duracao_min": duracao_min,
+        "message": (
+            f"O {categoria} mais próximo de {origem} é {mais_proximo['nome']}, "
+            f"a {distancia_km} km ({duracao_texto} {modo_texto})."
+        ),
+    }
 
 
 def get_weather(local: str = "São Paulo, BR"):
@@ -686,7 +750,7 @@ def get_weather(local: str = "São Paulo, BR"):
             "&count=1&language=pt&format=json"
         )
 
-        with urlopen(geocode_url, timeout=10) as response:
+        with urlopen(geocode_url, timeout=10, context=_SSL_CONTEXT) as response:
             geocode_data = json.loads(response.read())
 
         results = geocode_data.get("results")
@@ -713,7 +777,7 @@ def get_weather(local: str = "São Paulo, BR"):
             "&timezone=auto"
         )
 
-        with urlopen(forecast_url, timeout=10) as response:
+        with urlopen(forecast_url, timeout=10, context=_SSL_CONTEXT) as response:
             forecast_data = json.loads(response.read())
 
         current = forecast_data["current"]
@@ -1370,7 +1434,7 @@ def get_daily_news(query: str = "", limit: int = 5):
             headers={"User-Agent": "Mozilla/5.0"},
         )
 
-        with urlopen(request, timeout=10) as response:
+        with urlopen(request, timeout=10, context=_SSL_CONTEXT) as response:
             raw_data = response.read()
 
         root = ET.fromstring(raw_data)

@@ -1,6 +1,6 @@
-2026/09/05-01:00:27.896 1fe643d Reusing MANIFEST /Users/gabriel.araujo/jvs/J.A.R.V.I.S/assets/whatsapp_profile/Default/Local Storage/leveldb/MANIFEST-000001
-2026/09/05-01:00:27.902 1fe643d Recovering log #89
-2026/09/05-01:00:27.905 1fe643d Reusing old log /Users/gabriel.araujo/jvs/J.A.R.V.I.S/assets/whatsapp_profile/Default/Local Storage/leveldb/000089.log 
-2026/09/05-03:21:47.698 1fe6444 Level-0 table #94: started
-2026/09/05-03:21:47.706 1fe6444 Level-0 table #94: 16136 bytes OK
-2026/09/05-03:21:47.708 1fe6444 Delete type=0 #89
+2026/09/06-14:41:53.409 20b0843 Reusing MANIFEST /Users/gabriel.araujo/jvs/J.A.R.V.I.S/assets/whatsapp_profile/Default/Local Storage/leveldb/MANIFEST-000001
+2026/09/06-14:41:53.412 20b0843 Recovering log #104
+2026/09/06-14:41:53.412 20b0843 Reusing old log /Users/gabriel.araujo/jvs/J.A.R.V.I.S/assets/whatsapp_profile/Default/Local Storage/leveldb/000104.log 
+2026/09/06-22:50:04.588 20b0846 Level-0 table #108: started
+2026/09/06-22:50:04.597 20b0846 Level-0 table #108: 16008 bytes OK
+2026/09/06-22:50:04.601 20b0846 Delete type=0 #104

@@ -1,8 +1,11 @@
 import json
 import os
 import re
+import socket
 import threading
+import time
 import uuid
+import webview
 from dotenv import load_dotenv
 from tools.tools import TOOLS, TOOL_FUNCTIONS
 from openai import OpenAI
@@ -492,6 +495,48 @@ def escutar_acoes_timeline(memory_ref):
         ui_bridge.broadcast({"type": "timeline", "items": timeline_atual})
 
 
+def aguardar_servidor(host, port, timeout=10):
+    prazo = time.monotonic() + timeout
+    while time.monotonic() < prazo:
+        try:
+            with socket.create_connection((host, port), timeout=0.5):
+                return True
+        except OSError:
+            time.sleep(0.1)
+    return False
+
+
+def loop_jarvis(memory):
+    while True:
+        user_input = ui_bridge.mensagens_entrada.get()
+
+        if user_input.lower() in ["sair", "exit", "quit"]:
+            sounds.play("shutdown", block=True)
+            print("\nJARVIS desligado.")
+            os._exit(0)
+
+        response = ask_jarvis(user_input, memory)
+
+        facts = extract_facts(user_input, response)
+
+        with memory_lock:
+            novos = novos_itens_timeline(memory, facts)
+            memory = merge_facts_into_memory(memory, facts)
+            memory.setdefault("timeline", []).extend(novos)
+            memory = add_to_history(memory, user_input, response)
+            save_memory(memory)
+
+            fatos_para_ui = {
+                k: v for k, v in memory.items()
+                if k not in ("resumo_contexto", "historico_recente", "timeline")
+            }
+
+        for item in novos:
+            ui_bridge.broadcast({"type": "timeline_add", "item": item})
+
+        ui_bridge.broadcast({"type": "memory", "facts": fatos_para_ui})
+
+
 def main():
     memory = load_memory()
     ui_bridge.start_server_in_background()
@@ -533,35 +578,24 @@ Não faça várias perguntas.
         target=whatsapp_agent.start_whatsapp_session,
         daemon=True,
     ).start()
+    threading.Thread(
+        target=loop_jarvis,
+        args=(memory,),
+        daemon=True,
+    ).start()
 
-    while True:
-        user_input = ui_bridge.mensagens_entrada.get()
+    aguardar_servidor(ui_bridge.HOST, ui_bridge.PORT)
 
-        if user_input.lower() in ["sair", "exit", "quit"]:
-            sounds.play("shutdown", block=True)
-            print("\nJARVIS desligado.")
-            break
-
-        response = ask_jarvis(user_input, memory)
-
-        facts = extract_facts(user_input, response)
-
-        with memory_lock:
-            novos = novos_itens_timeline(memory, facts)
-            memory = merge_facts_into_memory(memory, facts)
-            memory.setdefault("timeline", []).extend(novos)
-            memory = add_to_history(memory, user_input, response)
-            save_memory(memory)
-
-            fatos_para_ui = {
-                k: v for k, v in memory.items()
-                if k not in ("resumo_contexto", "historico_recente", "timeline")
-            }
-
-        for item in novos:
-            ui_bridge.broadcast({"type": "timeline_add", "item": item})
-
-        ui_bridge.broadcast({"type": "memory", "facts": fatos_para_ui})
+    window = webview.create_window(
+        "J.A.R.V.I.S.",
+        f"http://{ui_bridge.HOST}:{ui_bridge.PORT}/",
+        width=1600,
+        height=900,
+        min_size=(960, 600),
+        background_color="#000000",
+    )
+    webview.start()
+    os._exit(0)
 
 
 if __name__ == "__main__":

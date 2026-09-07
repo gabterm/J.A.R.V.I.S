@@ -25,32 +25,16 @@ PORT = 8765
 _clients = set()
 _loop = None
 
-
-# ============================================================
-# FILAS DE ENTRADA
-# ============================================================
-
 # Comandos de texto enviados para o fluxo normal do JARVIS.
 mensagens_entrada = queue.Queue()
 
 jarvis_falando = threading.Event()
 
-# Escuta contínua do microfone (tools/mic_listener.py) — ligada por
-# padrão. Desligada via {"type": "mic_toggle", "ativo": false} vindo do
-# frontend, ou pela tool toggle_microphone (chamável por voz/texto); o
-# callback de captura em mic_listener.py checa esse evento e descarta
-# qualquer áudio enquanto ele estiver limpo, sem precisar fechar/reabrir
-# a InputStream a cada toggle.
 microfone_ativo = threading.Event()
 microfone_ativo.set()
 
-# Ações estruturadas da interface.
+
 acoes_entrada = queue.Queue()
-
-
-# ============================================================
-# LIFESPAN
-# ============================================================
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -63,10 +47,6 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
-
-# ============================================================
-# ARQUIVOS ESTÁTICOS
-# ============================================================
 
 app.mount(
     "/static",
@@ -84,24 +64,6 @@ async def javascript():
 async def index():
     return FileResponse(HTML_FILE)
 
-
-# ============================================================
-# PROXY DE EMBED
-# ============================================================
-#
-# Busca a página real por trás do servidor (em vez de o navegador buscar
-# direto) e devolve o conteúdo sem os headers que bloqueiam exibição em
-# <iframe> (X-Frame-Options / Content-Security-Policy: frame-ancestors).
-# Como, do ponto de vista do navegador, o conteúdo passa a vir da mesma
-# origem do HUD (127.0.0.1:8765), a regra de bloqueio do site original
-# nem chega a se aplicar.
-#
-# Limitações conhecidas (não dá pra contornar só tirando headers):
-#   - sites que fazem "frame-busting" via JavaScript, checando
-#     window.top !== window.self e recusando renderizar;
-#   - conteúdo que depende de cookies de sessão do domínio original
-#     (login) — a sessão do usuário não é repassada automaticamente.
-
 _HEADERS_A_REMOVER = {
     "x-frame-options",
     "content-security-policy",
@@ -115,11 +77,6 @@ _HEADERS_A_REMOVER = {
 
 @app.get("/proxy")
 async def proxy(url: str, request: Request):
-    # Repassa o header Range (pedido de "só esse trecho do arquivo") pra
-    # origem. É isso que permite ao navegador buscar um vídeo grande em
-    # pedaços — sem isso, ele teria que esperar o arquivo inteiro ser
-    # baixado no servidor antes de receber o primeiro byte, o que deixa
-    # tudo lento e quebra a barra de progresso/seek do player.
     headers_saida = {"User-Agent": "Mozilla/5.0 (JARVIS HUD Proxy)"}
     range_header = request.headers.get("range")
     if range_header:
@@ -141,17 +98,11 @@ async def proxy(url: str, request: Request):
     content_type = resposta.headers.get("content-type", "")
 
     if "text/html" in content_type:
-        # Páginas HTML costumam ser pequenas (diferente de vídeo/áudio),
-        # então bufferizar o corpo aqui pra injetar o <base> não pesa.
         html_bytes = await resposta.aread()
         await resposta.aclose()
         await client.aclose()
 
         html = html_bytes.decode(resposta.encoding or "utf-8", errors="replace")
-
-        # <base> resolve os caminhos relativos da página (css, imagens,
-        # links internos) contra a URL original, sem precisar reescrever
-        # cada URL manualmente dentro do HTML.
         base_tag = f'<base href="{url}">'
         if "<head>" in html:
             html = html.replace("<head>", f"<head>{base_tag}", 1)
@@ -197,9 +148,6 @@ async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
     _clients.add(websocket)
 
-    # Sincroniza o estado atual do microfone assim que o cliente conecta —
-    # essencial se ele foi desligado por outra aba/dispositivo antes desta
-    # conexão existir, ou pela tool toggle_microphone via voz/texto.
     await websocket.send_text(json.dumps({
         "type": "mic_state",
         "ativo": microfone_ativo.is_set(),
@@ -275,10 +223,6 @@ async def websocket_endpoint(websocket: WebSocket):
                     )
                     continue
 
-                # ----------------------------------------------
-                # AVISA A UI QUE COMEÇOU
-                # ----------------------------------------------
-
                 broadcast(
                     {
                         "type": "tool_exec",
@@ -288,15 +232,10 @@ async def websocket_endpoint(websocket: WebSocket):
                 )
 
                 try:
-                    # Executa a ferramenta fora do event loop.
                     resultado = await asyncio.to_thread(
                         func,
                         **args,
                     )
-
-                    # ------------------------------------------
-                    # RESULTADO
-                    # ------------------------------------------
 
                     broadcast(
                         {
@@ -337,32 +276,11 @@ async def websocket_endpoint(websocket: WebSocket):
                         }
                     )
 
-            # ==================================================
-            # INTERROMPER FALA
-            # ==================================================
-            #
-            # Ação em tempo real (não passa pelo LLM nem pelas filas):
-            # corta a reprodução de áudio que estiver rolando agora e
-            # sinaliza pro loop de falar_resposta() (em main.py) parar
-            # de emendar as frases seguintes da resposta atual.
-
             elif tipo == "stop_speaking":
                 from tools.voice import parar_fala
 
                 parar_fala()
                 broadcast({"type": "status", "state": "idle"})
-
-            # ==================================================
-            # LIGAR/DESLIGAR MICROFONE (escuta contínua)
-            # ==================================================
-            #
-            # Controla tools/mic_listener.py: o callback de captura lá
-            # checa esse mesmo Event antes de processar qualquer áudio.
-            # Rebroadcasta o estado pra sincronizar todas as interfaces
-            # conectadas (útil se houver mais de um cliente aberto). O
-            # mesmo caminho é usado pela tool toggle_microphone, chamada
-            # pelo modelo quando o pedido vem por voz/texto em vez do
-            # clique no botão.
 
             elif tipo == "mic_toggle":
                 ativo = evento.get("ativo")
@@ -425,10 +343,6 @@ def broadcast(event: dict):
         _loop,
     )
 
-
-# ============================================================
-# SERVIDOR EM BACKGROUND
-# ============================================================
 
 def start_server_in_background():
     """

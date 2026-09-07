@@ -154,7 +154,8 @@ document.addEventListener('keydown', (e) => {
 tornarPainelArrastavel(mediaFrame, mediaTopbar);
 
 
-const browserOverlay = document.getElementById('browserOverlay');
+const browserFrame = document.getElementById('browserFrame');
+const browserTopbar = document.getElementById('browserTopbar');
 const browserTitle = document.getElementById('browserTitle');
 const browserUrl = document.getElementById('browserUrl');
 const browserScreenshot = document.getElementById('browserScreenshot');
@@ -164,24 +165,181 @@ function atualizarNavegacaoAoVivo(titulo, url, imagemBase64) {
   browserTitle.textContent = titulo || '—';
   browserUrl.textContent = url || '';
   browserScreenshot.src = `data:image/jpeg;base64,${imagemBase64}`;
-  if (!browserOverlay.classList.contains('open')) {
-    browserOverlay.classList.add('open');
+
+  if (!browserScreenshot.dataset.interativo) {
+    browserScreenshot.dataset.interativo = 'true';
+
+    browserScreenshot.style.cursor = 'pointer';
+
+    browserScreenshot.addEventListener('click', (event) => {
+      const rect = browserScreenshot.getBoundingClientRect();
+
+      if (!rect.width || !rect.height) {
+        return;
+      }
+
+      const x = (event.clientX - rect.left) *
+        (1280 / rect.width);
+
+      const y = (event.clientY - rect.top) *
+        (800 / rect.height);
+
+      console.log('[BROWSER] Clique:', {
+        screenX: event.clientX,
+        screenY: event.clientY,
+        elementX: event.clientX - rect.left,
+        elementY: event.clientY - rect.top,
+        browserX: x,
+        browserY: y,
+      });
+
+      window.dispatchEvent(
+        new CustomEvent('jarvis-browser-click', {
+          detail: {
+            x,
+            y,
+          },
+        })
+      );
+    });
+  }
+
+  if (!browserFrame.classList.contains('open')) {
+    browserFrame.style.position = '';
+    browserFrame.style.left = '';
+    browserFrame.style.top = '';
+    browserFrame.style.margin = '';
+
+    browserFrame.classList.add('open');
+
     tocarSom('toggle');
-    addLogEvent('info', `Navegação ao vivo: ${titulo || url}`);
+
+    addLogEvent(
+      'info',
+      `Navegação ao vivo: ${titulo || url}`
+    );
   }
 }
 
 function fecharNavegacaoAoVivo() {
-  browserOverlay.classList.remove('open');
+  browserFrame.classList.remove('open');
 }
 
 browserClose.addEventListener('click', fecharNavegacaoAoVivo);
-browserOverlay.addEventListener('click', (e) => { if (e.target === browserOverlay) fecharNavegacaoAoVivo(); });
 document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape' && browserOverlay.classList.contains('open')) fecharNavegacaoAoVivo();
+  if (e.key === 'Escape' && browserFrame.classList.contains('open')) fecharNavegacaoAoVivo();
 });
 
-const reasoningOverlay = document.getElementById('reasoningOverlay');
+tornarPainelArrastavel(browserFrame, browserTopbar);
+
+const mapFrame = document.getElementById('mapFrame');
+const mapTopbar = document.getElementById('mapTopbar');
+const mapTitle = document.getElementById('mapTitle');
+const mapClose = document.getElementById('mapClose');
+const mapCaption = document.getElementById('mapCaption');
+
+let leafletMap = null;
+let mapRouteLayer = null;
+let mapMarkersLayer = null;
+
+function garantirMapaLeaflet() {
+  if (leafletMap) return leafletMap;
+
+  leafletMap = L.map('mapContainer', { zoomControl: true, attributionControl: true });
+
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    maxZoom: 19,
+    subdomains: 'abcd',
+    attribution: '&copy; OpenStreetMap &copy; CARTO',
+  }).addTo(leafletMap);
+
+  mapRouteLayer = L.layerGroup().addTo(leafletMap);
+  mapMarkersLayer = L.layerGroup().addTo(leafletMap);
+
+  return leafletMap;
+}
+
+function criarIconePonto(tipo) {
+  return L.divIcon({
+    className: '',
+    html: `<div class="map-marker-dot${tipo === 'destino' ? ' dest' : ''}"></div>`,
+    iconSize: [14, 14],
+    iconAnchor: [7, 7],
+  });
+}
+
+function abrirMapa(dados) {
+  // recentraliza o painel (desfaz posição arrastada de uma abertura anterior)
+  mapFrame.style.position = '';
+  mapFrame.style.left = '';
+  mapFrame.style.top = '';
+  mapFrame.style.margin = '';
+
+  mapTitle.textContent = `${dados.origem?.nome || 'Origem'} → ${dados.destino?.nome || 'Destino'}`;
+  mapFrame.classList.add('open');
+  tocarSom('toggle');
+  addLogEvent('info', `Rota traçada: ${dados.origem?.nome || ''} → ${dados.destino?.nome || ''}`);
+
+  // O container só tem dimensões reais depois do frame abrir (display
+  // muda via classe 'open'), por isso o invalidateSize/desenho espera
+  // um frame de animação.
+  requestAnimationFrame(() => {
+    const map = garantirMapaLeaflet();
+    map.invalidateSize();
+
+    mapRouteLayer.clearLayers();
+    mapMarkersLayer.clearLayers();
+
+    const corRota = getComputedStyle(document.body).getPropertyValue('--core-ring').trim() || '#5ec8ff';
+
+    if (dados.geometria) {
+      L.geoJSON(dados.geometria, {
+        style: { color: corRota, weight: 3.5, opacity: 0.85 },
+      }).addTo(mapRouteLayer);
+    }
+
+    if (dados.origem && dados.origem.lat != null && dados.origem.lon != null) {
+      L.marker([dados.origem.lat, dados.origem.lon], { icon: criarIconePonto('origem') })
+        .bindTooltip(dados.origem.nome || 'Origem', { direction: 'top' })
+        .addTo(mapMarkersLayer);
+    }
+
+    if (dados.destino && dados.destino.lat != null && dados.destino.lon != null) {
+      L.marker([dados.destino.lat, dados.destino.lon], { icon: criarIconePonto('destino') })
+        .bindTooltip(dados.destino.nome || 'Destino', { direction: 'top' })
+        .addTo(mapMarkersLayer);
+    }
+
+    const todasCamadas = [...mapRouteLayer.getLayers(), ...mapMarkersLayer.getLayers()];
+    if (todasCamadas.length) {
+      map.fitBounds(L.featureGroup(todasCamadas).getBounds(), { padding: [30, 30] });
+    } else if (dados.origem) {
+      map.setView([dados.origem.lat, dados.origem.lon], 13);
+    }
+  });
+
+  const duracaoMin = dados.duracao_min || 0;
+  const horas = Math.floor(duracaoMin / 60);
+  const minutos = Math.round(duracaoMin % 60);
+  const duracaoTexto = horas ? `${horas}h${String(minutos).padStart(2, '0')}` : `${minutos} min`;
+  const modoLabel = { driving: 'de carro', walking: 'a pé', cycling: 'de bicicleta' }[dados.modo] || dados.modo || '';
+
+  mapCaption.innerHTML = `<b>${dados.distancia_km ?? '--'} km</b> · ${duracaoTexto} ${modoLabel}`;
+}
+
+function fecharMapa() {
+  mapFrame.classList.remove('open');
+}
+
+mapClose.addEventListener('click', fecharMapa);
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && mapFrame.classList.contains('open')) fecharMapa();
+});
+
+tornarPainelArrastavel(mapFrame, mapTopbar);
+
+const reasoningFrame = document.getElementById('reasoningFrame');
+const reasoningTopbar = document.getElementById('reasoningTopbar');
 const reasoningTitle = document.getElementById('reasoningTitle');
 const reasoningSvg = document.getElementById('reasoningSvg');
 const reasoningCaption = document.getElementById('reasoningCaption');
@@ -196,23 +354,29 @@ const REASONING_TIPO_COR = {
 };
 
 function abrirQuadroRaciocinio(titulo) {
+  reasoningFrame.style.position = '';
+  reasoningFrame.style.left = '';
+  reasoningFrame.style.top = '';
+  reasoningFrame.style.margin = '';
+
   reasoningTitle.textContent = titulo || 'Raciocínio';
   reasoningSvg.innerHTML = '';
   reasoningCaption.textContent = '';
-  reasoningOverlay.classList.add('open');
+  reasoningFrame.classList.add('open');
   tocarSom('toggle');
   addLogEvent('info', `Quadro de raciocínio: ${titulo || ''}`);
 }
 
 function fecharQuadroRaciocinio() {
-  reasoningOverlay.classList.remove('open');
+  reasoningFrame.classList.remove('open');
 }
 
 reasoningClose.addEventListener('click', fecharQuadroRaciocinio);
-reasoningOverlay.addEventListener('click', (e) => { if (e.target === reasoningOverlay) fecharQuadroRaciocinio(); });
 document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape' && reasoningOverlay.classList.contains('open')) fecharQuadroRaciocinio();
+  if (e.key === 'Escape' && reasoningFrame.classList.contains('open')) fecharQuadroRaciocinio();
 });
+
+tornarPainelArrastavel(reasoningFrame, reasoningTopbar);
 
 function escapeXml(str) {
   return (str || '').replace(/[<>&"]/g, c => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;' }[c]));
@@ -419,20 +583,20 @@ const ESTADOS = {
 };
 
 function setEstado(estado) {
-  // const label = ESTADOS[estado] || estado.toUpperCase();
-  // clockStatus.innerHTML = `${label}<b id="dots">.</b>`;
+  const label = ESTADOS[estado] || estado.toUpperCase();
+  clockStatus.innerHTML = `${label}<b id="dots">.</b>`;
   micBtn.classList.toggle('active', estado === 'speaking' || estado === 'thinking' || estado === 'listening');
   clockStage.className = 'clock-stage mode-' + (estado === 'offline' ? 'alert' : estado);
 
   const jaOffline = document.body.classList.contains('offline');
   if (estado === 'offline' && !jaOffline) {
-    document.body.classList.add('offline'); statusPillText.textContent = 'SISTEMA OFFLINE';
+    document.body.classList.add('offline'); statusPillText.textContent = 'OFFLINE';
     document.getElementById('secureLinkLabel').textContent = 'OFFLINE';
     tocarSom('offline'); setSubsystem('websocket', false); addLogEvent('warn', 'Conexão perdida com o servidor');
     notify('Conexão perdida. Tentando reconectar…', 'warning');
   } else if (estado !== 'offline' && jaOffline) {
-    document.body.classList.remove('offline'); statusPillText.textContent = 'SISTEMA ONLINE';
-    document.getElementById('secureLinkLabel').textContent = 'ONLINE';
+    document.body.classList.remove('offline'); statusPillText.textContent = 'online';
+    document.getElementById('secureLinkLabel').textContent = 'online';
     tocarSom('online'); setSubsystem('websocket', true, true); addLogEvent('info', 'Conexão restabelecida');
     notify('Conexão estabelecida.', 'success');
   }
@@ -903,7 +1067,8 @@ document.addEventListener('click', (e) => {
   }
 });
 
-const simOverlay = document.getElementById('simOverlay');
+const simFrame = document.getElementById('simFrame');
+const simTopbar = document.getElementById('simTopbar');
 const simTitle = document.getElementById('simTitle');
 const simSvg = document.getElementById('simSvg');
 const simCaption = document.getElementById('simCaption');
@@ -924,22 +1089,28 @@ let simState = {
 };
 
 function abrirSimulacao(titulo) {
+  simFrame.style.position = '';
+  simFrame.style.left = '';
+  simFrame.style.top = '';
+  simFrame.style.margin = '';
+
   simSvg.innerHTML = '';
   simCaption.textContent = '';
   simTitle.textContent = titulo || 'Simulação';
-  simOverlay.classList.add('open');
+  simFrame.classList.add('open');
   tocarSom('toggle');
   addLogEvent('info', `Simulação: ${titulo || ''}`);
 }
 function fecharSimulacao() {
-  simOverlay.classList.remove('open');
+  simFrame.classList.remove('open');
   cancelAnimationFrame(simState.rafId);
 }
 simCloseBtn.addEventListener('click', fecharSimulacao);
-simOverlay.addEventListener('click', (e) => { if (e.target === simOverlay) fecharSimulacao(); });
 document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape' && simOverlay.classList.contains('open')) fecharSimulacao();
+  if (e.key === 'Escape' && simFrame.classList.contains('open')) fecharSimulacao();
 });
+
+tornarPainelArrastavel(simFrame, simTopbar);
 
 const SIM_FORMULAS = {
   projetil(p, t) {
@@ -1202,6 +1373,9 @@ function conectar() {
         break;
       case 'browser_screenshot':
         atualizarNavegacaoAoVivo(evento.titulo, evento.url, evento.imagem_base64);
+        break;
+      case 'map':
+        abrirMapa(evento);
         break;
       case 'reasoning_board':
         abrirQuadroRaciocinio(evento.titulo);

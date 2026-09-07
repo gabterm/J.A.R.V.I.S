@@ -238,13 +238,7 @@ def _localizar(page, alvo: str):
 
 
 def _snapshot(page, incluir_texto_completo=False):
-    """
-    Captura o estado atual da página: título, URL, um recorte do texto
-    visível (pro modelo "ler" sem outra chamada) e um screenshot em
-    base64. O screenshot é transmitido pra interface via ui_bridge, então
-    a navegação fica visível em tempo real — sem isso ela aconteceria só
-    "nos bastidores" do backend, invisível pro usuário.
-    """
+
     titulo = page.title()
     url = page.url
 

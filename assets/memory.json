@@ -1,5 +1,5 @@
 {
-    "nome": "Matheus",
+    "nome": "JARVIS",
     "idade": 21,
     "formacao": {
         "curso": "Ciência da Computação",
@@ -370,47 +370,47 @@
     ],
     "historico_recente": [
         {
-            "usuario": "execute: https://www.4devs.com.br/gerador_de_cnpj",
-            "jarvis": "Gerador de CNPJ aberto na interface, senhor."
+            "usuario": "exucute: https://www.4devs.com.br/gerador_de_cnpj",
+            "jarvis": "Site aberto, senhor."
+        },
+        {
+            "usuario": "na interface",
+            "jarvis": "O que o senhor quer abrir na interface?"
+        },
+        {
+            "usuario": "https://www.4devs.com.br/gerador_de_cnpj",
+            "jarvis": "Gerador de CNPJ aberto no navegador, senhor."
         },
         {
             "usuario": "jarvis",
             "jarvis": "À disposição, senhor."
         },
         {
-            "usuario": "resuma as principais noticias da ultima hora",
-            "jarvis": "Senhor, as principais notícias encontradas são:\n\nPrimeiro, o conflito entre os ministros Alexandre de Moraes e André Mendonça ganhou novos desdobramentos. A cobertura destaca os próximos passos do pedido de Moraes e a análise de possíveis interferências em um relatório da Polícia Federal.\n\nEm seguida, um coordenador do governo Lula classificou como profunda a crise no Supremo Tribunal Federal e defendeu uma modernização da Corte.\n\nTambém ganhou destaque uma pesquisa no Ceará. O levantamento aponta Lula com cinquenta e um vírgula seis por cento no primeiro turno, contra vinte e cinco vírgula sete por cento de Flávio.\n\nPor fim, a Advocacia Geral da União afirmou que não tinha competência para questionar uma decisão de Mendonça.\n\nO noticiário da última hora está bastante concentrado na tensão institucional envolvendo o Supremo e no cenário eleitoral brasileiro."
-        },
-        {
-            "usuario": "me mostre o clima de guaratuba",
-            "jarvis": "Em Guaratuba, estão dezessete graus, com garoa fraca, senhor."
-        },
-        {
             "usuario": "jarvis",
             "jarvis": "À disposição, senhor."
         },
         {
-            "usuario": "envie uma mensagem para o meu irmao perguntando sobre como está o jogo ali",
-            "jarvis": "Senhor, não consegui abrir a conversa com “Irmão”. O WhatsApp alterou a estrutura da página.\n\nQual é o nome exato dele como aparece no WhatsApp? Aí preparo o rascunho: “Como está o jogo aí?”"
+            "usuario": "checke minhas mensagens",
+            "jarvis": "Não há mensagens novas, senhor."
         },
         {
-            "usuario": "o nome do meu irmão é matheus",
-            "jarvis": "Entendido, senhor. O nome exato no WhatsApp é Matheus. Vou preparar o rascunho: “Como está o jogo aí?” Posso enviar?"
+            "usuario": "tente de novo",
+            "jarvis": "O que deseja que eu tente novamente, senhor?"
         },
         {
-            "usuario": "pode enviar",
-            "jarvis": "Senhor, não consegui enviar. O WhatsApp mudou a estrutura da página e o campo de mensagem não foi localizado."
+            "usuario": "[NOTIFICAÇÃO AUTOMÁTICA DE WHATSAPP] Chegou uma mensagem nova de Matheus. Prévia: \"Apaga a luz gay\". Use read_whatsapp_chat para ler a conversa completa com Matheus. Avise o usuário sobre a mensagem, resuma o conteúdo dela em fala natural, e já sugira um rascunho de resposta chamando send_whatsapp_message com confirmado=false. Fale o rascunho sugerido e pergunte se pode enviar. Não chame send_whatsapp_message com confirmado=true nesta mesma resposta, mesmo que o rascunho pareça óbvio — a aprovação só vem em uma mensagem seguinte do usuário.",
+            "jarvis": "Senhor, o WhatsApp informou que Matheus escreveu: “Apaga a luz gay”. Não consegui ler a conversa completa porque o serviço apresentou um erro.\n\nSugeri este rascunho: “Você pode explicar melhor o que quis dizer com ‘apaga a luz gay’?”\n\nPosso enviar?"
         },
         {
-            "usuario": "tente enviar a mensagem novaente",
-            "jarvis": "Mensagem enviada para Matheus, senhor."
+            "usuario": "jjaarrvviiss",
+            "jarvis": "À disposição, senhor."
         },
         {
-            "usuario": "[NOTIFICAÇÃO AUTOMÁTICA DE WHATSAPP] Chegou uma mensagem nova de Matheus. Prévia: \"\". Use read_whatsapp_chat para ler a conversa completa com Matheus. Avise o usuário sobre a mensagem, resuma o conteúdo dela em fala natural, e já sugira um rascunho de resposta chamando send_whatsapp_message com confirmado=false. Fale o rascunho sugerido e pergunte se pode enviar. Não chame send_whatsapp_message com confirmado=true nesta mesma resposta, mesmo que o rascunho pareça óbvio — a aprovação só vem em uma mensagem seguinte do usuário.",
-            "jarvis": "Senhor, chegou uma mensagem de Matheus, mas não consegui ler o conteúdo porque o WhatsApp retornou um erro técnico. Sem o texto, não vou inventar um resumo nem preparar uma resposta no escuro. Se o senhor colar a mensagem aqui, preparo o rascunho e peço sua confirmação antes de enviar."
+            "usuario": "nnoottiicciiaass  ddee  hhoojjee",
+            "jarvis": "As principais notícias de hoje são:\n\nPrimeiro, Ricardo Nunes deve distribuir camisas em apoio a André Mendonça durante um ato na Avenida Paulista.\n\nEm seguida, o Planalto afirmou que o desfile de sete de setembro reuniu setenta mil pessoas, mas imagens analisadas pelo Poder360 não confirmam esse número.\n\nTambém na Paulista, um ato de Romeu Zema exibiu uma faixa com uma imagem de Alexandre de Moraes atrás das grades.\n\nNo entretenimento, um streamer tentou invadir o Rock in Rio pulando uma grade. O anel ficou preso, causando a amputação de um dedo. O caso foi registrado em vídeo.\n\nPor fim, Augusto Cury fez um aceno ao ministro André Mendonça durante um ato que reuniu cerca de mil e quatrocentas pessoas em Copacabana."
         }
     ],
-    "resumo_contexto": "Matheus enviou uma nova mensagem no WhatsApp, mas JARVIS não conseguiu ler seu conteúdo devido a uma alteração na estrutura da página. JARVIS informou que não inventaria uma resposta e ofereceu tentar novamente ou receber o conteúdo para preparar um rascunho mediante aprovação. Também abriu o gerador de CNPJ do 4Devs a pedido de Matheus.",
+    "resumo_contexto": "Matheus pediu a abertura do GitHub, que foi aberto no navegador por JARVIS. Ao dizer “EXECUTE”, não especificou nenhuma ação adicional.",
     "timeline": [
         {
             "id": "277740a4-92e9-496a-978e-0f4c024d414a",

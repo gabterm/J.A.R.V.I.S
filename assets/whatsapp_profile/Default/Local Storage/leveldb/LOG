@@ -1,21 +1,6 @@
-2026/09/05-10:02:17.861 1ff6590 Reusing MANIFEST /Users/gabriel.araujo/jvs/J.A.R.V.I.S/assets/whatsapp_profile/Default/Local Storage/leveldb/MANIFEST-000001
-2026/09/05-10:02:17.872 1ff6590 Recovering log #93
-2026/09/05-10:02:17.873 1ff6590 Reusing old log /Users/gabriel.araujo/jvs/J.A.R.V.I.S/assets/whatsapp_profile/Default/Local Storage/leveldb/000093.log 
-2026/09/05-10:22:26.466 1ff6593 Level-0 table #97: started
-2026/09/05-10:22:26.475 1ff6593 Level-0 table #97: 15011 bytes OK
-2026/09/05-10:22:26.478 1ff6593 Delete type=0 #93
-2026/09/05-16:01:11.439 1ff6593 Level-0 table #99: started
-2026/09/05-16:01:11.450 1ff6593 Level-0 table #99: 17730 bytes OK
-2026/09/05-16:01:11.454 1ff6593 Delete type=0 #96
-2026/09/06-09:24:11.927 1ff6590 Level-0 table #101: started
-2026/09/06-09:24:11.942 1ff6590 Level-0 table #101: 16364 bytes OK
-2026/09/06-09:24:11.946 1ff6590 Delete type=0 #98
-2026/09/06-09:24:11.952 1ff6593 Compacting 4@0 + 1@1 files
-2026/09/06-09:24:11.959 1ff6593 Generated table #102@0: 584 keys, 32824 bytes
-2026/09/06-09:24:11.959 1ff6593 Compacted 4@0 + 1@1 files => 32824 bytes
-2026/09/06-09:24:11.960 1ff6593 compacted to: files[ 0 1 1 0 0 0 0 ]
-2026/09/06-09:24:11.961 1ff6593 Delete type=2 #101
-2026/09/06-09:24:11.961 1ff6593 Delete type=2 #99
-2026/09/06-09:24:11.961 1ff6593 Delete type=2 #94
-2026/09/06-09:24:11.961 1ff6593 Delete type=2 #97
-2026/09/06-09:24:11.961 1ff6593 Delete type=2 #91
+2026/09/07-17:44:21.613 2159bda Reusing MANIFEST /Users/gabriel.araujo/jvs/J.A.R.V.I.S/assets/whatsapp_profile/Default/Local Storage/leveldb/MANIFEST-000001
+2026/09/07-17:44:21.622 2159bda Recovering log #107
+2026/09/07-17:44:21.622 2159bda Reusing old log /Users/gabriel.araujo/jvs/J.A.R.V.I.S/assets/whatsapp_profile/Default/Local Storage/leveldb/000107.log 
+2026/09/07-17:45:21.632 2159bdd Level-0 table #111: started
+2026/09/07-17:45:21.637 2159bdd Level-0 table #111: 17307 bytes OK
+2026/09/07-17:45:21.646 2159bdd Delete type=0 #107

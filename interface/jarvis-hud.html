@@ -8,6 +8,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700;800&family=Share+Tech+Mono&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/static/css/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="qrc:///qtwebchannel/qwebchannel.js"></script>
 </head>
 <body>
@@ -29,7 +31,7 @@
     <span class="floating-panel-title" id="mediaTitle">—</span>
     <div class="media-actions">
       <button class="icon-btn" id="mediaOpenExternal" title="Abrir no navegador do sistema">EXTERNO</button>
-      <button class="icon-btn" id="mediaClose" title="Fechar">FECHAR ✕</button>
+      <button class="icon-btn" id="mediaClose" title="Fechar">✕</button>
     </div>
   </div>
   <iframe id="mediaIframe" class="media-iframe"
@@ -82,42 +84,45 @@
   </div>
 </div>
 
-<div class="browser-overlay" id="browserOverlay">
-  <div class="browser-frame">
-    <div class="browser-topbar">
-      <span class="browser-title" id="browserTitle">—</span>
-      <span class="browser-url" id="browserUrl"></span>
-      <button class="icon-btn" id="browserClose" title="Fechar">FECHAR ✕</button>
-    </div>
-    <img id="browserScreenshot" class="browser-screenshot" alt="Navegação ao vivo" />
+<div class="floating-panel browser-frame" id="browserFrame">
+  <div class="floating-panel-topbar" id="browserTopbar">
+    <span class="browser-title" id="browserTitle">—</span>
+    <span class="browser-url" id="browserUrl"></span>
+    <button class="icon-btn" id="browserClose" title="Fechar">✕</button>
   </div>
+  <img id="browserScreenshot" class="browser-screenshot" alt="Navegação ao vivo" />
 </div>
 
-<div class="reasoning-overlay" id="reasoningOverlay">
-  <div class="reasoning-frame">
-    <div class="reasoning-topbar">
-      <span class="reasoning-title" id="reasoningTitle">—</span>
-      <button class="icon-btn" id="reasoningClose" title="Fechar">FECHAR ✕</button>
-    </div>
-    <svg id="reasoningSvg" class="reasoning-svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet"></svg>
-    <div class="reasoning-caption" id="reasoningCaption"></div>
+<div class="floating-panel map-frame" id="mapFrame">
+  <div class="floating-panel-topbar" id="mapTopbar">
+    <span class="floating-panel-title" id="mapTitle">Rota</span>
+    <button class="icon-btn" id="mapClose" title="Fechar">✕</button>
   </div>
+  <div id="mapContainer" class="map-container"></div>
+  <div class="map-caption" id="mapCaption">—</div>
 </div>
 
-<div class="simulation-overlay" id="simOverlay">
-  <div class="simulation-frame">
-    <div class="simulation-topbar">
-      <span class="simulation-title" id="simTitle">—</span>
-      <div class="simulation-controls">
-        <button class="icon-btn" id="simPlayBtn" title="Pausar/retomar">PAUSAR</button>
-        <button class="icon-btn" id="simRestartBtn" title="Reiniciar do início">REINICIAR</button>
-        <input type="range" id="simSpeedRange" min="0.25" max="3" step="0.25" value="1" title="Velocidade da simulação">
-        <button class="icon-btn" id="simClose" title="Fechar">FECHAR ✕</button>
-      </div>
-    </div>
-    <svg id="simSvg" class="simulation-svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet"></svg>
-    <div class="simulation-caption" id="simCaption"></div>
+<div class="floating-panel reasoning-frame" id="reasoningFrame">
+  <div class="floating-panel-topbar" id="reasoningTopbar">
+    <span class="reasoning-title" id="reasoningTitle">—</span>
+    <button class="icon-btn" id="reasoningClose" title="Fechar">✕</button>
   </div>
+  <svg id="reasoningSvg" class="reasoning-svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet"></svg>
+  <div class="reasoning-caption" id="reasoningCaption"></div>
+</div>
+
+<div class="floating-panel simulation-frame" id="simFrame">
+  <div class="floating-panel-topbar" id="simTopbar">
+    <span class="simulation-title" id="simTitle">—</span>
+    <div class="simulation-controls">
+      <button class="icon-btn" id="simPlayBtn" title="Pausar/retomar">PAUSAR</button>
+      <button class="icon-btn" id="simRestartBtn" title="Reiniciar do início">REINICIAR</button>
+      <input type="range" id="simSpeedRange" min="0.25" max="3" step="0.25" value="1" title="Velocidade da simulação">
+      <button class="icon-btn" id="simClose" title="Fechar">✕</button>
+    </div>
+  </div>
+  <svg id="simSvg" class="simulation-svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet"></svg>
+  <div class="simulation-caption" id="simCaption"></div>
 </div>
 
 <div class="boot-overlay" id="bootOverlay">
@@ -135,13 +140,13 @@
     </div>
     <div class="divider"></div>
     <div class="tb-item"><span class="tb-label">USER:</span><span class="tb-value" id="operatorName">ARAUJO</span></div>
-    <div class="tb-item"><span class="tb-label">STATUS:</span><span class="tb-value ok" id="secureLinkLabel">ONLINE</span><span class="tb-dot"></span></div>
+    <div class="tb-item"><span class="tb-label">STATUS:</span><span class="tb-value ok" id="secureLinkLabel">online</span><span class="tb-dot"></span></div>
     <div class="tb-item"><span class="tb-label">UPTIME:</span><span class="tb-value" id="uptime">00:00:00</span></div>
     <div class="divider"></div>
     <div class="tb-item tb-item-muted"><span class="tb-label">LAN</span><span class="tb-value" id="tbLan">192.168.1.103</span></div>
     <div class="tb-item tb-item-muted"><span class="tb-label">PWR</span><span class="tb-value" id="tbPwr">98%</span></div>
     <div class="tb-spacer"></div>
-    <div class="status-pill" id="statusPill"><div class="dot"></div><span id="statusPillText">SISTEMA ONLINE</span></div>
+    <div class="status-pill" id="statusPill"><div class="dot"></div><span id="statusPillText">online</span></div>
     <div class="settings-toggle" id="settingsToggle" title="Personalização">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
     </div>
@@ -263,6 +268,7 @@
         <text class="mr-brand" x="100" y="182" text-anchor="middle">J.A.R.V.I.S.</text>
       </svg>
 
+      <div class="clock-status-row" id="clockStatus"><b id="dots">.</b></div>
       <div class="subsys-row" id="subsysRow">
         
       </div>
@@ -305,7 +311,7 @@
           >
             <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
           </svg>
-          <span>logs</span>
+          <span>SYSTEM LOGS</span>
         </div>
         <span class="panel-count" id="logsCount">0</span>
       </div>
@@ -328,7 +334,7 @@
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
     </div>
     <textarea class="cmd-input" placeholder="Digite um comando, fale com o JARVIS, ou use /help para ferramentas diretas…" rows="1"></textarea>
-    <button class="send-btn" id="sendBtn">></button>
+    <button class="send-btn" id="sendBtn">enviar</button>
   </div>
 
 </div>
