@@ -1,5 +1,5 @@
 {
-    "nome": "JARVIS",
+    "nome": "Jarvis",
     "idade": 21,
     "formacao": {
         "curso": "Ciência da Computação",
@@ -46,7 +46,9 @@
         "Análise de padrões de sono",
         "programação",
         "desenvolvimento de tecnologia",
-        "programar"
+        "programar",
+        "Hino do Santos",
+        "música rock metálico"
     ],
     "conhecimentos_tecnicos": {
         "linguagens": [
@@ -221,7 +223,8 @@
         "Criar um lembrete para essa tarefa",
         "Inserir manualmente os arquivos de retorno no ClickHouse",
         "Criar cada arquivo para testar se o fluxo da tela de staging de arquivo está funcionando",
-        "ir para Guaratuba hoje"
+        "ir para Guaratuba hoje",
+        "Enviar uma notificação para o próprio celular"
     ],
     "rotina": [
         "Está calibrando um modelo de síntese de voz.",
@@ -366,51 +369,62 @@
         "linguagem mais informal",
         "sem ponto final",
         "viajar de ônibus",
-        "Considerar Curitiba como cidade padrão quando a cidade não for informada"
+        "Considerar Curitiba como cidade padrão quando a cidade não for informada",
+        "Escolheria os números sete, treze, dezesseis, dezessete, vinte e três, quarenta e dois, sessenta e quatro, setenta e três, oitenta e nove e noventa e sete.",
+        "Usaria sete, dezessete, vinte e três, quarenta e dois, sessenta e quatro, setenta e três e noventa e sete em um jogo.",
+        "Quer um X Duplo Cheddar",
+        "Não quer milho",
+        "Não quer tomate",
+        "Não quer alface",
+        "Não quer presunto",
+        "não quer batata palha",
+        "Abrir a música diretamente no YouTube Music em vez da interface",
+        "rock metálico",
+        "ouvir música para dormir"
     ],
     "historico_recente": [
         {
-            "usuario": "exucute: https://www.4devs.com.br/gerador_de_cnpj",
-            "jarvis": "Site aberto, senhor."
+            "usuario": "toque o hino do palmeiras",
+            "jarvis": "Tocando o Hino da Sociedade Esportiva Palmeiras no YouTube Music, senhor."
         },
         {
-            "usuario": "na interface",
-            "jarvis": "O que o senhor quer abrir na interface?"
+            "usuario": "me de o clima atual",
+            "jarvis": "Em Curitiba, está fazendo oito graus, com céu nublado, senhor."
         },
         {
-            "usuario": "https://www.4devs.com.br/gerador_de_cnpj",
-            "jarvis": "Gerador de CNPJ aberto no navegador, senhor."
+            "usuario": "e as noticias de agora",
+            "jarvis": "As principais notícias de agora são:\n\nPrimeiro, manifestações na Avenida Paulista reuniram apoiadores de Trump e Bolsonaro. Um dos atos teve críticas a Zema, que foi hostilizado.\n\nEm seguida, uma pesquisa Quaest sobre o primeiro turno aponta Lula com trinta e seis por cento, Flávio Bolsonaro com vinte e nove por cento e Cury com oito por cento.\n\nO Planalto declarou que cerca de setenta mil pessoas participaram do evento de sete de setembro ligado a Lula. O Poder360 afirma que as imagens não confirmam esse número.\n\nTambém há uma crise no STF. Fachin aguarda explicações de Moraes e Mendonça.\n\nEsses são os destaques mais recentes disponíveis, senhor."
         },
         {
-            "usuario": "jarvis",
-            "jarvis": "À disposição, senhor."
+            "usuario": "toque o hino do corinthians",
+            "jarvis": "Tocando o Hino do Corinthians no YouTube Music, senhor."
         },
         {
-            "usuario": "jarvis",
-            "jarvis": "À disposição, senhor."
+            "usuario": "toque o hino do santos",
+            "jarvis": "Tocando o Hino do Santos no YouTube Music, senhor."
         },
         {
-            "usuario": "checke minhas mensagens",
-            "jarvis": "Não há mensagens novas, senhor."
+            "usuario": "toque o hino do flamengo",
+            "jarvis": "Tocando o Hino do Flamengo no YouTube Music, senhor."
         },
         {
-            "usuario": "tente de novo",
-            "jarvis": "O que deseja que eu tente novamente, senhor?"
+            "usuario": "toque o hino da alemanha",
+            "jarvis": "Tocando o hino da Alemanha, Deutschlandlied, no YouTube Music, senhor."
         },
         {
-            "usuario": "[NOTIFICAÇÃO AUTOMÁTICA DE WHATSAPP] Chegou uma mensagem nova de Matheus. Prévia: \"Apaga a luz gay\". Use read_whatsapp_chat para ler a conversa completa com Matheus. Avise o usuário sobre a mensagem, resuma o conteúdo dela em fala natural, e já sugira um rascunho de resposta chamando send_whatsapp_message com confirmado=false. Fale o rascunho sugerido e pergunte se pode enviar. Não chame send_whatsapp_message com confirmado=true nesta mesma resposta, mesmo que o rascunho pareça óbvio — a aprovação só vem em uma mensagem seguinte do usuário.",
-            "jarvis": "Senhor, o WhatsApp informou que Matheus escreveu: “Apaga a luz gay”. Não consegui ler a conversa completa porque o serviço apresentou um erro.\n\nSugeri este rascunho: “Você pode explicar melhor o que quis dizer com ‘apaga a luz gay’?”\n\nPosso enviar?"
+            "usuario": "toque o hino da argentina",
+            "jarvis": "Tocando o Hino Nacional da Argentina no YouTube Music, senhor."
         },
         {
-            "usuario": "jjaarrvviiss",
-            "jarvis": "À disposição, senhor."
+            "usuario": "toque alguma musica que seja rock metalico",
+            "jarvis": "Tocando “Edifice of Tyranny”, do Ouroboros, no YouTube Music, senhor. Metal técnico e suficientemente elétrico para acordar até um processo travado."
         },
         {
-            "usuario": "nnoottiicciiaass  ddee  hhoojjee",
-            "jarvis": "As principais notícias de hoje são:\n\nPrimeiro, Ricardo Nunes deve distribuir camisas em apoio a André Mendonça durante um ato na Avenida Paulista.\n\nEm seguida, o Planalto afirmou que o desfile de sete de setembro reuniu setenta mil pessoas, mas imagens analisadas pelo Poder360 não confirmam esse número.\n\nTambém na Paulista, um ato de Romeu Zema exibiu uma faixa com uma imagem de Alexandre de Moraes atrás das grades.\n\nNo entretenimento, um streamer tentou invadir o Rock in Rio pulando uma grade. O anel ficou preso, causando a amputação de um dedo. O caso foi registrado em vídeo.\n\nPor fim, Augusto Cury fez um aceno ao ministro André Mendonça durante um ato que reuniu cerca de mil e quatrocentas pessoas em Copacabana."
+            "usuario": "toque algumaa musica para dormir",
+            "jarvis": "Tocando uma seleção de piano relaxante para dormir no YouTube Music, senhor."
         }
     ],
-    "resumo_contexto": "Matheus pediu a abertura do GitHub, que foi aberto no navegador por JARVIS. Ao dizer “EXECUTE”, não especificou nenhuma ação adicional.",
+    "resumo_contexto": "Matheus pediu o Hino de Irati, esclarecendo que não queria o Hino Nacional. O YouTube Music redirecionou novamente para o Hino Nacional, pois JARVIS não encontrou uma faixa identificada como Hino de Irati. JARVIS informou anteriormente que não consegue controlar uma música já aberta, mas pode reabrir faixas no YouTube Music. Houve também pedido anterior para tocar uma música não especificada e a frase “Não, Felipe, os polsão.”, sem contexto adicional.",
     "timeline": [
         {
             "id": "277740a4-92e9-496a-978e-0f4c024d414a",
@@ -1172,6 +1186,90 @@
             "id": "dd7f7e08-cf6a-4608-9309-c00dac7833f6",
             "tipo": "preferencia",
             "text": "Considerar Curitiba como cidade padrão quando a cidade não for informada",
+            "pinned": false
+        },
+        {
+            "id": "097277fa-4505-4195-94db-063e555dc8fe",
+            "tipo": "objetivo",
+            "text": "Enviar uma notificação para o próprio celular",
+            "pinned": false
+        },
+        {
+            "id": "e816eb2a-2eb4-42eb-8fc0-59b4904892f8",
+            "tipo": "preferencia",
+            "text": "Escolheria os números sete, treze, dezesseis, dezessete, vinte e três, quarenta e dois, sessenta e quatro, setenta e três, oitenta e nove e noventa e sete.",
+            "pinned": false
+        },
+        {
+            "id": "14abf899-3cad-47fe-a61d-eb4151fb34f2",
+            "tipo": "preferencia",
+            "text": "Usaria sete, dezessete, vinte e três, quarenta e dois, sessenta e quatro, setenta e três e noventa e sete em um jogo.",
+            "pinned": false
+        },
+        {
+            "id": "d6f144e5-5e10-4ead-8577-50bb4964942a",
+            "tipo": "preferencia",
+            "text": "Quer um X Duplo Cheddar",
+            "pinned": false
+        },
+        {
+            "id": "2185bf39-a3d8-42b9-82d7-eda236a386dd",
+            "tipo": "preferencia",
+            "text": "Não quer milho",
+            "pinned": false
+        },
+        {
+            "id": "6a4bf845-f71a-4162-aa76-8a8b8541ab4d",
+            "tipo": "preferencia",
+            "text": "Não quer tomate",
+            "pinned": false
+        },
+        {
+            "id": "d59684bd-cead-485c-9d12-00ecdcab3f7a",
+            "tipo": "preferencia",
+            "text": "Não quer alface",
+            "pinned": false
+        },
+        {
+            "id": "806238d8-1112-4cd4-bdf7-e127daee6f40",
+            "tipo": "preferencia",
+            "text": "Não quer presunto",
+            "pinned": false
+        },
+        {
+            "id": "8e7a364e-8130-4ad3-8077-1024d87a31ff",
+            "tipo": "preferencia",
+            "text": "não quer batata palha",
+            "pinned": false
+        },
+        {
+            "id": "6da7fb9c-023c-4550-8507-8f4bdee3f9d9",
+            "tipo": "preferencia",
+            "text": "Abrir a música diretamente no YouTube Music em vez da interface",
+            "pinned": false
+        },
+        {
+            "id": "9f2dc33c-56a5-47f5-9091-91d4b0a98eec",
+            "tipo": "interesse",
+            "text": "Hino do Santos",
+            "pinned": false
+        },
+        {
+            "id": "63e0911f-117a-4c7a-91cd-93c308543038",
+            "tipo": "interesse",
+            "text": "música rock metálico",
+            "pinned": false
+        },
+        {
+            "id": "d6a8e061-c08a-48db-bd6c-8d5636bb13ad",
+            "tipo": "preferencia",
+            "text": "rock metálico",
+            "pinned": false
+        },
+        {
+            "id": "8a5f9102-41b6-4987-8701-c0bdbc71fee6",
+            "tipo": "preferencia",
+            "text": "ouvir música para dormir",
             "pinned": false
         }
     ]

@@ -1,21 +1,29 @@
+from dotenv import load_dotenv
+
+                                                                  
+load_dotenv()
+
 import json
 import os
 import re
 import socket
+import sys
 import threading
 import time
 import uuid
-import webview
-from dotenv import load_dotenv
 from tools.tools import TOOLS, TOOL_FUNCTIONS
 from openai import OpenAI
 from tools.jarvis_sounds import sounds
-from tools.voice import speak, limpar_para_fala, extrair_proxima_frase
+from tools.voice import speak, limpar_para_fala, limpar_para_texto, extrair_proxima_frase
 import tools.ui_bridge as ui_bridge
 import tools.whatsapp_agent as whatsapp_agent
+from tools.push import enviar_push
+from tools.ntfy_listener import escutar_ntfy
 from pathlib import Path
-
-load_dotenv()
+import tools.proactive as proactive
+from PySide6.QtCore import QUrl
+from PySide6.QtWidgets import QApplication, QMainWindow
+from PySide6.QtWebEngineWidgets import QWebEngineView
 
 client = OpenAI(
     api_key=os.getenv("OPENAI_API_KEY")
@@ -28,6 +36,9 @@ MEMORY_FILE = ASSETS_DIR / "memory.json"
 PROMPT_FILE = ASSETS_DIR / "prompt.txt"
 
 memory_lock = threading.Lock()
+
+                                                                        
+MAX_TAMANHO_RESPOSTA_PUSH = 1000
 
 
 def default_memory():
@@ -43,7 +54,6 @@ def default_memory():
         "historico_recente": [],
         "timeline": [],
     }
-
 
 
 def load_memory():
@@ -71,12 +81,6 @@ def save_memory(memory):
 
 
 def _normalizar(texto):
-    """
-    Normaliza texto só para fins de comparação/dedupe — nunca é o que
-    é salvo. Resolve o grosso dos near-duplicates que o extrator de
-    fatos gera entre chamadas (aspas, capitalização, espaços extras),
-    ex: 'Ser chamado apenas de "senhor"' vs 'ser chamado apenas de senhor'.
-    """
     if not isinstance(texto, str):
         return texto
     t = texto.strip().strip("\"'").lower()
@@ -137,11 +141,6 @@ def extract_facts(user_message, assistant_response):
 
 
 def novos_itens_timeline(memory, facts):
-    """
-    Compara os fatos recém-extraídos contra o que já existe em memory
-    (por texto normalizado) e devolve só os itens genuinamente novos,
-    já no formato usado pela timeline da UI.
-    """
     campos = (
         ("interesses", "interesse"),
         ("rotina", "rotina"),
@@ -252,7 +251,7 @@ def load_prompt():
         return file.read()
 
 
-def ask_jarvis(message, memory):
+def ask_jarvis(message, memory, falar_resposta_ativa=True):
     system_prompt = load_prompt()
 
     fatos = {
@@ -284,7 +283,7 @@ def ask_jarvis(message, memory):
 
     memory_context = "\n\n".join(contexto_parts)
 
-    messages = [
+    system_messages = [
         {
             "role": "system",
             "content": system_prompt,
@@ -293,6 +292,23 @@ def ask_jarvis(message, memory):
             "role": "system",
             "content": memory_context,
         },
+    ]
+
+    if not falar_resposta_ativa:
+        system_messages.append({
+            "role": "system",
+            "content": (
+                "Esta resposta específica será entregue como texto "
+                "escrito, numa notificação push — não vai ser falada em "
+                "voz alta. Escreva de forma normal para leitura: use "
+                "algarismos para números (ex: 73, não 'setenta e três'), "
+                "não soletre siglas, não substitua símbolos por palavras "
+                "e não adapte nada para fala. Seja direto e conciso, já "
+                "que é uma notificação."
+            ),
+        })
+
+    messages = system_messages + [
         {
             "role": "user",
             "content": message,
@@ -320,7 +336,17 @@ def ask_jarvis(message, memory):
         if not assistant_message.tool_calls:
             full_response = assistant_message.content or ""
 
-            falar_resposta(full_response)
+            if falar_resposta_ativa:
+                falar_resposta(full_response)
+            else:
+                                                                        
+                                                                        
+                print("JARVIS (via push, sem voz):", full_response)
+                ui_bridge.broadcast({
+                    "type": "log",
+                    "role": "jarvis",
+                    "text": full_response
+                })
 
             ui_bridge.broadcast({
                 "type": "status",
@@ -465,12 +491,6 @@ def escutar_terminal():
 
 
 def escutar_acoes_timeline(memory_ref):
-    """
-    Consome pin/unpin/remove vindos da UI (fila separada da de comandos,
-    já que essas ações não passam pelo LLM). Muta e persiste o mesmo
-    memory.json usado pelo resto do JARVIS, e rebroadcasta a timeline
-    atualizada para todos os clientes conectados.
-    """
     while True:
         acao = ui_bridge.acoes_entrada.get()
         item_id = acao["id"]
@@ -508,33 +528,70 @@ def aguardar_servidor(host, port, timeout=10):
 
 def loop_jarvis(memory):
     while True:
-        user_input = ui_bridge.mensagens_entrada.get()
+        item = ui_bridge.mensagens_entrada.get()
+
+        if isinstance(item, tuple):
+            origem, user_input = item
+        else:
+            origem, user_input = None, item
 
         if user_input.lower() in ["sair", "exit", "quit"]:
             sounds.play("shutdown", block=True)
             print("\nJARVIS desligado.")
             os._exit(0)
 
-        response = ask_jarvis(user_input, memory)
+        try:
+            response = ask_jarvis(
+                user_input,
+                memory,
+                falar_resposta_ativa=(origem != "ntfy"),
+            )
 
-        facts = extract_facts(user_input, response)
+            if origem == "ntfy":
+                resposta_texto = limpar_para_texto(response)
+                resposta_push = (
+                    resposta_texto
+                    if len(resposta_texto) <= MAX_TAMANHO_RESPOSTA_PUSH
+                    else resposta_texto[:MAX_TAMANHO_RESPOSTA_PUSH] + "…"
+                )
+                enviar_push("JARVIS", resposta_push)
 
-        with memory_lock:
-            novos = novos_itens_timeline(memory, facts)
-            memory = merge_facts_into_memory(memory, facts)
-            memory.setdefault("timeline", []).extend(novos)
-            memory = add_to_history(memory, user_input, response)
-            save_memory(memory)
+            facts = extract_facts(user_input, response)
 
-            fatos_para_ui = {
-                k: v for k, v in memory.items()
-                if k not in ("resumo_contexto", "historico_recente", "timeline")
-            }
+            with memory_lock:
+                novos = novos_itens_timeline(memory, facts)
+                memory = merge_facts_into_memory(memory, facts)
+                memory.setdefault("timeline", []).extend(novos)
+                memory = add_to_history(memory, user_input, response)
+                save_memory(memory)
 
-        for item in novos:
-            ui_bridge.broadcast({"type": "timeline_add", "item": item})
+                fatos_para_ui = {
+                    k: v for k, v in memory.items()
+                    if k not in ("resumo_contexto", "historico_recente", "timeline")
+                }
 
-        ui_bridge.broadcast({"type": "memory", "facts": fatos_para_ui})
+            for novo_item in novos:
+                ui_bridge.broadcast({"type": "timeline_add", "item": novo_item})
+
+            ui_bridge.broadcast({"type": "memory", "facts": fatos_para_ui})
+
+        except Exception as error:
+            print(f"⚠️  Erro processando mensagem: {error}")
+            sounds.play("error")
+            ui_bridge.broadcast({
+                "type": "status",
+                "state": "idle"
+            })
+
+            if origem == "ntfy":
+                try:
+                    enviar_push(
+                        "JARVIS",
+                        f"Não consegui processar sua mensagem agora: {error}",
+                        prioridade="alta",
+                    )
+                except Exception:
+                    pass
 
 
 def main():
@@ -579,22 +636,31 @@ Não faça várias perguntas.
         daemon=True,
     ).start()
     threading.Thread(
+        target=escutar_ntfy,
+        daemon=True,
+    ).start()
+    threading.Thread(
         target=loop_jarvis,
         args=(memory,),
         daemon=True,
     ).start()
+    proactive.iniciar_scheduler()
 
     aguardar_servidor(ui_bridge.HOST, ui_bridge.PORT)
+    app_qt = QApplication(sys.argv)
 
-    window = webview.create_window(
-        "J.A.R.V.I.S.",
-        f"http://{ui_bridge.HOST}:{ui_bridge.PORT}/",
-        width=1600,
-        height=900,
-        min_size=(960, 600),
-        background_color="#000000",
-    )
-    webview.start()
+    window = QMainWindow()
+    window.setWindowTitle("J.A.R.V.I.S.")
+    window.resize(1600, 900)
+    window.setMinimumSize(960, 600)
+    window.setStyleSheet("background-color: #000000;")
+
+    view = QWebEngineView()
+    view.setUrl(QUrl(f"http://{ui_bridge.HOST}:{ui_bridge.PORT}/"))
+    window.setCentralWidget(view)
+
+    window.show()
+    app_qt.exec()
     os._exit(0)
 
 

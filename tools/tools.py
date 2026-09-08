@@ -16,11 +16,13 @@ from zoneinfo import ZoneInfo
 import uuid
 import certifi
 from ytmusicapi import YTMusic
-
+from tools.push import enviar_push
+from tools.proactive import run_routine
 import tools.ui_bridge as ui_bridge
 import tools.web_agent as web_agent
 import tools.whatsapp_agent as whatsapp_agent
 from tools.voice import speak, limpar_para_fala
+import tools.music_player as music_player
 
 _SSL_CONTEXT = ssl.create_default_context(cafile=certifi.where())
 
@@ -1514,6 +1516,8 @@ def _get_ytmusic_client():
     return _ytmusic_client
 
 
+import tools.music_player as music_player
+
 def play_music(query: str):
     try:
         client = _get_ytmusic_client()
@@ -1535,23 +1539,22 @@ def play_music(query: str):
         if not video_id:
             return {
                 "success": False,
-                "message": (
-                    "A música encontrada não possui um ID válido."
-                ),
+                "message": "A música encontrada não possui um ID válido.",
             }
 
-        embed_url = f"https://www.youtube.com/embed/{video_id}?autoplay=1"
         watch_url = f"https://music.youtube.com/watch?v={video_id}"
         artists = ", ".join(
             artist["name"] for artist in top_result.get("artists", [])
         )
+        thumbnails = top_result.get("thumbnails") or []
+        thumbnail = thumbnails[-1]["url"] if thumbnails else None
 
-        ui_bridge.broadcast({
-            "type": "browser_navigate",
-            "url": embed_url,
-            "titulo": f"{top_result.get('title')} - {artists}",
-            "url_externo": watch_url,
-        })
+        resultado = music_player.tocar(
+            video_id, watch_url, top_result.get("title"), artists, thumbnail
+        )
+
+        if not resultado.get("success"):
+            return resultado
 
         return {
             "success": True,
@@ -1566,8 +1569,6 @@ def play_music(query: str):
             "success": False,
             "message": f"Não foi possível tocar a música: {error}",
         }
-
-
 def _validate_coordinate(value, field_name):
     if not isinstance(value, (int, float)):
         return f"Coordenada '{field_name}' inválida: {value!r}"
@@ -2530,6 +2531,61 @@ TOOLS = [
     },
 
     {
+    "type": "function",
+    "function": {
+        "name": "send_push_notification",
+        "description": (
+            "Envia uma notificação push para o celular/desktop do "
+            "usuário via ntfy.sh, mesmo que ele não esteja na frente "
+            "do computador. Use para avisos importantes que não podem "
+            "esperar até a próxima interação (mensagem urgente, alarme "
+            "crítico, evento inesperado)."
+        ),
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "titulo": {"type": "string", "description": "Título curto da notificação."},
+                "mensagem": {"type": "string", "description": "Corpo da notificação."},
+                "prioridade": {
+                    "type": "string",
+                    "enum": ["baixa", "normal", "alta", "urgente"],
+                    "description": "Prioridade da notificação. Padrão: normal.",
+                },
+            },
+            "required": ["titulo", "mensagem"],
+            "additionalProperties": False,
+        },
+    },
+},
+{
+    "type": "function",
+    "function": {
+        "name": "run_routine",
+        "description": (
+            "Executa uma rotina pré-definida que encadeia várias ações "
+            "de uma vez. Rotinas disponíveis: 'bom_dia' (clima + "
+            "notícias + lembretes + alarmes, falado em voz alta), "
+            "'boa_noite' (resumo de pendências antes de dormir), "
+            "'saindo_de_casa' (aviso de clima + acompanhamento remoto), "
+            "'foco' (silencia avisos não urgentes) e 'fim_foco' "
+            "(desativa o modo foco). Use quando o usuário pedir "
+            "explicitamente por um desses modos/rotinas."
+        ),
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "nome": {
+                    "type": "string",
+                    "enum": ["bom_dia", "boa_noite", "saindo_de_casa", "foco", "fim_foco"],
+                },
+            },
+            "required": ["nome"],
+            "additionalProperties": False,
+        },
+    },
+},
+
+    {
         "type": "function",
         "function": {
             "name": "set_alarm",
@@ -3185,6 +3241,8 @@ TOOL_FUNCTIONS = {
     "browser_close": browser_close,
     "get_weather": get_weather,
     "get_distance": get_distance,
+    "send_push_notification": enviar_push,
+    "run_routine": run_routine,
     "find_nearest_place": find_nearest_place,
     "open_application": open_application,
     "close_application": close_application,

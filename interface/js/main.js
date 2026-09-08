@@ -569,6 +569,156 @@ document.addEventListener('keydown', (e) => {
 
 tornarPainelArrastavel(weatherFrame, weatherTopbar);
 
+// ---- Player de música — floating panel com visualizador de áudio ----
+
+const musicFrame = document.getElementById('musicFrame');
+const musicTopbar = document.getElementById('musicTopbar');
+const musicClose = document.getElementById('musicClose');
+const musicThumb = document.getElementById('musicThumb');
+const musicTitleBar = document.getElementById('musicTitleBar');
+const musicTitle = document.getElementById('musicTitle');
+const musicArtist = document.getElementById('musicArtist');
+const musicSeek = document.getElementById('musicSeek');
+const musicTimeAtual = document.getElementById('musicTimeAtual');
+const musicTimeTotal = document.getElementById('musicTimeTotal');
+const musicPlayPause = document.getElementById('musicPlayPause');
+const musicStop = document.getElementById('musicStop');
+const musicVisualizer = document.getElementById('musicVisualizer');
+const jarvisAudio = document.getElementById('jarvisAudio');
+
+// Barras do visualizador — criadas uma única vez, atualizadas via custom
+// property --v (0 a 1), lida pelo CSS (altura/box-shadow de cada barra).
+const MUSIC_BANDAS = 24;
+for (let i = 0; i < MUSIC_BANDAS; i++) {
+  const bar = document.createElement('span');
+  bar.className = 'music-bar';
+  musicVisualizer.appendChild(bar);
+}
+const musicBars = musicVisualizer.querySelectorAll('.music-bar');
+
+let musicAudioCtx = null, musicAnalyser = null, musicSource = null;
+let musicSeekArrastando = false;
+
+function formatarTempo(segundos) {
+  if (!isFinite(segundos) || segundos < 0) segundos = 0;
+  const m = Math.floor(segundos / 60);
+  const s = Math.floor(segundos % 60);
+  return `${m}:${String(s).padStart(2, '0')}`;
+}
+
+function iniciarAnalyserMusica() {
+  if (musicAudioCtx) {
+    if (musicAudioCtx.state === 'suspended') {
+      musicAudioCtx.resume().catch(() => {});
+    }
+
+    return;
+  }
+
+  const AC = window.AudioContext || window.webkitAudioContext;
+  if (!AC) return;
+
+  try {
+    musicAudioCtx = new AC();
+
+    musicSource = musicAudioCtx.createMediaElementSource(jarvisAudio);
+    musicAnalyser = musicAudioCtx.createAnalyser();
+    musicAnalyser.fftSize = 64;
+
+    musicSource.connect(musicAnalyser);
+    musicAnalyser.connect(musicAudioCtx.destination);
+
+    requestAnimationFrame(atualizarVisualizadorMusica);
+
+  } catch (error) {
+    console.error('[MUSIC] Falha ao iniciar visualizador:', error);
+
+    musicAudioCtx = null;
+    musicAnalyser = null;
+    musicSource = null;
+  }
+}
+
+function atualizarVisualizadorMusica() {
+  if (musicAnalyser && !jarvisAudio.paused) {
+    const dados = new Uint8Array(musicAnalyser.frequencyBinCount);
+    musicAnalyser.getByteFrequencyData(dados);
+    musicBars.forEach((bar, i) => {
+      bar.style.setProperty('--v', ((dados[i] || 0) / 255).toFixed(3));
+    });
+  } else {
+    musicBars.forEach(bar => bar.style.setProperty('--v', '0'));
+  }
+  requestAnimationFrame(atualizarVisualizadorMusica);
+}
+
+function abrirPlayerMusica(evento) {
+  musicFrame.style.position = '';
+  musicFrame.style.left = '';
+  musicFrame.style.top = '';
+  musicFrame.style.margin = '';
+
+  musicTitle.textContent = evento.titulo || '—';
+  musicArtist.textContent = evento.artistas || '—';
+  musicThumb.style.display = evento.thumbnail ? 'block' : 'none';
+  if (evento.thumbnail) musicThumb.src = evento.thumbnail;
+
+  jarvisAudio.src = evento.url;
+  jarvisAudio.currentTime = 0;
+
+  
+  musicFrame.classList.add('open');
+  tocarSom('toggle');
+  addLogEvent('info', `Tocando: ${evento.titulo || ''} - ${evento.artistas || ''}`);
+}
+
+function fecharPlayerMusica() {
+  jarvisAudio.pause();
+  musicFrame.classList.remove('open');
+}
+
+musicClose.addEventListener('click', fecharPlayerMusica);
+musicStop.addEventListener('click', () => { jarvisAudio.pause(); jarvisAudio.currentTime = 0; });
+musicPlayPause.addEventListener('click', () => {
+  if (jarvisAudio.paused) jarvisAudio.play().catch(() => {});
+  else jarvisAudio.pause();
+});
+
+jarvisAudio.addEventListener('play', () => {
+  musicFrame.classList.add('playing');
+});
+
+jarvisAudio.addEventListener('pause', () => {
+  musicFrame.classList.remove('playing');
+});
+
+jarvisAudio.addEventListener('ended', () => {
+  musicFrame.classList.remove('playing');
+  addLogEvent('info', 'Reprodução concluída');
+});
+jarvisAudio.addEventListener('loadedmetadata', () => {
+  musicSeek.max = jarvisAudio.duration || 0;
+  musicTimeTotal.textContent = formatarTempo(jarvisAudio.duration);
+});
+jarvisAudio.addEventListener('timeupdate', () => {
+  if (musicSeekArrastando) return;
+  musicSeek.value = jarvisAudio.currentTime;
+  musicTimeAtual.textContent = formatarTempo(jarvisAudio.currentTime);
+});
+
+musicSeek.addEventListener('mousedown', () => { musicSeekArrastando = true; });
+musicSeek.addEventListener('input', () => { musicTimeAtual.textContent = formatarTempo(parseFloat(musicSeek.value)); });
+musicSeek.addEventListener('change', () => {
+  jarvisAudio.currentTime = parseFloat(musicSeek.value);
+  musicSeekArrastando = false;
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && musicFrame.classList.contains('open')) fecharPlayerMusica();
+});
+
+tornarPainelArrastavel(musicFrame, musicTopbar);
+
 const micBtn = document.getElementById('micBtn');
 const clockStage = document.getElementById('clockStage');
 const clockStatus = document.getElementById('clockStatus');
@@ -1397,6 +1547,9 @@ function conectar() {
         break;
       case 'weather':
         abrirClima(evento);
+        break;
+      case 'play_audio':
+        abrirPlayerMusica(evento);
         break;
       case 'event': addLogEvent(evento.level || 'info', evento.text); break;
       case 'notification': notify(evento.text, evento.level || 'info'); break;

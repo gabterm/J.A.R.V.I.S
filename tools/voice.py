@@ -2,12 +2,10 @@ import os
 import re
 import time
 import unicodedata
-import pygame
-from fish_audio_sdk import Session, TTSRequest
-from pathlib import Path
-import os
 import subprocess
+from pathlib import Path
 
+import pygame
 from dotenv import load_dotenv
 from fish_audio_sdk import Session, TTSRequest
 
@@ -16,18 +14,11 @@ load_dotenv()
 FISH_AUDIO_API_KEY = os.getenv("FISH_AUDIO_API_KEY")
 
 if not FISH_AUDIO_API_KEY:
-    raise RuntimeError(
-        "FISH_AUDIO_API_KEY não configurada."
-    )
+    raise RuntimeError("FISH_AUDIO_API_KEY não configurada.")
 
-print(
-    "Fish Audio API Key:",
-    f"{FISH_AUDIO_API_KEY[:8]}..."
-)
+print("Fish Audio API Key:", f"{FISH_AUDIO_API_KEY[:8]}...")
 
 fish_session = Session(FISH_AUDIO_API_KEY)
-
-
 
 FISH_AUDIO_VOICE_ID = os.getenv(
     "FISH_AUDIO_VOICE_ID",
@@ -154,7 +145,6 @@ REGEX_EMOJI = re.compile(
 
 
 def detectar_idioma_simples(texto):
-
     palavras = re.findall(r"[a-zA-ZÀ-ÿ]+", texto.lower())
     if not palavras:
         return "pt"
@@ -173,17 +163,10 @@ def detectar_idioma_simples(texto):
 
 def aplicar_efeito_jarvis(input_file, output_file):
     filtro = (
-    "equalizer=f=160:t=q:w=1:g=1.2,"
-    # Presença
-    "equalizer=f=3000:t=q:w=1:g=1.0,"
-    # Controle de brilho/chiado
-
-    # Eco mais longo, mas ainda discreto
-    # Textura robótica leve
-
-    # Volume
-    "loudnorm=I=-16:TP=-1.5:LRA=7"
-)
+        "equalizer=f=160:t=q:w=1:g=1.2,"
+        "equalizer=f=3000:t=q:w=1:g=1.0,"
+        "loudnorm=I=-16:TP=-1.5:LRA=7"
+    )
 
     subprocess.run(
         [
@@ -199,6 +182,7 @@ def aplicar_efeito_jarvis(input_file, output_file):
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
     )
+
 
 def aplicar_siglas(texto):
     for regex, substituto in SIGLAS_SOLETRADAS_COMPILADAS:
@@ -251,7 +235,6 @@ DEZENAS_EN = {
 }
 
 PRONUNCIAS_TTS = {
-    # Linguagens / frameworks
     "Python": "Páiton",
     "JavaScript": "Java Script",
     "TypeScript": "Taip Script",
@@ -261,8 +244,6 @@ PRONUNCIAS_TTS = {
     "LiveView": "Laive View",
     "PySide": "Pai Side",
     "PySide6": "Pai Side seis",
-
-    # Ferramentas
     "Docker": "Dóquer",
     "GitHub": "Git Ráb",
     "GitLab": "Git Láb",
@@ -270,8 +251,6 @@ PRONUNCIAS_TTS = {
     "npm": "N P M",
     "pip": "pip",
     "FFmpeg": "F F Mpeg",
-
-    # Tecnologias
     "OpenAI": "Open A I",
     "ChatGPT": "Chat G P T",
     "GPT": "G P T",
@@ -285,8 +264,6 @@ PRONUNCIAS_TTS = {
     "SQL": "S Q L",
     "UUID": "U U I D",
     "URL": "U R L",
-
-    # Termos técnicos
     "frontend": "front end",
     "backend": "back end",
     "fullstack": "full stack",
@@ -302,8 +279,6 @@ PRONUNCIAS_TTS = {
     "branch": "branch",
     "merge": "merge",
     "pull request": "pull request",
-
-    # Formatos
     ".json": " ponto Jason",
     ".csv": " ponto C S V",
     ".txt": " ponto T X T",
@@ -315,8 +290,6 @@ PRONUNCIAS_TTS = {
     ".ts": " ponto T S",
     ".html": " ponto H T M L",
     ".css": " ponto C S S",
-
-    # Comandos
     "mix phx.server": "mix fênix ponto server",
     "mix deps.get": "mix deps get",
     "npm install": "N P M install",
@@ -327,8 +300,8 @@ PRONUNCIAS_TTS = {
     "git pull": "git pull",
 }
 
-def numero_por_extenso(n, idioma="pt", genero="masc"):
 
+def numero_por_extenso(n, idioma="pt", genero="masc"):
     if idioma == "en":
         unidades = UNIDADES_EN
         dezenas = DEZENAS_EN
@@ -356,9 +329,7 @@ REGEX_HORA = re.compile(
 
 
 def ler_horas(texto, idioma="pt"):
-
     def substituir(match):
-
         hora = int(match.group(1))
         minuto = match.group(2)
         minuto_num = int(minuto) if minuto is not None else 0
@@ -399,8 +370,7 @@ def ler_horas(texto, idioma="pt"):
     return REGEX_HORA.sub(substituir, texto)
 
 
-def limpar_para_fala(texto):
-
+def _remover_markdown(texto):
     texto = re.sub(r"```.*?```", "", texto, flags=re.DOTALL)
     texto = re.sub(r"\*\*(.*?)\*\*", r"\1", texto)
     texto = re.sub(r"(?<!\w)\*(.*?)\*(?!\w)", r"\1", texto)
@@ -409,6 +379,23 @@ def limpar_para_fala(texto):
     texto = re.sub(r"(?m)^\s*[-*•]\s+", "", texto)
     texto = re.sub(r"(?m)^\s*\d+[.)]\s+", "", texto)
     texto = re.sub(r"(?m)^#{1,6}\s*", "", texto)
+    return texto
+
+
+def limpar_para_texto(texto):
+    if not texto:
+        return ""
+
+    texto = _remover_markdown(texto)
+    texto = re.sub(r"\n{3,}", "\n\n", texto)
+    texto = re.sub(r"[ \t]{2,}", " ", texto)
+    texto = unicodedata.normalize("NFC", texto)
+
+    return texto.strip()
+
+
+def limpar_para_fala(texto):
+    texto = _remover_markdown(texto)
 
     idioma_preliminar = detectar_idioma_simples(texto)
     placeholder_link = "um link" if idioma_preliminar == "pt" else "a link"
@@ -422,7 +409,6 @@ def limpar_para_fala(texto):
 
     idioma = detectar_idioma_simples(texto)
     texto = aplicar_simbolos(texto, idioma)
-
 
     texto = ler_horas(texto, idioma_preliminar)
 
@@ -439,6 +425,7 @@ def limpar_para_fala(texto):
 
     return texto.strip()
 
+
 def aplicar_pronuncias_tts(texto):
     for termo in sorted(PRONUNCIAS_TTS, key=len, reverse=True):
         substituto = PRONUNCIAS_TTS[termo]
@@ -452,10 +439,9 @@ def aplicar_pronuncias_tts(texto):
 
     return texto
 
+
 def extrair_proxima_frase(buffer):
-
     for i, char in enumerate(buffer):
-
         if char not in ".!?":
             continue
 
@@ -482,8 +468,6 @@ def extrair_proxima_frase(buffer):
 
 
 def speak(text):
-    """Gera o áudio via Fish Audio, aplica efeitos e toca."""
-
     if not text or not text.strip():
         return
 
