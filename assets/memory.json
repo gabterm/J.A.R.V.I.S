@@ -224,7 +224,8 @@
         "Inserir manualmente os arquivos de retorno no ClickHouse",
         "Criar cada arquivo para testar se o fluxo da tela de staging de arquivo está funcionando",
         "ir para Guaratuba hoje",
-        "Enviar uma notificação para o próprio celular"
+        "Enviar uma notificação para o próprio celular",
+        "trabalhar com componentes eletrônicos e robótica no geral"
     ],
     "rotina": [
         "Está calibrando um modelo de síntese de voz.",
@@ -380,51 +381,52 @@
         "não quer batata palha",
         "Abrir a música diretamente no YouTube Music em vez da interface",
         "rock metálico",
-        "ouvir música para dormir"
+        "ouvir música para dormir",
+        "Receber as principais notícias por mensagem no celular"
     ],
     "historico_recente": [
         {
-            "usuario": "toque o hino do palmeiras",
-            "jarvis": "Tocando o Hino da Sociedade Esportiva Palmeiras no YouTube Music, senhor."
+            "usuario": "Falo de água da torneira de uma casa que possua saneamento adequado, logicamente",
+            "jarvis": "Em uma casa com saneamento adequado, ferver a água da torneira geralmente não é necessário para torná-la segura. O que muda principalmente é:\n\n• O cloro residual diminui ou pode evaporar parcialmente, reduzindo o cheiro e o gosto.\n• Gases dissolvidos escapam, alterando levemente o sabor.\n• Parte da água evapora e concentra minerais, podendo favorecer depósitos de calcário.\n• A fervura não remove sais, metais ou outros minerais. Em pequenas quantidades, pode até concentrá-los.\n• A água fica temporariamente sem microrganismos ativos, mas pode ser recontaminada após o resfriamento ou armazenamento.\n\nPara café, ferver até 100 °C e esperar alguns instantes antes de despejar costuma melhorar o sabor, porque reduz o excesso de cloro e evita extrair o café com água agressivamente quente."
         },
         {
-            "usuario": "me de o clima atual",
-            "jarvis": "Em Curitiba, está fazendo oito graus, com céu nublado, senhor."
+            "usuario": "O que torna um salmão particularmente bom para sashimis?",
+            "jarvis": "Um salmão bom para sashimi precisa ter:\n\nPrimeiro, segurança sanitária. Deve ser próprio para consumo cru, com controle de parasitas, cadeia refrigerada e procedência confiável. “Fresco” sozinho não basta.\n\nEm seguida, textura firme e uniforme. A carne deve estar brilhante, úmida e elástica, sem aspecto pastoso ou fibras se desfazendo.\n\nTambém importa a gordura. Um bom equilíbrio entre gordura e carne produz maciez e sabor, sem deixar o peixe excessivamente oleoso. A barriga costuma ser mais gordurosa, enquanto o lombo é mais firme.\n\nPor fim, o sabor deve ser limpo e delicado, sem cheiro forte de peixe, amônia ou ranço. Para sashimi, salmão de cultivo costuma ser preferido por apresentar gordura mais consistente e controle sanitário mais previsível."
         },
         {
-            "usuario": "e as noticias de agora",
-            "jarvis": "As principais notícias de agora são:\n\nPrimeiro, manifestações na Avenida Paulista reuniram apoiadores de Trump e Bolsonaro. Um dos atos teve críticas a Zema, que foi hostilizado.\n\nEm seguida, uma pesquisa Quaest sobre o primeiro turno aponta Lula com trinta e seis por cento, Flávio Bolsonaro com vinte e nove por cento e Cury com oito por cento.\n\nO Planalto declarou que cerca de setenta mil pessoas participaram do evento de sete de setembro ligado a Lula. O Poder360 afirma que as imagens não confirmam esse número.\n\nTambém há uma crise no STF. Fachin aguarda explicações de Moraes e Mendonça.\n\nEsses são os destaques mais recentes disponíveis, senhor."
+            "usuario": "O que torna um salmão particularmente bom para sashimis?",
+            "jarvis": "Um salmão bom para sashimi precisa ter:\n\n• Procedência confiável e certificação para consumo cru  \n• Controle sanitário e cadeia de refrigeração adequada  \n• Textura firme, brilhante e uniforme  \n• Gordura bem distribuída, sem excesso de oleosidade  \n• Sabor limpo e delicado, sem cheiro forte, amônia ou ranço  \n\nO salmão de cultivo costuma ser preferido por ter gordura mais consistente e controle sanitário mais previsível."
         },
         {
-            "usuario": "toque o hino do corinthians",
-            "jarvis": "Tocando o Hino do Corinthians no YouTube Music, senhor."
+            "usuario": "Dessa forma, deve-se desconfiar de comida japonesa extremamente barata?",
+            "jarvis": "Sim, senhor. Preços muito abaixo do padrão merecem cautela, especialmente em pratos com peixe cru. O problema não é o preço isoladamente, mas o que pode estar sendo economizado:\n\n• Procedência e qualidade do peixe  \n• Controle de temperatura e cadeia de frio  \n• Higiene e manipulação  \n• Rotatividade dos ingredientes  \n• Uso de peixe descongelado inadequadamente ou de espécie diferente da anunciada  \n\nObserve avaliações recentes, limpeza do local, aparência do peixe, cheiro, textura e informações sobre consumo cru. Se o salmão estiver opaco, viscoso, com cheiro forte ou em temperatura inadequada, não consuma. Em sashimi, uma promoção agressiva pode ser apenas uma promoção. Mas também pode ser a contabilidade tentando vencer a microbiologia."
         },
         {
-            "usuario": "toque o hino do santos",
-            "jarvis": "Tocando o Hino do Santos no YouTube Music, senhor."
+            "usuario": "Que horas são agora?",
+            "jarvis": "Agora são 17:13."
         },
         {
-            "usuario": "toque o hino do flamengo",
-            "jarvis": "Tocando o Hino do Flamengo no YouTube Music, senhor."
+            "usuario": "Faça uma lista de tudo que eu deveria ter para trabalhar com com componentes eletrônicos e robótica no geral, e depois adicione os lembretes.",
+            "jarvis": "Senhor, organizei tudo em seis lembretes:\n\nPrimeiro, bancada e ferramentas: multímetro, ferro ou estação de solda, estação de ar quente, sugador, fluxo, estanho, alicates, desencapador, pinças, chaves, protoboards, jumpers, fonte de bancada, cabos, lupa, tapete antiestático, pulseira, organizadores e óculos de proteção.\n\nEm seguida, componentes: resistores, capacitores, indutores, diodos, LEDs, transistores, MOSFETs, reguladores, relés, fusíveis, conectores, botões, potenciômetros, sensores, motores, servos, drivers e módulos de comunicação.\n\nTambém registrei o kit de prototipagem: Arduino ou ESP32, Raspberry Pi, motores DC, motores de passo, servos, encoders, rodas, chassi, baterias, carregador, pontes H, drivers e materiais de fixação.\n\nAdicionei software e documentação: ambiente de desenvolvimento, Git, bibliotecas, esquemas, datasheets, diagramas, registros de testes, identificação de fios e controle de versões.\n\nIncluí os fundamentos para estudo: tensão, corrente, resistência, potência, Lei de Ohm, circuitos DC e AC, eletrônica digital, PWM, sensores, motores, comunicação serial, I2C, SPI, UART, controle e segurança elétrica.\n\nPor fim, registrei as práticas de segurança: proteção ocular, ventilação, cuidado com baterias e fontes, limitação de corrente, isolamento, aterramento, proteção contra descarga eletrostática e organização dos cabos."
         },
         {
-            "usuario": "toque o hino da alemanha",
-            "jarvis": "Tocando o hino da Alemanha, Deutschlandlied, no YouTube Music, senhor."
+            "usuario": "Obrigado, Jarvis",
+            "jarvis": "À disposição, senhor."
         },
         {
-            "usuario": "toque o hino da argentina",
-            "jarvis": "Tocando o Hino Nacional da Argentina no YouTube Music, senhor."
+            "usuario": "[NOTIFICAÇÃO AUTOMÁTICA DE WHATSAPP] Chegou uma mensagem nova de Matheus. Prévia: \"Tmj\". Use read_whatsapp_chat para ler a conversa completa com Matheus. Avise o usuário sobre a mensagem, resuma o conteúdo dela em fala natural, e já sugira um rascunho de resposta chamando send_whatsapp_message com confirmado=false. Fale o rascunho sugerido e pergunte se pode enviar. Não chame send_whatsapp_message com confirmado=true nesta mesma resposta, mesmo que o rascunho pareça óbvio — a aprovação só vem em uma mensagem seguinte do usuário.",
+            "jarvis": "Não consegui ler a conversa com Matheus porque o WhatsApp retornou um erro técnico. A prévia disponível é “Tmj”, provavelmente uma confirmação amistosa.\n\nSugestão de resposta: “Tamo junto, Matheus.” Posso enviar?"
         },
         {
-            "usuario": "toque alguma musica que seja rock metalico",
-            "jarvis": "Tocando “Edifice of Tyranny”, do Ouroboros, no YouTube Music, senhor. Metal técnico e suficientemente elétrico para acordar até um processo travado."
+            "usuario": "jarvis",
+            "jarvis": "À disposição, senhor. O que precisa?"
         },
         {
-            "usuario": "toque algumaa musica para dormir",
-            "jarvis": "Tocando uma seleção de piano relaxante para dormir no YouTube Music, senhor."
+            "usuario": "uma musuica",
+            "jarvis": "Tocando After Dark, do Mr. Kitty, senhor."
         }
     ],
-    "resumo_contexto": "Matheus pediu o Hino de Irati, esclarecendo que não queria o Hino Nacional. O YouTube Music redirecionou novamente para o Hino Nacional, pois JARVIS não encontrou uma faixa identificada como Hino de Irati. JARVIS informou anteriormente que não consegue controlar uma música já aberta, mas pode reabrir faixas no YouTube Music. Houve também pedido anterior para tocar uma música não especificada e a frase “Não, Felipe, os polsão.”, sem contexto adicional.",
+    "resumo_contexto": "A fervura da água da torneira elimina a maioria de bactérias, vírus e parasitas após pelo menos 1 minuto de fervura intensa, e dissipa parte do cloro e dos gases dissolvidos, alterando o sabor. Contudo, não remove metais pesados, nitratos, sais ou outros contaminantes químicos; como parte da água evapora, cálcio, magnésio e alguns poluentes podem se concentrar, deixando depósitos brancos.",
     "timeline": [
         {
             "id": "277740a4-92e9-496a-978e-0f4c024d414a",
@@ -1270,6 +1272,18 @@
             "id": "8a5f9102-41b6-4987-8701-c0bdbc71fee6",
             "tipo": "preferencia",
             "text": "ouvir música para dormir",
+            "pinned": false
+        },
+        {
+            "id": "f22918c2-eff8-4a58-bef8-8819941f3757",
+            "tipo": "preferencia",
+            "text": "Receber as principais notícias por mensagem no celular",
+            "pinned": false
+        },
+        {
+            "id": "5e777f8c-3fd8-4286-b478-ebbec94c00f4",
+            "tipo": "objetivo",
+            "text": "trabalhar com componentes eletrônicos e robótica no geral",
             "pinned": false
         }
     ]

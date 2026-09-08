@@ -1676,77 +1676,8 @@ popularSpark();
    ========================================================================== */
 
 function startCoreMorph() {
-  const stage = document.querySelector('.clock-stage');
-  const outer = document.querySelector('.clock-ring-outer');
-  const mid = document.querySelector('.clock-ring-mid');
-  const ticksMajor = document.querySelector('.clock-ring-ticks-major');
-  const arc = document.querySelector('.clock-accent-arc');
-  const halo = document.querySelector('.clock-halo');
-
-  if (!stage || !outer || !mid || !ticksMajor || !arc) return;
-
-  function currentMode() {
-    if (stage.classList.contains('mode-speaking')) return 'speaking';
-    if (stage.classList.contains('mode-thinking')) return 'thinking';
-    return 'static';
-  }
-
-  function resetVisuals() {
-    [outer, mid, ticksMajor, arc].forEach(el => {
-      el.style.borderRadius = '';
-      el.style.filter = '';
-    });
-    if (halo) halo.style.opacity = '';
-  }
-
-  // harmonics: 1 = mais uniforme/rítmico (thinking), 2 = mais orgânico (speaking)
-  // travel: velocidade com que o padrão de onda "viaja" ao redor do anel
-  // (fase do ruído se desloca com o tempo em vez de só respirar no lugar)
-  function blobRadius(t, phase, speed, amp, harmonics, travel) {
-    const v = [];
-    for (let i = 0; i < 8; i++) {
-      const ang = i * 0.9 + phase + t * 0.0006 * travel;
-      let n;
-      if (harmonics === 1) {
-        n = Math.sin(ang * 1.0 + t * 0.0016 * speed + phase);
-      } else {
-        n = Math.sin(ang * 1.1 + t * 0.0022 * speed) * 0.6
-          + Math.sin(ang * 1.9 - t * 0.0031 * speed + phase) * 0.4;
-      }
-      v.push((50 + n * amp).toFixed(1));
-    }
-    return `${v[0]}% ${v[1]}% ${v[2]}% ${v[3]}% / ${v[4]}% ${v[5]}% ${v[6]}% ${v[7]}%`;
-  }
-
-  let lastMode = null;
-
-  function frame(t) {
-    const mode = currentMode();
-
-    if (mode === 'speaking') {
-      const glow = 5 + Math.abs(Math.sin(t * 0.004)) * 5;
-      outer.style.borderRadius = blobRadius(t, 0, 2.2, 6, 2, 1.4);
-      mid.style.borderRadius = blobRadius(t, 2.5, 2.6, 5.5, 2, -1.1);
-      ticksMajor.style.borderRadius = blobRadius(t, 1.2, 1.9, 5, 2, 0.9);
-      arc.style.borderRadius = blobRadius(t, 4.0, 2.3, 4.5, 2, -1.3);
-      outer.style.filter = `drop-shadow(0 0 ${glow.toFixed(1)}px rgba(94,200,255,.4))`;
-      if (halo) halo.style.opacity = (0.85 + 0.2 * Math.sin(t * 0.004)).toFixed(2);
-    } else if (mode === 'thinking') {
-      outer.style.borderRadius = blobRadius(t, 0, 0.8, 2.5, 1, 0.4);
-      mid.style.borderRadius = blobRadius(t, 1.8, 1.0, 2.2, 1, -0.3);
-      ticksMajor.style.borderRadius = blobRadius(t, 3.4, 0.7, 2, 1, 0.35);
-      arc.style.borderRadius = blobRadius(t, 0.6, 0.9, 1.8, 1, -0.25);
-      outer.style.filter = 'drop-shadow(0 0 3px rgba(94,200,255,.25))';
-      if (halo) halo.style.opacity = '1';
-    } else if (lastMode === 'speaking' || lastMode === 'thinking') {
-      resetVisuals();
-    }
-
-    lastMode = mode;
-    requestAnimationFrame(frame);
-  }
-
-  requestAnimationFrame(frame);
+  // O core mecânico agora usa SVGs e mantém o housing externo fixo.
+  // Os estados são controlados por classes CSS; não deformamos mais os anéis.
 }
 
 startCoreMorph();
