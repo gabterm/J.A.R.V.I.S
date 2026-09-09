@@ -268,44 +268,43 @@ body.offline .status-pill .dot{background:var(--warn);box-shadow:0 0 6px var(--w
 #clockTime,#clockDate{display:none;}
 .clock-brand{font-family:var(--display);font-weight:600;font-size:16px;letter-spacing:.23em;color:#f5ffff;text-shadow:0 0 3px #fff,0 0 9px rgba(var(--core-ring-rgb),.9),0 0 20px rgba(var(--core-ring-rgb),.42);text-align:center;position:relative;z-index:10;white-space:nowrap;}
 .clock-brand-sub{display:none;}
-.voice-wave{position:absolute;left:50%;top:50%;width:188px;height:70px;transform:translate(-50%,-50%);display:none;align-items:center;justify-content:center;gap:3px;z-index:9;opacity:.68;pointer-events:none;filter:drop-shadow(0 0 5px rgba(var(--core-ring-rgb),.75));}
-.mode-speaking .voice-wave{display:flex;}
-.voice-wave span{display:block;width:2.5px;height:8px;border-radius:2px;background:linear-gradient(to bottom,#dfffff,#55e8f3 55%,#1597ad);box-shadow:0 0 4px rgba(var(--core-ring-rgb),.8);transform-origin:center;opacity:.82;}
-.mode-speaking .voice-wave span:nth-child(1){animation:jarvisVoice1 0.325s ease-in-out infinite alternate;} 
-.mode-speaking .voice-wave span:nth-child(2){animation:jarvisVoice2 0.38s ease-in-out infinite alternate reverse;} 
-.mode-speaking .voice-wave span:nth-child(3){animation:jarvisVoice3 0.435s ease-in-out infinite alternate;} 
-.mode-speaking .voice-wave span:nth-child(4){animation:jarvisVoice4 0.49s ease-in-out infinite alternate reverse;} 
-.mode-speaking .voice-wave span:nth-child(5){animation:jarvisVoice5 0.545s ease-in-out infinite alternate;} 
-.mode-speaking .voice-wave span:nth-child(6){animation:jarvisVoice6 0.6s ease-in-out infinite alternate reverse;} 
-.mode-speaking .voice-wave span:nth-child(7){animation:jarvisVoice7 0.27s ease-in-out infinite alternate;} 
-.mode-speaking .voice-wave span:nth-child(8){animation:jarvisVoice8 0.325s ease-in-out infinite alternate reverse;} 
-.mode-speaking .voice-wave span:nth-child(9){animation:jarvisVoice9 0.38s ease-in-out infinite alternate;} 
-.mode-speaking .voice-wave span:nth-child(10){animation:jarvisVoice10 0.435s ease-in-out infinite alternate reverse;} 
-.mode-speaking .voice-wave span:nth-child(11){animation:jarvisVoice11 0.49s ease-in-out infinite alternate;} 
-.mode-speaking .voice-wave span:nth-child(12){animation:jarvisVoice12 0.545s ease-in-out infinite alternate reverse;} 
-.mode-speaking .voice-wave span:nth-child(13){animation:jarvisVoice13 0.6s ease-in-out infinite alternate;} 
-.mode-speaking .voice-wave span:nth-child(14){animation:jarvisVoice14 0.27s ease-in-out infinite alternate reverse;} 
-.mode-speaking .voice-wave span:nth-child(15){animation:jarvisVoice15 0.325s ease-in-out infinite alternate;} 
-.mode-speaking .voice-wave span:nth-child(16){animation:jarvisVoice16 0.38s ease-in-out infinite alternate reverse;} 
-.mode-speaking .voice-wave span:nth-child(17){animation:jarvisVoice17 0.435s ease-in-out infinite alternate;} 
-.mode-speaking .voice-wave span:nth-child(18){animation:jarvisVoice18 0.49s ease-in-out infinite alternate reverse;} 
-.mode-speaking .voice-wave span:nth-child(19){animation:jarvisVoice19 0.545s ease-in-out infinite alternate;} 
-.mode-speaking .voice-wave span:nth-child(20){animation:jarvisVoice20 0.6s ease-in-out infinite alternate reverse;} 
-.mode-speaking .voice-wave span:nth-child(21){animation:jarvisVoice21 0.27s ease-in-out infinite alternate;} 
-.mode-speaking .voice-wave span:nth-child(22){animation:jarvisVoice22 0.325s ease-in-out infinite alternate reverse;} 
-.mode-speaking .voice-wave span:nth-child(23){animation:jarvisVoice23 0.38s ease-in-out infinite alternate;} 
-.mode-speaking .voice-wave span:nth-child(24){animation:jarvisVoice24 0.435s ease-in-out infinite alternate reverse;} 
-.mode-speaking .voice-wave span:nth-child(25){animation:jarvisVoice25 0.49s ease-in-out infinite alternate;} 
-.mode-speaking .voice-wave span:nth-child(26){animation:jarvisVoice26 0.545s ease-in-out infinite alternate reverse;} 
-.mode-speaking .voice-wave span:nth-child(27){animation:jarvisVoice27 0.6s ease-in-out infinite alternate;} 
-@keyframes jarvisVoice1{to{height:18px}}@keyframes jarvisVoice2{to{height:34px}}@keyframes jarvisVoice3{to{height:12px}}@keyframes jarvisVoice4{to{height:45px}}@keyframes jarvisVoice5{to{height:24px}}@keyframes jarvisVoice6{to{height:58px}}@keyframes jarvisVoice7{to{height:32px}}@keyframes jarvisVoice8{to{height:70px}}@keyframes jarvisVoice9{to{height:42px}}@keyframes jarvisVoice10{to{height:62px}}@keyframes jarvisVoice11{to{height:29px}}@keyframes jarvisVoice12{to{height:52px}}@keyframes jarvisVoice13{to{height:74px}}@keyframes jarvisVoice14{to{height:37px}}@keyframes jarvisVoice15{to{height:64px}}@keyframes jarvisVoice16{to{height:31px}}@keyframes jarvisVoice17{to{height:69px}}@keyframes jarvisVoice18{to{height:43px}}@keyframes jarvisVoice19{to{height:57px}}@keyframes jarvisVoice20{to{height:27px}}@keyframes jarvisVoice21{to{height:48px}}@keyframes jarvisVoice22{to{height:36px}}@keyframes jarvisVoice23{to{height:61px}}@keyframes jarvisVoice24{to{height:21px}}@keyframes jarvisVoice25{to{height:42px}}@keyframes jarvisVoice26{to{height:30px}}@keyframes jarvisVoice27{to{height:17px}}
+
+.voice-wave{
+  position:absolute;left:50%;top:50%;width:188px;height:70px;
+  transform:translate(-50%,-50%);
+  display:flex;align-items:center;justify-content:center;gap:3px;
+  z-index:9;pointer-events:none;
+  filter:drop-shadow(0 0 5px rgba(var(--core-ring-rgb),.75));
+  opacity:.82;transition:opacity .25s;
+}
+.voice-wave span{
+  display:block;width:2.5px;border-radius:2px;
+  background:linear-gradient(to bottom,#dfffff,#55e8f3 55%,#1597ad);
+  box-shadow:0 0 calc(2px + var(--v,0) * 6px) rgba(var(--core-ring-rgb), calc(.35 + var(--v,0) * .65));
+  transform-origin:center;
+  opacity:calc(.35 + var(--v,0) * .65);
+  height:calc(6px + var(--v,0) * 58px);
+  transition:height .05s linear, box-shadow .05s linear, opacity .05s linear;
+}
+
+.voice-wave-idle{opacity:.45;}
+.voice-wave-thinking span,
+.voice-wave-listening span{
+  background:linear-gradient(to bottom,#fff,#7fd9ff 55%,#1597ad);
+}
+.voice-wave-alert{opacity:.9;}
+.voice-wave-alert span{
+  background:linear-gradient(to bottom,#fff,var(--warn) 55%,#a4293f);
+}
+.voice-wave-offline{opacity:.15;}
+
 @keyframes jarvisBreathe{0%,100%{opacity:.55;transform:scale(.98)}50%{opacity:.9;transform:scale(1.02)}}
 @keyframes jarvisThinkGlow{0%,100%{opacity:.5}50%{opacity:1}}
 @keyframes jarvisSpeakingGlow{0%,100%{opacity:.62}50%{opacity:1}}
 @keyframes jarvisSpinA{to{transform:rotate(360deg)}}
 @keyframes jarvisSpinB{to{transform:rotate(-360deg)}}
 /* The physical outer shell remains fixed. Only inner instrumentation moves. */
-.mode-idle .clock-ring-ticks{animation:jarvisSpinB 130s linear infinite}.mode-idle .clock-ring-ticks-major{animation:jarvisSpinA 180s linear infinite}.mode-idle .clock-ring-mid{animation:jarvisSpinA 150s linear infinite}.mode-idle .clock-accent-arc{animation:jarvisSpinB 170s linear infinite}.mode-idle .clock-halo{animation:jarvisBreathe 4s ease-in-out infinite}
+.mode-idle .clock-ring-ticks{animation:jarvisSpinB 15s linear infinite}.mode-idle .clock-ring-ticks-major{animation:jarvisSpinA 10s linear infinite}.mode-idle .clock-ring-mid{animation:jarvisSpinA 150s linear infinite}.mode-idle .clock-accent-arc{animation:jarvisSpinB 170s linear infinite}.mode-idle .clock-halo{animation:jarvisBreathe 4s ease-in-out infinite}
 .mode-thinking .clock-ring-ticks{animation:jarvisSpinB 70s linear infinite}.mode-thinking .clock-ring-ticks-major{animation:jarvisSpinA 90s linear infinite}.mode-thinking .clock-ring-mid{animation:jarvisSpinA 75s linear infinite}.mode-thinking .clock-accent-arc{animation:jarvisSpinB 85s linear infinite}.mode-thinking .clock-halo{animation:jarvisThinkGlow .7s ease-in-out infinite}
 .mode-listening .clock-ring-ticks{animation:jarvisSpinB 100s linear infinite}.mode-listening .clock-ring-ticks-major{animation:jarvisSpinA 125s linear infinite}.mode-listening .clock-ring-mid{animation:jarvisSpinA 105s linear infinite}.mode-listening .clock-accent-arc{animation:jarvisSpinB 115s linear infinite}.mode-listening .clock-halo{animation:jarvisSpeakingGlow 1.2s ease-in-out infinite}
 .mode-speaking .clock-ring-ticks{animation:jarvisSpinB 95s linear infinite}.mode-speaking .clock-ring-ticks-major{animation:jarvisSpinA 120s linear infinite}.mode-speaking .clock-ring-mid{animation:jarvisSpinA 105s linear infinite}.mode-speaking .clock-accent-arc{animation:jarvisSpinB 110s linear infinite}.mode-speaking .clock-halo{animation:jarvisSpeakingGlow .7s ease-in-out infinite}

@@ -382,51 +382,52 @@
         "Abrir a música diretamente no YouTube Music em vez da interface",
         "rock metálico",
         "ouvir música para dormir",
-        "Receber as principais notícias por mensagem no celular"
+        "Receber as principais notícias por mensagem no celular",
+        "ouvir a música \"I Choose You\", de Hans Zimmer"
     ],
     "historico_recente": [
         {
-            "usuario": "Falo de água da torneira de uma casa que possua saneamento adequado, logicamente",
-            "jarvis": "Em uma casa com saneamento adequado, ferver a água da torneira geralmente não é necessário para torná-la segura. O que muda principalmente é:\n\n• O cloro residual diminui ou pode evaporar parcialmente, reduzindo o cheiro e o gosto.\n• Gases dissolvidos escapam, alterando levemente o sabor.\n• Parte da água evapora e concentra minerais, podendo favorecer depósitos de calcário.\n• A fervura não remove sais, metais ou outros minerais. Em pequenas quantidades, pode até concentrá-los.\n• A água fica temporariamente sem microrganismos ativos, mas pode ser recontaminada após o resfriamento ou armazenamento.\n\nPara café, ferver até 100 °C e esperar alguns instantes antes de despejar costuma melhorar o sabor, porque reduz o excesso de cloro e evita extrair o café com água agressivamente quente."
+            "usuario": "toque after dark\\",
+            "jarvis": "Tocando After Dark, do Mr. Kitty, senhor."
         },
         {
-            "usuario": "O que torna um salmão particularmente bom para sashimis?",
-            "jarvis": "Um salmão bom para sashimi precisa ter:\n\nPrimeiro, segurança sanitária. Deve ser próprio para consumo cru, com controle de parasitas, cadeia refrigerada e procedência confiável. “Fresco” sozinho não basta.\n\nEm seguida, textura firme e uniforme. A carne deve estar brilhante, úmida e elástica, sem aspecto pastoso ou fibras se desfazendo.\n\nTambém importa a gordura. Um bom equilíbrio entre gordura e carne produz maciez e sabor, sem deixar o peixe excessivamente oleoso. A barriga costuma ser mais gordurosa, enquanto o lombo é mais firme.\n\nPor fim, o sabor deve ser limpo e delicado, sem cheiro forte de peixe, amônia ou ranço. Para sashimi, salmão de cultivo costuma ser preferido por apresentar gordura mais consistente e controle sanitário mais previsível."
-        },
-        {
-            "usuario": "O que torna um salmão particularmente bom para sashimis?",
-            "jarvis": "Um salmão bom para sashimi precisa ter:\n\n• Procedência confiável e certificação para consumo cru  \n• Controle sanitário e cadeia de refrigeração adequada  \n• Textura firme, brilhante e uniforme  \n• Gordura bem distribuída, sem excesso de oleosidade  \n• Sabor limpo e delicado, sem cheiro forte, amônia ou ranço  \n\nO salmão de cultivo costuma ser preferido por ter gordura mais consistente e controle sanitário mais previsível."
-        },
-        {
-            "usuario": "Dessa forma, deve-se desconfiar de comida japonesa extremamente barata?",
-            "jarvis": "Sim, senhor. Preços muito abaixo do padrão merecem cautela, especialmente em pratos com peixe cru. O problema não é o preço isoladamente, mas o que pode estar sendo economizado:\n\n• Procedência e qualidade do peixe  \n• Controle de temperatura e cadeia de frio  \n• Higiene e manipulação  \n• Rotatividade dos ingredientes  \n• Uso de peixe descongelado inadequadamente ou de espécie diferente da anunciada  \n\nObserve avaliações recentes, limpeza do local, aparência do peixe, cheiro, textura e informações sobre consumo cru. Se o salmão estiver opaco, viscoso, com cheiro forte ou em temperatura inadequada, não consuma. Em sashimi, uma promoção agressiva pode ser apenas uma promoção. Mas também pode ser a contabilidade tentando vencer a microbiologia."
-        },
-        {
-            "usuario": "Que horas são agora?",
-            "jarvis": "Agora são 17:13."
-        },
-        {
-            "usuario": "Faça uma lista de tudo que eu deveria ter para trabalhar com com componentes eletrônicos e robótica no geral, e depois adicione os lembretes.",
-            "jarvis": "Senhor, organizei tudo em seis lembretes:\n\nPrimeiro, bancada e ferramentas: multímetro, ferro ou estação de solda, estação de ar quente, sugador, fluxo, estanho, alicates, desencapador, pinças, chaves, protoboards, jumpers, fonte de bancada, cabos, lupa, tapete antiestático, pulseira, organizadores e óculos de proteção.\n\nEm seguida, componentes: resistores, capacitores, indutores, diodos, LEDs, transistores, MOSFETs, reguladores, relés, fusíveis, conectores, botões, potenciômetros, sensores, motores, servos, drivers e módulos de comunicação.\n\nTambém registrei o kit de prototipagem: Arduino ou ESP32, Raspberry Pi, motores DC, motores de passo, servos, encoders, rodas, chassi, baterias, carregador, pontes H, drivers e materiais de fixação.\n\nAdicionei software e documentação: ambiente de desenvolvimento, Git, bibliotecas, esquemas, datasheets, diagramas, registros de testes, identificação de fios e controle de versões.\n\nIncluí os fundamentos para estudo: tensão, corrente, resistência, potência, Lei de Ohm, circuitos DC e AC, eletrônica digital, PWM, sensores, motores, comunicação serial, I2C, SPI, UART, controle e segurança elétrica.\n\nPor fim, registrei as práticas de segurança: proteção ocular, ventilação, cuidado com baterias e fontes, limitação de corrente, isolamento, aterramento, proteção contra descarga eletrostática e organização dos cabos."
-        },
-        {
-            "usuario": "Obrigado, Jarvis",
-            "jarvis": "À disposição, senhor."
-        },
-        {
-            "usuario": "[NOTIFICAÇÃO AUTOMÁTICA DE WHATSAPP] Chegou uma mensagem nova de Matheus. Prévia: \"Tmj\". Use read_whatsapp_chat para ler a conversa completa com Matheus. Avise o usuário sobre a mensagem, resuma o conteúdo dela em fala natural, e já sugira um rascunho de resposta chamando send_whatsapp_message com confirmado=false. Fale o rascunho sugerido e pergunte se pode enviar. Não chame send_whatsapp_message com confirmado=true nesta mesma resposta, mesmo que o rascunho pareça óbvio — a aprovação só vem em uma mensagem seguinte do usuário.",
-            "jarvis": "Não consegui ler a conversa com Matheus porque o WhatsApp retornou um erro técnico. A prévia disponível é “Tmj”, provavelmente uma confirmação amistosa.\n\nSugestão de resposta: “Tamo junto, Matheus.” Posso enviar?"
+            "usuario": "toque after dark",
+            "jarvis": "Tocando After Dark, do Mr. Kitty, senhor."
         },
         {
             "usuario": "jarvis",
             "jarvis": "À disposição, senhor. O que precisa?"
         },
         {
-            "usuario": "uma musuica",
-            "jarvis": "Tocando After Dark, do Mr. Kitty, senhor."
+            "usuario": "jarvis",
+            "jarvis": "À disposição, senhor. O que precisa?"
+        },
+        {
+            "usuario": "qual o clima agora em curitiba?",
+            "jarvis": "Em Curitiba, estão quinze graus, com poucas nuvens, senhor."
+        },
+        {
+            "usuario": "que dia ser;a amanha?",
+            "jarvis": "Amanhã será quarta-feira, nove de setembro de dois mil e vinte e seis, senhor."
+        },
+        {
+            "usuario": "jarvis",
+            "jarvis": "À disposição, senhor. O que precisa?"
+        },
+        {
+            "usuario": "alarame para daqui ha duas horas",
+            "jarvis": "Alarme configurado para daqui a duas horas, senhor."
+        },
+        {
+            "usuario": "toque rest of my life do hans zimmer",
+            "jarvis": "Tocando The Rest of My Life, de Hans Zimmer, senhor."
+        },
+        {
+            "usuario": "toque agora i choose you, tambem do hans zimmer",
+            "jarvis": "Tocando I Chose You, de Hans Zimmer e The Magnificent Six, senhor."
         }
     ],
-    "resumo_contexto": "A fervura da água da torneira elimina a maioria de bactérias, vírus e parasitas após pelo menos 1 minuto de fervura intensa, e dissipa parte do cloro e dos gases dissolvidos, alterando o sabor. Contudo, não remove metais pesados, nitratos, sais ou outros contaminantes químicos; como parte da água evapora, cálcio, magnésio e alguns poluentes podem se concentrar, deixando depósitos brancos.",
+    "resumo_contexto": "O usuário solicitou a reprodução de “The Rest of My Life”, de Hans Zimmer, e JARVIS confirmou que a música estava tocando. Posteriormente, chegou uma mensagem de Matheus com a prévia “Daí, tudo certo com o ônibus”; devido a um erro técnico, JARVIS não conseguiu ler a conversa completa. Sugeriu o rascunho “Daí, tudo certo com o ônibus. Tamo junto.” e perguntou ao usuário se poderia enviá-lo, sem realizar o envio.",
     "timeline": [
         {
             "id": "277740a4-92e9-496a-978e-0f4c024d414a",
@@ -1284,6 +1285,12 @@
             "id": "5e777f8c-3fd8-4286-b478-ebbec94c00f4",
             "tipo": "objetivo",
             "text": "trabalhar com componentes eletrônicos e robótica no geral",
+            "pinned": false
+        },
+        {
+            "id": "4a67e985-d160-4962-90fc-8abc23c2ad6e",
+            "tipo": "preferencia",
+            "text": "ouvir a música \"I Choose You\", de Hans Zimmer",
             "pinned": false
         }
     ]

@@ -57,8 +57,6 @@ function updateUptime() {
   document.getElementById('uptime').textContent = `${h}:${m}:${s}`;
 }
 setInterval(updateUptime, 1000);
-let dotCount = 1;
-setInterval(() => { dotCount = (dotCount % 3) + 1; const dots = document.getElementById('dots'); if (dots) dots.textContent = '.'.repeat(dotCount); }, 600);
 
 const settingsToggle = document.getElementById('settingsToggle');
 const settingsDrawer = document.getElementById('settingsDrawer');
@@ -732,11 +730,51 @@ const ESTADOS = {
   offline: 'desconectado'
 };
 
+// ---- Waveform central (voiceWave) reagindo ao estado do JARVIS ----
+const voiceWaveEl = document.getElementById('voiceWave');
+const voiceWaveBars = voiceWaveEl.querySelectorAll('span');
+let waveRafId = null;
+let waveEstadoAtual = 'idle';
+let waveT = 0;
+
+const WAVE_PERFIS = {
+  idle:      { amp: 0.06, speed: 0.4,  ruido: 0.02 },
+  thinking:  { amp: 0.55, speed: 1.6,  ruido: 0.25 },
+  speaking:  { amp: 0.95, speed: 2.4,  ruido: 0.35 },
+  listening: { amp: 0.75, speed: 2.0,  ruido: 0.4  },
+  alert:     { amp: 0.6,  speed: 3.2,  ruido: 0.5  },
+  offline:   { amp: 0,    speed: 0,    ruido: 0    },
+};
+
+function atualizarWaveformEstado(estado) {
+  waveEstadoAtual = WAVE_PERFIS[estado] ? estado : 'idle';
+  voiceWaveEl.className = 'voice-wave voice-wave-' + waveEstadoAtual;
+  if (!waveRafId) loopWaveform();
+}
+
+function loopWaveform() {
+  const perfil = WAVE_PERFIS[waveEstadoAtual];
+  waveT += 0.05 * (perfil.speed || 0.001);
+
+  voiceWaveBars.forEach((bar, i) => {
+    const fase = i * 0.35;
+    const onda = Math.sin(waveT + fase) * 0.5 + 0.5;
+    const ruido = perfil.ruido ? (Math.random() - 0.5) * perfil.ruido : 0;
+    const valor = Math.max(0, Math.min(1, onda * perfil.amp + ruido));
+    bar.style.setProperty('--v', valor.toFixed(3));
+  });
+
+  waveRafId = requestAnimationFrame(loopWaveform);
+}
+
+atualizarWaveformEstado('idle');
+
 function setEstado(estado) {
   const label = ESTADOS[estado] || estado.toUpperCase();
-  clockStatus.innerHTML = `${label}<b id="dots">.</b>`;
+  clockStatus.textContent = label;
   micBtn.classList.toggle('active', estado === 'speaking' || estado === 'thinking' || estado === 'listening');
   clockStage.className = 'clock-stage mode-' + (estado === 'offline' ? 'alert' : estado);
+  atualizarWaveformEstado(estado);
 
   const jaOffline = document.body.classList.contains('offline');
   if (estado === 'offline' && !jaOffline) {
@@ -1665,19 +1703,9 @@ function popularSpark() {
 }
 popularSpark();
 
-/* ==========================================================================
-   MORPH ORGÂNICO DO NÚCLEO (thinking / speaking)
-   Deforma a borda dos anéis reais (ring-outer, ring-mid, ring-ticks-major,
-   accent-arc) via border-radius animado, com o padrão de onda "viajando"
-   ao redor do anel (parâmetro travel) e um glow reativo no speaking.
-   Amplitudes baixas de propósito para manter o anel próximo do circular.
-   Não cria elementos novos nem depende de CSS adicional — só sobrescreve
-   border-radius/filter inline enquanto o modo estiver ativo.
-   ========================================================================== */
 
 function startCoreMorph() {
-  // O core mecânico agora usa SVGs e mantém o housing externo fixo.
-  // Os estados são controlados por classes CSS; não deformamos mais os anéis.
+
 }
 
 startCoreMorph();
