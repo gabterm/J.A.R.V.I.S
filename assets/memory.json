@@ -387,22 +387,6 @@
     ],
     "historico_recente": [
         {
-            "usuario": "toque after dark\\",
-            "jarvis": "Tocando After Dark, do Mr. Kitty, senhor."
-        },
-        {
-            "usuario": "toque after dark",
-            "jarvis": "Tocando After Dark, do Mr. Kitty, senhor."
-        },
-        {
-            "usuario": "jarvis",
-            "jarvis": "À disposição, senhor. O que precisa?"
-        },
-        {
-            "usuario": "jarvis",
-            "jarvis": "À disposição, senhor. O que precisa?"
-        },
-        {
             "usuario": "qual o clima agora em curitiba?",
             "jarvis": "Em Curitiba, estão quinze graus, com poucas nuvens, senhor."
         },
@@ -425,9 +409,25 @@
         {
             "usuario": "toque agora i choose you, tambem do hans zimmer",
             "jarvis": "Tocando I Chose You, de Hans Zimmer e The Magnificent Six, senhor."
+        },
+        {
+            "usuario": "jarvis",
+            "jarvis": "À disposição, senhor. O que precisa?"
+        },
+        {
+            "usuario": "jarvis",
+            "jarvis": "À disposição, senhor. O que precisa?"
+        },
+        {
+            "usuario": "toque rest of my life do hans zimmer",
+            "jarvis": "Tocando The Rest of My Life, de Hans Zimmer, senhor."
+        },
+        {
+            "usuario": "[NOTIFICAÇÃO AUTOMÁTICA DE WHATSAPP] Chegou uma mensagem nova de Mãe. Prévia: \"Credo filho\". Use read_whatsapp_chat para ler a conversa completa com Mãe. Avise o usuário sobre a mensagem, resuma o conteúdo dela em fala natural, e já sugira um rascunho de resposta chamando send_whatsapp_message com confirmado=false. Fale o rascunho sugerido e pergunte se pode enviar. Não chame send_whatsapp_message com confirmado=true nesta mesma resposta, mesmo que o rascunho pareça óbvio — a aprovação só vem em uma mensagem seguinte do usuário.",
+            "jarvis": "Não consegui ler a conversa com sua mãe porque o WhatsApp retornou um erro. A única informação disponível é a prévia: “Credo filho”. Não vou inventar contexto, por mais tentador que seja.\n\nQuer que eu tente ler novamente?"
         }
     ],
-    "resumo_contexto": "O usuário solicitou a reprodução de “The Rest of My Life”, de Hans Zimmer, e JARVIS confirmou que a música estava tocando. Posteriormente, chegou uma mensagem de Matheus com a prévia “Daí, tudo certo com o ônibus”; devido a um erro técnico, JARVIS não conseguiu ler a conversa completa. Sugeriu o rascunho “Daí, tudo certo com o ônibus. Tamo junto.” e perguntou ao usuário se poderia enviá-lo, sem realizar o envio.",
+    "resumo_contexto": "O usuário solicitou a reprodução de “After Dark”, do Mr. Kitty, e JARVIS confirmou que a música estava tocando. JARVIS permanece à disposição para novas solicitações.",
     "timeline": [
         {
             "id": "277740a4-92e9-496a-978e-0f4c024d414a",

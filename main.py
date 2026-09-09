@@ -109,7 +109,7 @@ Regras:
 - Campos não mencionados na mensagem devem vir como null (nome/idade) ou
   lista vazia (demais campos).
 - NUNCA invente informação. Só extraia o que foi dito literalmente.
-- Não inclua opiniões, suposições ou inferências.
+- Não inclua, suposições ou inferências.
 """
 
 
@@ -611,13 +611,13 @@ def main():
     if memory.get("primeira_interacao"):
         response = ask_jarvis(
             """
-O usuário acabou de iniciar o sistema.
-Comece a primeira interação.
-Apresente-se como JARVIS.
-Explique que você está aqui para ajudar.
-Faça somente uma pergunta simples para conhecer o usuário.
-Não faça várias perguntas.
-""",
+                O usuário acabou de iniciar o sistema.
+                Comece a primeira interação.
+                Apresente-se como JARVIS.
+                Explique que você está aqui para ajudar.
+                Faça somente uma pergunta simples para conhecer o usuário.
+                Não faça várias perguntas.
+                """,
             memory
         )
         memory["primeira_interacao"] = False
@@ -653,7 +653,7 @@ Não faça várias perguntas.
     window.setWindowTitle("J.A.R.V.I.S.")
     window.resize(1600, 900)
     window.setMinimumSize(960, 600)
-    window.setStyleSheet("background-color: #000000;")
+    window.setStyleSheet("background-color: #040c11;")
 
     view = QWebEngineView()
     view.setUrl(QUrl(f"http://{ui_bridge.HOST}:{ui_bridge.PORT}/"))
