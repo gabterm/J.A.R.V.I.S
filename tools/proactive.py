@@ -12,6 +12,12 @@ from tools.push import enviar_push
 STATE_PATH = os.path.expanduser("~/.jarvis/proactive_state.json")
 TIMEZONE = "America/Sao_Paulo"
 
+HORARIOS_AGENDADOS = {
+    "bom_dia": (7, 30),
+    "boa_noite": (23, 0),
+}
+INTERVALO_CHECAGEM_SEGUNDOS = 30
+
 _lock = threading.Lock()
 
 
@@ -29,72 +35,103 @@ def _save_state(state):
         json.dump(state, file, ensure_ascii=False, indent=2)
 
 
-def rotina_bom_dia():
-    from tools.tools import get_weather, get_daily_news, list_reminders, list_alarms
-
-    clima = get_weather()
-    noticias = get_daily_news(limit=3)
-    lembretes = list_reminders()
-    alarmes = list_alarms()
-
-    partes = ["Bom dia!"]
-
-    if clima.get("success"):
-        partes.append(
-            f"Em {clima['local']} está {clima['temperatura']}°C, {clima['condicao']}."
-        )
-
-    if lembretes.get("success") and lembretes.get("count"):
-        pendentes = [
-            r["texto"] for r in lembretes.get("reminders", [])
-            if not r.get("concluido")
-        ]
-        if pendentes:
-            partes.append(
-                f"Você tem {len(pendentes)} lembrete(s) pendente(s): "
-                + "; ".join(pendentes[:5]) + "."
-            )
-
-    if alarmes.get("success") and alarmes.get("count"):
-        partes.append(f"Você tem {alarmes['count']} alarme(s) ativo(s).")
-
-    if noticias.get("success") and noticias.get("news"):
-        titulos = [n["title"] for n in noticias["news"][:3]]
-        partes.append("Principais notícias: " + "; ".join(titulos) + ".")
-
-    resumo = " ".join(partes)
-
+def _anunciar(resumo, eventos_extra=None):
+    """Fala o resumo, loga no HUD e opcionalmente manda eventos extra de UI."""
     speak(limpar_para_fala(resumo))
     ui_bridge.broadcast({"type": "log", "role": "jarvis", "text": resumo})
-    enviar_push("☀️ Bom dia", resumo)
-
+    for evento in eventos_extra or []:
+        ui_bridge.broadcast(evento)
     return {"success": True, "message": resumo}
 
 
-def rotina_boa_noite():
+def _pendentes_lembretes(limite=5):
     from tools.tools import list_reminders
 
     lembretes = list_reminders()
-    pendentes = []
-    if lembretes.get("success"):
-        pendentes = [
-            r["texto"] for r in lembretes.get("reminders", [])
-            if not r.get("concluido")
-        ]
+    if not lembretes.get("success"):
+        return []
+    return [
+        r["texto"] for r in lembretes.get("reminders", [])
+        if not r.get("concluido")
+    ][:limite]
+
+def rotina_bom_dia():
+    from tools.tools import get_weather, get_daily_news, list_alarms
+
+    clima = get_weather()
+    noticias = get_daily_news(limit=3)
+    alarmes = list_alarms()
+    pendentes = _pendentes_lembretes()
+
+    partes = ["Bom dia, senhor."]
+
+    if clima.get("success"):
+        partes.append(
+            f"Por aqui, senhor, {clima['temperatura']}°C e "
+            f"{clima['condicao'].lower()}."
+        )
 
     if pendentes:
-        resumo = (
-            "Boa noite! Antes de dormir, você ainda tem pendente: "
-            + "; ".join(pendentes[:5]) + "."
+        if len(pendentes) == 1:
+            partes.append(
+                f"Ah, senhor, ficou uma coisa pendente: {pendentes[0]}."
+            )
+        else:
+            partes.append(
+                f"Ah, senhor, ficaram algumas coisas pendentes: "
+                + "; ".join(pendentes)
+                + "."
+            )
+
+    if alarmes.get("success") and alarmes.get("count"):
+        quantidade = alarmes["count"]
+
+        if quantidade == 1:
+            partes.append("Seu alarme continua programado, senhor.")
+        else:
+            partes.append(
+                f"O senhor está com {quantidade} alarmes programados."
+            )
+
+    if noticias.get("success") and noticias.get("news"):
+        titulos = [n["title"] for n in noticias["news"][:3]]
+
+        partes.append(
+            "Também separei algumas notícias para o senhor: "
+            + "; ".join(titulos)
+            + "."
         )
+
+    resultado = _anunciar(" ".join(partes))
+
+    enviar_push(
+        "☀️ Bom dia",
+        resultado["message"]
+    )
+
+    return resultado
+
+
+def rotina_boa_noite():
+    pendentes = _pendentes_lembretes()
+
+    if pendentes:
+        if len(pendentes) == 1:
+            resumo = (
+                f"Senhor, antes de encerrar o dia, "
+                f"só ficou uma coisa pendente: {pendentes[0]}."
+            )
+        else:
+            resumo = (
+                "Senhor, antes de encerrar o dia, "
+                "ainda ficaram algumas coisas pendentes: "
+                + "; ".join(pendentes)
+                + "."
+            )
     else:
-        resumo = "Boa noite! Sem pendências pra amanhã. Durma bem."
+        resumo = "Senhor, por aqui está tudo certo. Boa noite."
 
-    speak(limpar_para_fala(resumo))
-    ui_bridge.broadcast({"type": "log", "role": "jarvis", "text": resumo})
-
-    return {"success": True, "message": resumo}
-
+    return _anunciar(resumo)
 
 def rotina_saindo_de_casa():
     from tools.tools import get_weather
@@ -108,28 +145,17 @@ def rotina_saindo_de_casa():
         "Saindo de casa. Vou continuar de olho no WhatsApp e te aviso "
         "por notificação se precisar." + aviso_clima
     )
-
-    speak(limpar_para_fala(resumo))
-    ui_bridge.broadcast({"type": "log", "role": "jarvis", "text": resumo})
-    ui_bridge.broadcast({"type": "presence", "estado": "fora"})
-
-    return {"success": True, "message": resumo}
+    return _anunciar(resumo, eventos_extra=[{"type": "presence", "estado": "fora"}])
 
 
 def rotina_foco():
     resumo = "Modo foco ativado. Vou segurar avisos não urgentes até você desativar."
-    ui_bridge.broadcast({"type": "focus_mode", "ativo": True})
-    ui_bridge.broadcast({"type": "log", "role": "jarvis", "text": resumo})
-    speak(limpar_para_fala(resumo))
-    return {"success": True, "message": resumo}
+    return _anunciar(resumo, eventos_extra=[{"type": "focus_mode", "ativo": True}])
 
 
 def rotina_fim_foco():
     resumo = "Modo foco desativado."
-    ui_bridge.broadcast({"type": "focus_mode", "ativo": False})
-    ui_bridge.broadcast({"type": "log", "role": "jarvis", "text": resumo})
-    speak(limpar_para_fala(resumo))
-    return {"success": True, "message": resumo}
+    return _anunciar(resumo, eventos_extra=[{"type": "focus_mode", "ativo": False}])
 
 
 ROTINAS = {
@@ -146,24 +172,18 @@ def run_routine(nome: str):
     if not funcao:
         return {
             "success": False,
-            "message": (
-                f"Rotina desconhecida: '{nome}'. Disponíveis: "
-                + ", ".join(ROTINAS.keys())
-            ),
+            "message": f"Rotina desconhecida: '{nome}'. Disponíveis: " + ", ".join(ROTINAS.keys()),
         }
     try:
         return funcao()
     except Exception as error:
+        print(f"⚠️  Erro na rotina '{nome}': {error}")
         return {"success": False, "message": f"Falha ao executar a rotina: {error}"}
 
 
-_HORARIOS_AGENDADOS = {
-    "bom_dia": (7, 30),
-    "boa_noite": (23, 0),
-}
-
-_INTERVALO_CHECAGEM_SEGUNDOS = 30
-
+# ---------------------------------------------------------------------------
+# Scheduler
+# ---------------------------------------------------------------------------
 
 def _ja_rodou_hoje(state, nome_rotina, hoje_iso):
     return state.get(nome_rotina) == hoje_iso
@@ -182,27 +202,19 @@ def _loop_scheduler():
 
             with _lock:
                 state = _load_state()
-
-                for nome_rotina, (hora, minuto) in _HORARIOS_AGENDADOS.items():
-                    horario_alvo = agora.replace(
-                        hour=hora, minute=minuto, second=0, microsecond=0
-                    )
-
+                for nome_rotina, (hora, minuto) in HORARIOS_AGENDADOS.items():
+                    horario_alvo = agora.replace(hour=hora, minute=minuto, second=0, microsecond=0)
                     ja_passou = agora >= horario_alvo
                     ja_rodou = _ja_rodou_hoje(state, nome_rotina, hoje_iso)
 
                     if ja_passou and not ja_rodou:
                         _marcar_rodou_hoje(state, nome_rotina, hoje_iso)
-                        threading.Thread(
-                            target=run_routine,
-                            args=(nome_rotina,),
-                            daemon=True,
-                        ).start()
+                        threading.Thread(target=run_routine, args=(nome_rotina,), daemon=True).start()
 
         except Exception as error:
             print(f"⚠️  Erro no scheduler proativo: {error}")
 
-        time.sleep(_INTERVALO_CHECAGEM_SEGUNDOS)
+        time.sleep(INTERVALO_CHECAGEM_SEGUNDOS)
 
 
 _scheduler_started = False

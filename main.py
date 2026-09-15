@@ -21,9 +21,7 @@ from tools.push import enviar_push
 from tools.ntfy_listener import escutar_ntfy
 from pathlib import Path
 import tools.proactive as proactive
-from PySide6.QtCore import QUrl
-from PySide6.QtWidgets import QApplication, QMainWindow
-from PySide6.QtWebEngineWidgets import QWebEngineView
+import webview
 
 client = OpenAI(
     api_key=os.getenv("OPENAI_API_KEY")
@@ -647,20 +645,16 @@ def main():
     proactive.iniciar_scheduler()
 
     aguardar_servidor(ui_bridge.HOST, ui_bridge.PORT)
-    app_qt = QApplication(sys.argv)
 
-    window = QMainWindow()
-    window.setWindowTitle("J.A.R.V.I.S.")
-    window.resize(1600, 900)
-    window.setMinimumSize(960, 600)
-    window.setStyleSheet("background-color: #040c11;")
-
-    view = QWebEngineView()
-    view.setUrl(QUrl(f"http://{ui_bridge.HOST}:{ui_bridge.PORT}/"))
-    window.setCentralWidget(view)
-
-    window.show()
-    app_qt.exec()
+    window = webview.create_window(
+        "J.A.R.V.I.S.",
+        f"http://{ui_bridge.HOST}:{ui_bridge.PORT}/",
+        width=1600,
+        height=900,
+        min_size=(960, 600),
+        background_color="#040c11",
+    )
+    webview.start()
     os._exit(0)
 
 

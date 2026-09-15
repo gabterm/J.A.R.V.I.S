@@ -513,6 +513,65 @@ function tornarPainelArrastavel(frame, topbar) {
 
 tornarPainelArrastavel(newsFrame, newsTopbar);
 
+// ---- Painel de músicas recentes — lista o histórico e toca do cache ----
+
+const recentFrame = document.getElementById('recentFrame');
+const recentTopbar = document.getElementById('recentTopbar');
+const recentClose = document.getElementById('recentClose');
+const recentBody = document.getElementById('recentBody');
+
+function abrirRecentes(lista) {
+  recentFrame.style.position = '';
+  recentFrame.style.left = '';
+  recentFrame.style.top = '';
+  recentFrame.style.margin = '';
+
+  recentBody.innerHTML = (lista || []).map(item => {
+    const thumb = item.thumbnail
+      ? `<img class="recent-item-thumb" src="${item.thumbnail}" alt="" loading="lazy">`
+      : `<div class="recent-item-thumb recent-item-thumb-empty"></div>`;
+    return `
+      <div class="recent-item" data-id="${item.video_id}">
+        ${thumb}
+        <div class="recent-item-body">
+          <div class="recent-item-title">${escapeXml(item.titulo)}</div>
+          <div class="recent-item-artist">${escapeXml(item.artistas || '')}</div>
+        </div>
+        <button class="recent-item-play" type="button" title="Tocar" aria-label="Tocar">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><polygon points="6 3 20 12 6 21 6 3"></polygon></svg>
+        </button>
+      </div>
+    `;
+  }).join('') || '<div class="term-empty">Nenhuma música em cache ainda.</div>';
+
+  recentBody.querySelectorAll('.recent-item').forEach(el => {
+    el.addEventListener('click', () => {
+      if (!ws || ws.readyState !== WebSocket.OPEN) { setEstado('offline'); return; }
+      ws.send(JSON.stringify({
+        type: 'tool_call',
+        name: 'tocar_do_historico',
+        args: { video_id: el.dataset.id },
+      }));
+      tocarSom('toggle');
+    });
+  });
+
+  recentFrame.classList.add('open');
+  tocarSom('toggle');
+  addLogEvent('info', `Painel de recentes: ${(lista || []).length} música(s)`);
+}
+
+function fecharRecentes() {
+  recentFrame.classList.remove('open');
+}
+
+recentClose.addEventListener('click', fecharRecentes);
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && recentFrame.classList.contains('open')) fecharRecentes();
+});
+
+tornarPainelArrastavel(recentFrame, recentTopbar);
+
 // ---- Painel de clima — mesmo card translúcido, sem overlay ----
 
 const weatherFrame = document.getElementById('weatherFrame');
@@ -584,6 +643,12 @@ const musicStop = document.getElementById('musicStop');
 const musicVisualizer = document.getElementById('musicVisualizer');
 const jarvisAudio = document.getElementById('jarvisAudio');
 
+// Permite que o áudio seja roteado pelo AudioContext (visualizador) sem
+// ficar "tainted" — o servidor de música já manda
+// Access-Control-Allow-Origin: * (ver music_player.py), então isso é
+// seguro e evita que o analyser retorne sempre zero.
+jarvisAudio.crossOrigin = 'anonymous';
+
 // Barras do visualizador — criadas uma única vez, atualizadas via custom
 // property --v (0 a 1), lida pelo CSS (altura/box-shadow de cada barra).
 const MUSIC_BANDAS = 24;
@@ -596,6 +661,13 @@ const musicBars = musicVisualizer.querySelectorAll('.music-bar');
 
 let musicAudioCtx = null, musicAnalyser = null, musicSource = null;
 let musicSeekArrastando = false;
+
+// Fica true sempre que HÁ intenção de que a música esteja tocando
+// (aberta pelo backend ou play manual), e false quando o usuário
+// pausa/para de propósito. Usado pelo desbloqueio de autoplay abaixo:
+// se o navegador bloquear play() por falta de gesto do usuário, a
+// próxima interação (clique, tecla) tenta retomar automaticamente.
+let musicIntencaoTocar = false;
 
 function formatarTempo(segundos) {
   if (!isFinite(segundos) || segundos < 0) segundos = 0;
@@ -621,7 +693,7 @@ function iniciarAnalyserMusica() {
 
     musicSource = musicAudioCtx.createMediaElementSource(jarvisAudio);
     musicAnalyser = musicAudioCtx.createAnalyser();
-    musicAnalyser.fftSize = 64;
+    musicAnalyser.fftSize = 128;
 
     musicSource.connect(musicAnalyser);
     musicAnalyser.connect(musicAudioCtx.destination);
@@ -650,6 +722,43 @@ function atualizarVisualizadorMusica() {
   requestAnimationFrame(atualizarVisualizadorMusica);
 }
 
+// Ponto único que tenta de fato tocar o áudio. Sempre passa por aqui
+// (abertura automática via backend OU clique manual no botão de play),
+// pra manter musicIntencaoTocar e o AudioContext consistentes.
+function tentarTocarMusica() {
+  musicIntencaoTocar = true;
+  iniciarAnalyserMusica();
+
+  const promessa = jarvisAudio.play();
+  if (promessa && typeof promessa.catch === 'function') {
+    promessa.catch((error) => {
+      // Autoplay bloqueado pelo navegador (comum quando a música é
+      // iniciada por voz/comando, sem um clique síncrono do usuário).
+      // Não é um erro real — só precisa de uma interação pra liberar.
+      // O listener global de desbloqueio abaixo cuida de retomar assim
+      // que o usuário clicar ou apertar qualquer tecla na interface.
+      console.warn('[MUSIC] Reprodução aguardando interação do usuário:', error);
+    });
+  }
+}
+
+// Desbloqueia o AudioContext (e retenta o play, se necessário) assim
+// que o usuário interagir com a página de qualquer forma — clique,
+// tecla, toque. Sem isso, música iniciada via voz pode "tocar" (o
+// <audio> avança, os logs mostram "Tocando...") mas ficar muda, porque
+// o AudioContext do visualizador nasceu suspenso.
+function desbloquearAudioMusica() {
+  if (musicAudioCtx && musicAudioCtx.state === 'suspended') {
+    musicAudioCtx.resume().catch(() => {});
+  }
+  if (musicIntencaoTocar && jarvisAudio.paused && jarvisAudio.src) {
+    jarvisAudio.play().catch(() => {});
+  }
+}
+document.addEventListener('click', desbloquearAudioMusica);
+document.addEventListener('keydown', desbloquearAudioMusica);
+document.addEventListener('touchstart', desbloquearAudioMusica, { passive: true });
+
 function abrirPlayerMusica(evento) {
   musicFrame.style.position = '';
   musicFrame.style.left = '';
@@ -664,22 +773,32 @@ function abrirPlayerMusica(evento) {
   jarvisAudio.src = evento.url;
   jarvisAudio.currentTime = 0;
 
-  
   musicFrame.classList.add('open');
   tocarSom('toggle');
   addLogEvent('info', `Tocando: ${evento.titulo || ''} - ${evento.artistas || ''}`);
+
+  tentarTocarMusica();
 }
 
 function fecharPlayerMusica() {
+  musicIntencaoTocar = false;
   jarvisAudio.pause();
   musicFrame.classList.remove('open');
 }
 
 musicClose.addEventListener('click', fecharPlayerMusica);
-musicStop.addEventListener('click', () => { jarvisAudio.pause(); jarvisAudio.currentTime = 0; });
+musicStop.addEventListener('click', () => {
+  musicIntencaoTocar = false;
+  jarvisAudio.pause();
+  jarvisAudio.currentTime = 0;
+});
 musicPlayPause.addEventListener('click', () => {
-  if (jarvisAudio.paused) jarvisAudio.play().catch(() => {});
-  else jarvisAudio.pause();
+  if (jarvisAudio.paused) {
+    tentarTocarMusica();
+  } else {
+    musicIntencaoTocar = false;
+    jarvisAudio.pause();
+  }
 });
 
 jarvisAudio.addEventListener('play', () => {
@@ -691,6 +810,7 @@ jarvisAudio.addEventListener('pause', () => {
 });
 
 jarvisAudio.addEventListener('ended', () => {
+  musicIntencaoTocar = false;
   musicFrame.classList.remove('playing');
   addLogEvent('info', 'Reprodução concluída');
 });
@@ -914,7 +1034,7 @@ const TOOLS_META = {
   list_files:          { params: [{ n: 'path', req: true }] },
   run_terminal:        { params: [{ n: 'command', req: true }] },
   take_screenshot:     { params: [{ n: 'save_path', req: false }] },
-  lock_screen:         { params: [] },
+  lock_screen:          { params: [] },
   set_volume:          { params: [{ n: 'level', req: true, tipo: 'int' }] },
   get_battery_status:  { params: [] },
   add_reminder:        { params: [{ n: 'texto', req: true }, { n: 'quando', req: false }] },
@@ -929,6 +1049,9 @@ const TOOLS_META = {
   show_tactical_board: { params: [{ n: 'titulo', req: true }, { n: 'quadros', req: true, tipo: 'json' }, { n: 'formacao_casa', req: false }, { n: 'formacao_visitante', req: false }] },
   show_reasoning_board:{ params: [{ n: 'titulo', req: true }, { n: 'quadros', req: true, tipo: 'json' }] },
   show_simulation:     { params: [{ n: 'titulo', req: true }, { n: 'objetos', req: true, tipo: 'json' }, { n: 'modo', req: false }, { n: 'duracao', req: false }, { n: 'loop', req: false }, { n: 'velocidade', req: false }, { n: 'anotacao', req: false }] },
+  listar_recentes:       { params: [{ n: 'limite', req: false, tipo: 'int' }] },
+  tocar_do_historico:    { params: [{ n: 'video_id', req: true }] },
+  abrir_painel_recentes: { params: [{ n: 'limite', req: false, tipo: 'int' }] },
 };
 
 function tokenizarArgs(resto) {
@@ -1588,6 +1711,9 @@ function conectar() {
         break;
       case 'play_audio':
         abrirPlayerMusica(evento);
+        break;
+      case 'music_recent':
+        abrirRecentes(evento.recentes);
         break;
       case 'event': addLogEvent(evento.level || 'info', evento.text); break;
       case 'notification': notify(evento.text, evento.level || 'info'); break;

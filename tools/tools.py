@@ -1516,8 +1516,6 @@ def _get_ytmusic_client():
     return _ytmusic_client
 
 
-import tools.music_player as music_player
-
 def play_music(query: str):
     try:
         client = _get_ytmusic_client()
@@ -1569,6 +1567,28 @@ def play_music(query: str):
             "success": False,
             "message": f"Não foi possível tocar a música: {error}",
         }
+
+
+# ============================================================
+# HISTÓRICO DE MÚSICAS (listar_recentes / tocar_do_historico /
+# abrir_painel_recentes) — só encaminham para tools/music_player.py, que
+# concentra toda a lógica de cache e histórico. Ficam aqui como wrappers
+# finos só para terem uma entrada própria no TOOL_FUNCTIONS/TOOLS, igual
+# ao padrão já usado por play_music/music_player.tocar.
+# ============================================================
+
+def listar_recentes(limite: int = 12):
+    return music_player.listar_recentes(limite)
+
+
+def tocar_do_historico(video_id: str):
+    return music_player.tocar_do_historico(video_id)
+
+
+def abrir_painel_recentes(limite: int = 12):
+    return music_player.abrir_painel_recentes(limite)
+
+
 def _validate_coordinate(value, field_name):
     if not isinstance(value, (int, float)):
         return f"Coordenada '{field_name}' inválida: {value!r}"
@@ -2797,6 +2817,89 @@ TOOLS = [
             },
         },
     },
+    {
+        "type": "function",
+        "function": {
+            "name": "abrir_painel_recentes",
+            "description": (
+                "Abre o painel de músicas tocadas recentemente na "
+                "interface, permitindo tocar novamente qualquer uma "
+                "delas com um clique. Use quando o usuário pedir pra "
+                "ver o histórico de músicas, as músicas recentes, ou "
+                "'o que eu toquei antes'."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "limite": {
+                        "type": "integer",
+                        "description": (
+                            "Quantidade máxima de músicas a listar no "
+                            "painel. Padrão: 12."
+                        ),
+                    },
+                },
+                "required": [],
+                "additionalProperties": False,
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "listar_recentes",
+            "description": (
+                "Lista as músicas mais recentes que ainda estão "
+                "disponíveis em cache local, sem necessariamente abrir "
+                "o painel na interface. Use quando quiser apenas "
+                "consultar o histórico internamente (ex: pra decidir o "
+                "que tocar), sem exibir nada na tela — para exibir na "
+                "tela use abrir_painel_recentes."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "limite": {
+                        "type": "integer",
+                        "description": (
+                            "Quantidade máxima de músicas a retornar. "
+                            "Padrão: 12."
+                        ),
+                    },
+                },
+                "required": [],
+                "additionalProperties": False,
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "tocar_do_historico",
+            "description": (
+                "Toca novamente uma música específica do histórico, "
+                "identificada pelo video_id (obtido de "
+                "listar_recentes/abrir_painel_recentes). Use quando o "
+                "usuário pedir pra tocar de novo uma música que já "
+                "tocou antes."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "video_id": {
+                        "type": "string",
+                        "description": (
+                            "ID do vídeo/música no histórico, exatamente "
+                            "como retornado por listar_recentes ou "
+                            "abrir_painel_recentes."
+                        ),
+                    },
+                },
+                "required": ["video_id"],
+                "additionalProperties": False,
+            },
+        },
+    },
 
     {
         "type": "function",
@@ -3257,6 +3360,9 @@ TOOL_FUNCTIONS = {
     "toggle_microphone": toggle_microphone,
     "get_daily_news": get_daily_news,
     "play_music": play_music,
+    "listar_recentes": listar_recentes,
+    "tocar_do_historico": tocar_do_historico,
+    "abrir_painel_recentes": abrir_painel_recentes,
     "show_tactical_board": show_tactical_board,
     "show_reasoning_board": show_reasoning_board,
     "show_simulation": show_simulation,

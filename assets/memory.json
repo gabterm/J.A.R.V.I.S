@@ -285,7 +285,10 @@
         "não vai jantar com eles hoje",
         "Ir dormir agora",
         "chegou antes",
-        "está no centro"
+        "está no centro",
+        "Fica anos e meses sem falar ou ver essa pessoa",
+        "Fechou-se para novas pessoas",
+        "Não organiza mais a vida em torno disso."
     ],
     "preferencias": [
         "Não gosta muito de frases de efeito",
@@ -387,47 +390,47 @@
     ],
     "historico_recente": [
         {
-            "usuario": "qual o clima agora em curitiba?",
-            "jarvis": "Em Curitiba, estão quinze graus, com poucas nuvens, senhor."
-        },
-        {
-            "usuario": "que dia ser;a amanha?",
-            "jarvis": "Amanhã será quarta-feira, nove de setembro de dois mil e vinte e seis, senhor."
-        },
-        {
             "usuario": "jarvis",
             "jarvis": "À disposição, senhor. O que precisa?"
         },
         {
-            "usuario": "alarame para daqui ha duas horas",
-            "jarvis": "Alarme configurado para daqui a duas horas, senhor."
+            "usuario": "liste musicas recentes",
+            "jarvis": "A música mais recente registrada é “Infinity”, de Jaymes Young. Já deixei tocando, senhor."
         },
         {
-            "usuario": "toque rest of my life do hans zimmer",
-            "jarvis": "Tocando The Rest of My Life, de Hans Zimmer, senhor."
+            "usuario": "toque iron man do black sabath",
+            "jarvis": "Tocando Iron Man, do Black Sabbath, senhor."
         },
         {
-            "usuario": "toque agora i choose you, tambem do hans zimmer",
-            "jarvis": "Tocando I Chose You, de Hans Zimmer e The Magnificent Six, senhor."
+            "usuario": "abra o painel de muiscas recentes",
+            "jarvis": "Não tenho uma ação disponível para abrir um painel de músicas recentes, senhor. Posso tocar uma música específica pelo YouTube Music."
         },
         {
-            "usuario": "jarvis",
-            "jarvis": "À disposição, senhor. O que precisa?"
+            "usuario": "toque portals do alan silvestri",
+            "jarvis": "Tocando Portals, de Alan Silvestri, senhor."
         },
         {
-            "usuario": "jarvis",
-            "jarvis": "À disposição, senhor. O que precisa?"
+            "usuario": "toque portals do alan silvestri",
+            "jarvis": "Tocando Portals, de Alan Silvestri, senhor."
         },
         {
-            "usuario": "toque rest of my life do hans zimmer",
-            "jarvis": "Tocando The Rest of My Life, de Hans Zimmer, senhor."
+            "usuario": "toque last son",
+            "jarvis": "Tocando Last Son, de David Fleming, senhor."
         },
         {
-            "usuario": "[NOTIFICAÇÃO AUTOMÁTICA DE WHATSAPP] Chegou uma mensagem nova de Mãe. Prévia: \"Credo filho\". Use read_whatsapp_chat para ler a conversa completa com Mãe. Avise o usuário sobre a mensagem, resuma o conteúdo dela em fala natural, e já sugira um rascunho de resposta chamando send_whatsapp_message com confirmado=false. Fale o rascunho sugerido e pergunte se pode enviar. Não chame send_whatsapp_message com confirmado=true nesta mesma resposta, mesmo que o rascunho pareça óbvio — a aprovação só vem em uma mensagem seguinte do usuário.",
-            "jarvis": "Não consegui ler a conversa com sua mãe porque o WhatsApp retornou um erro. A única informação disponível é a prévia: “Credo filho”. Não vou inventar contexto, por mais tentador que seja.\n\nQuer que eu tente ler novamente?"
+            "usuario": "toque: https://www.youtube.com/watch?v=UbB6Ld7ySmc&list=RDUbB6Ld7ySmc&start_radio=1",
+            "jarvis": "Não encontrei a música a partir desse link. Envie o nome da faixa ou do artista, e eu pesquiso no YouTube Music."
+        },
+        {
+            "usuario": "o titulo é exatamente \"\nPost Malone ft. 21 Savage - Rockstar - (Slowed/Reverb)\"",
+            "jarvis": "Tocando “rockstar”, de Post Malone com 21 Savage, senhor. A versão Slowed/Reverb não foi identificada com precisão, então deixei a faixa oficial."
+        },
+        {
+            "usuario": "toque shield of pain",
+            "jarvis": "Tocando Shield of Pain, de Michael Giacchino, senhor."
         }
     ],
-    "resumo_contexto": "O usuário solicitou a reprodução de “After Dark”, do Mr. Kitty, e JARVIS confirmou que a música estava tocando. JARVIS permanece à disposição para novas solicitações.",
+    "resumo_contexto": "O usuário solicitou a reprodução de “Iron Man”, do Black Sabbath, e JARVIS informou que a música estava sendo tocada. Posteriormente, chegou uma mensagem de Tia Ana com a prévia “Elas quem?”; JARVIS tentou ler a conversa, mas o WhatsApp retornou erro, impedindo a obtenção do contexto. JARVIS não inventou uma resposta nem enviou mensagem, oferecendo tentar novamente.",
     "timeline": [
         {
             "id": "277740a4-92e9-496a-978e-0f4c024d414a",
@@ -1291,6 +1294,24 @@
             "id": "4a67e985-d160-4962-90fc-8abc23c2ad6e",
             "tipo": "preferencia",
             "text": "ouvir a música \"I Choose You\", de Hans Zimmer",
+            "pinned": false
+        },
+        {
+            "id": "26d3d9c8-7272-4654-b382-45b655d715fc",
+            "tipo": "rotina",
+            "text": "Fica anos e meses sem falar ou ver essa pessoa",
+            "pinned": false
+        },
+        {
+            "id": "709df4cd-f664-4e54-bbd3-0193b33627b2",
+            "tipo": "rotina",
+            "text": "Fechou-se para novas pessoas",
+            "pinned": false
+        },
+        {
+            "id": "fc7504f0-919f-417a-b8e1-e7a7a26e068d",
+            "tipo": "rotina",
+            "text": "Não organiza mais a vida em torno disso.",
             "pinned": false
         }
     ]

@@ -613,71 +613,158 @@ body.offline .status-pill .dot{background:var(--warn);box-shadow:0 0 6px var(--w
 }
 .map-caption b{color:var(--core-ring);}
 
-.music-frame{width:min(300px,84vw);top:72px;right:20px;}
-.music-body{padding:16px 18px 18px;display:flex;flex-direction:column;gap:14px;}
+/* ---------- PLAYER DE MÚSICA (.music-frame) ---------- */
+
+.music-frame{
+  width:min(320px,86vw);
+  top:72px;right:20px;
+  border-radius:14px;
+  overflow:hidden;
+  border:1px solid rgba(var(--core-ring-rgb),.28);
+  box-shadow:0 12px 40px rgba(0,0,0,.55), 0 0 0 1px rgba(var(--core-ring-rgb),.06) inset;
+}
+.music-frame .floating-panel-topbar{
+  background:linear-gradient(180deg,rgba(var(--core-ring-rgb),.08),transparent);
+}
+.music-body{padding:18px 18px 20px;display:flex;flex-direction:column;gap:16px;}
 
 .music-art-visualizer{
-  position:relative;width:100%;aspect-ratio:1/1;max-height:160px;
-  border:1px solid rgba(var(--core-ring-rgb),.4);
-  background:radial-gradient(circle,rgba(var(--core-ring-rgb),.12),transparent 75%);
-  overflow:hidden;display:flex;align-items:center;justify-content:center;
+  position:relative;width:100%;aspect-ratio:1/1;max-height:220px;
+  border-radius:12px;
+  border:1px solid rgba(var(--core-ring-rgb),.35);
+  background:radial-gradient(circle,rgba(var(--core-ring-rgb),.16),rgba(2,8,11,.4) 75%);
+  overflow:hidden;display:flex;align-items:flex-end;justify-content:center;
+  box-shadow:0 0 30px rgba(var(--core-ring-rgb),.12), inset 0 0 40px rgba(0,0,0,.5);
 }
+/* anel giratório decorativo, puramente cosmético */
+.music-art-visualizer::before{
+  content:'';position:absolute;inset:-1px;border-radius:12px;
+  background:conic-gradient(from 0deg, transparent 0 70%, rgba(var(--core-ring-rgb),.5) 85%, transparent 100%);
+  opacity:.5;animation:musicRingSpin 6s linear infinite;pointer-events:none;mix-blend-mode:screen;
+}
+@keyframes musicRingSpin{to{transform:rotate(360deg);}}
+
 .music-thumb{
   position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
-  filter:saturate(1.1) contrast(1.05);opacity:.5;
+  filter:saturate(1.15) contrast(1.08) brightness(.9);opacity:.85;
+  transition:transform .4s ease;
 }
+.music-frame.playing .music-thumb{transform:scale(1.04);}
+
+/* gradiente inferior pra barras do visualizador ficarem legíveis sobre a capa */
+.music-art-visualizer::after{
+  content:'';position:absolute;left:0;right:0;bottom:0;height:55%;
+  background:linear-gradient(to top, rgba(2,8,11,.85), transparent);
+  pointer-events:none;
+}
+
 .music-visualizer{
   position:relative;z-index:1;
-  display:flex;align-items:flex-end;justify-content:center;gap:2.5px;height:60%;width:88%;
+  display:flex;align-items:flex-end;justify-content:center;gap:3px;height:50%;width:94%;
+  padding-bottom:10px;
 }
 .music-bar{
-  flex:1;min-width:2px;
-  height:calc(4% + var(--v,0) * 96%);
-  background:linear-gradient(to top, var(--core-ring), transparent);
-  box-shadow:0 0 6px rgba(var(--core-ring-rgb), calc(var(--v,0) * .9));
-  transition:height .06s linear;
+  flex:1;min-width:3px;max-width:7px;border-radius:3px 3px 1px 1px;
+  height:calc(6% + var(--v,0) * 94%);
+  background:linear-gradient(to top, #0f7c92, var(--core-ring) 55%, #eafeff);
+  box-shadow:0 0 8px rgba(var(--core-ring-rgb), calc(.25 + var(--v,0) * .75));
+  position:relative;
+  transition:height .07s ease-out;
+}
+/* pontinho de brilho no topo de cada barra */
+.music-bar::after{
+  content:'';position:absolute;left:0;right:0;top:-1px;height:2px;border-radius:2px;
+  background:#eafeff;opacity:calc(.3 + var(--v,0) * .7);
 }
 
 .music-meta{text-align:center;}
-.music-title{font-size:11.5px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.music-artist{font-size:9.5px;color:var(--text-dim);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-
-.music-progress-row{display:flex;align-items:center;gap:8px;}
-.music-time{font-size:8.5px;color:var(--text-dim);flex-shrink:0;width:28px;}
-.music-time:last-child{text-align:right;}
-.music-seek{
-  flex:1;-webkit-appearance:none;appearance:none;height:3px;background:var(--line-strong);
-  outline:none;cursor:pointer;
+.music-title{
+  font-family:var(--display);font-size:13px;letter-spacing:.03em;color:var(--text);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  text-shadow:0 0 8px rgba(var(--core-ring-rgb),.25);
 }
+.music-artist{
+  font-size:10px;color:var(--text-dim);margin-top:4px;letter-spacing:.05em;
+  text-transform:uppercase;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+
+.music-progress-row{display:flex;align-items:center;gap:10px;}
+.music-time{font-size:8.5px;color:var(--text-dim);flex-shrink:0;width:30px;font-variant-numeric:tabular-nums;}
+.music-time:last-child{text-align:right;}
+
+.music-seek{
+  flex:1;-webkit-appearance:none;appearance:none;height:4px;border-radius:4px;
+  background:var(--line-strong);outline:none;cursor:pointer;
+}
+/* preenchimento real no Firefox */
+.music-seek::-moz-range-track{height:4px;border-radius:4px;background:var(--line-strong);}
+.music-seek::-moz-range-progress{height:4px;border-radius:4px;background:var(--core-ring);}
+.music-seek::-webkit-slider-runnable-track{height:4px;border-radius:4px;background:transparent;}
 .music-seek::-webkit-slider-thumb{
-  -webkit-appearance:none;width:10px;height:10px;border-radius:50%;
-  background:var(--core-ring);box-shadow:0 0 6px rgba(var(--core-ring-rgb),.7);cursor:pointer;
+  -webkit-appearance:none;width:12px;height:12px;border-radius:50%;margin-top:-4px;
+  background:#fff;border:2px solid var(--core-ring);
+  box-shadow:0 0 8px rgba(var(--core-ring-rgb),.8);cursor:pointer;
 }
 .music-seek::-moz-range-thumb{
-  width:10px;height:10px;border-radius:50%;border:none;
-  background:var(--core-ring);box-shadow:0 0 6px rgba(var(--core-ring-rgb),.7);cursor:pointer;
+  width:12px;height:12px;border-radius:50%;border:2px solid var(--core-ring);
+  background:#fff;box-shadow:0 0 8px rgba(var(--core-ring-rgb),.8);cursor:pointer;
 }
 
-.music-controls{display:flex;gap:8px;justify-content:center;}
-.music-btn{flex:1;text-align:center;}
-.music-frame.playing #musicPlayPause{color:var(--core-ring);border-color:rgba(var(--core-ring-rgb),.6);}
+.music-controls{display:flex;align-items:center;gap:14px;justify-content:center;}
+
+.music-btn{
+  border-radius:50%;width:40px;height:40px;min-height:0;padding:0;
+  display:flex;align-items:center;justify-content:center;
+  border:1.5px solid rgba(var(--core-ring-rgb),.4);
+  background:transparent;
+  color:var(--text);
+  transition:.18s;
+}
+.music-btn:hover{
+  border-color:var(--core-ring);
+  background:rgba(var(--core-ring-rgb),.14);
+  color:var(--core-ring);
+  box-shadow:0 0 14px rgba(var(--core-ring-rgb),.35);
+  transform:translateY(-1px);
+}
+.music-btn:active{transform:translateY(0) scale(.94);}
+
+/* botão principal de play/pausa — em destaque só pelo tamanho e pela borda/glow, sem preenchimento */
+#musicPlayPause{
+  width:56px;height:56px;
+  border:1.5px solid var(--core-ring);
+  background:transparent;
+  color:var(--core-ring);
+  box-shadow:0 0 14px rgba(var(--core-ring-rgb),.35);
+}
+#musicPlayPause:hover{
+  background:rgba(var(--core-ring-rgb),.1);
+  box-shadow:0 0 20px rgba(var(--core-ring-rgb),.55);
+  transform:translateY(-2px);
+  color:var(--core-ring);
+}
+.music-frame.playing #musicPlayPause{
+  box-shadow:0 0 22px rgba(var(--core-ring-rgb),.6);
+}
 
 .music-control-icon{
-  width:15px;
-  height:15px;
+  width:16px;
+  height:16px;
   flex-shrink:0;
   fill:none;
   stroke:currentColor;
-  stroke-width:1.7;
+  stroke-width:2.1;
   stroke-linecap:round;
   stroke-linejoin:round;
   pointer-events:none;
 }
+#musicPlayPause .music-control-icon{width:19px;height:19px;stroke-width:2.3;}
 
 .music-icon-play{
   fill:currentColor;
   stroke:none;
 }
+#musicPlayPause .music-icon-play{fill:var(--core-ring);}
 
 .music-icon-pause{
   display:none;
@@ -691,24 +778,58 @@ body.offline .status-pill .dot{background:var(--warn);box-shadow:0 0 6px var(--w
   display:block;
 }
 
-.music-btn{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  min-height:32px;
-  padding:7px;
-}
-
-.music-frame.playing #musicPlayPause{
-  color:var(--core-ring);
-  border-color:rgba(var(--core-ring-rgb),.6);
-  box-shadow:0 0 8px rgba(var(--core-ring-rgb),.18);
-}
-
-.music-btn:hover{
-  color:var(--core-ring);
-  border-color:var(--core-ring);
-  box-shadow:0 0 8px rgba(var(--core-ring-rgb),.2);
-}
-
 .topbar,.settings-drawer,.hud-frame{display:none;}
+
+/* ---------- PAINEL DE RECENTES (.recent-frame) ---------- */
+
+.recent-frame{
+  width:min(400px,90vw);max-height:min(560px,80vh);
+  border-radius:14px;overflow:hidden;
+  border:1px solid rgba(var(--core-ring-rgb),.28);
+  box-shadow:0 12px 40px rgba(0,0,0,.55);
+}
+.recent-body{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;}
+
+.recent-item{
+  position:relative;display:flex;gap:12px;align-items:center;
+  border:1px solid rgba(255,255,255,.04);border-radius:10px;padding:8px;
+  background:rgba(255,255,255,.02);cursor:pointer;transition:.18s;overflow:hidden;
+}
+.recent-item::before{
+  content:'';position:absolute;left:0;top:10%;bottom:10%;width:2px;border-radius:2px;
+  background:var(--core-ring);opacity:0;transition:.18s;
+}
+.recent-item:hover{background:rgba(var(--core-ring-rgb),.07);transform:translateX(2px);}
+.recent-item:hover::before{opacity:.8;}
+
+.recent-item-thumb,
+.recent-item-thumb-empty{
+  width:52px;height:52px;flex-shrink:0;border-radius:8px;
+}
+.recent-item-thumb{object-fit:cover;box-shadow:0 2px 10px rgba(0,0,0,.4);}
+.recent-item-thumb-empty{
+  background:repeating-linear-gradient(45deg,rgba(255,255,255,.04) 0 4px,transparent 4px 8px);
+}
+
+.recent-item-body{flex:1;min-width:0;}
+.recent-item-title{
+  font-size:11.5px;color:var(--text);font-weight:500;line-height:1.35;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.recent-item-artist{
+  font-size:9px;color:var(--text-dim);margin-top:3px;letter-spacing:.03em;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+
+/* botão de play some por cima da capa, só aparece no hover (estilo Spotify) */
+.recent-item-play{
+  position:absolute;left:8px;top:8px;width:52px;height:52px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(2,8,11,.55);backdrop-filter:blur(2px);
+  border:none;color:#fff;opacity:0;transition:.18s;
+}
+.recent-item:hover .recent-item-play{opacity:1;}
+.recent-item-play svg{
+  width:16px;height:16px;fill:currentColor;margin-left:1px;
+  filter:drop-shadow(0 0 6px rgba(var(--core-ring-rgb),.8));
+}

@@ -10,7 +10,6 @@
 <link rel="stylesheet" href="/static/css/style.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-<script src="qrc:///qtwebchannel/qwebchannel.js"></script>
 </head>
 <body>
 
@@ -51,7 +50,14 @@
   <div class="news-body" id="newsBody"></div>
 </div>
 
-<!-- Painel de clima — mesmo estilo de card, sem overlay -->
+<div class="floating-panel recent-frame" id="recentFrame">
+  <div class="floating-panel-topbar" id="recentTopbar">
+    <span class="floating-panel-title" id="recentTitle">Recentes</span>
+    <button class="icon-btn" id="recentClose">FECHAR</button>
+  </div>
+  <div class="recent-body" id="recentBody"></div>
+</div>
+
 <div class="floating-panel weather-frame" id="weatherFrame">
   <div class="floating-panel-topbar" id="weatherTopbar">
     <span class="floating-panel-title" id="weatherLocal">Clima</span>
