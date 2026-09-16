@@ -30,7 +30,9 @@
     <span class="floating-panel-title" id="mediaTitle"></span>
     <div class="media-actions">
       <button class="icon-btn" id="mediaOpenExternal" title="Abrir no navegador do sistema">EXTERNO</button>
-      <button class="icon-btn" id="mediaClose" title="Fechar">✕</button>
+      <button class="panel-close" id="mediaClose" title="Fechar" aria-label="Fechar">
+        <svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
     </div>
   </div>
   <iframe id="mediaIframe" class="media-iframe"
@@ -45,7 +47,9 @@
 <div class="floating-panel news-frame" id="newsFrame">
   <div class="floating-panel-topbar" id="newsTopbar">
     <span class="floating-panel-title" id="newsTitle">Notícias</span>
-    <button class="icon-btn" id="newsClose">FECHAR</button>
+    <button class="panel-close" id="newsClose" title="Fechar" aria-label="Fechar">
+      <svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
   </div>
   <div class="news-body" id="newsBody"></div>
 </div>
@@ -53,7 +57,9 @@
 <div class="floating-panel recent-frame" id="recentFrame">
   <div class="floating-panel-topbar" id="recentTopbar">
     <span class="floating-panel-title" id="recentTitle">Recentes</span>
-    <button class="icon-btn" id="recentClose">FECHAR</button>
+    <button class="panel-close" id="recentClose" title="Fechar" aria-label="Fechar">
+      <svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
   </div>
   <div class="recent-body" id="recentBody"></div>
 </div>
@@ -61,7 +67,9 @@
 <div class="floating-panel weather-frame" id="weatherFrame">
   <div class="floating-panel-topbar" id="weatherTopbar">
     <span class="floating-panel-title" id="weatherLocal">Clima</span>
-    <button class="icon-btn" id="weatherClose">FECHAR</button>
+    <button class="panel-close" id="weatherClose" title="Fechar" aria-label="Fechar">
+      <svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
   </div>
   <div class="weather-body">
     <div class="weather-main">
@@ -94,7 +102,9 @@
   <div class="floating-panel-topbar" id="browserTopbar">
     <span class="browser-title" id="browserTitle"></span>
     <span class="browser-url" id="browserUrl"></span>
-    <button class="icon-btn" id="browserClose" title="Fechar">✕</button>
+    <button class="panel-close" id="browserClose" title="Fechar" aria-label="Fechar">
+      <svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
   </div>
   <img id="browserScreenshot" class="browser-screenshot" alt="Navegação ao vivo" />
 </div>
@@ -102,7 +112,9 @@
 <div class="floating-panel map-frame" id="mapFrame">
   <div class="floating-panel-topbar" id="mapTopbar">
     <span class="floating-panel-title" id="mapTitle">Rota</span>
-    <button class="icon-btn" id="mapClose" title="Fechar">✕</button>
+    <button class="panel-close" id="mapClose" title="Fechar" aria-label="Fechar">
+      <svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
   </div>
   <div id="mapContainer" class="map-container"></div>
   <div class="map-caption" id="mapCaption"></div>
@@ -110,8 +122,10 @@
 
 <div class="floating-panel music-frame" id="musicFrame">
   <div class="floating-panel-topbar" id="musicTopbar">
-    <span class="floating-panel-title" id="musicTitleBar">Player</span>
-    <button class="icon-btn" id="musicClose" title="Fechar">✕</button>
+    <span class="floating-panel-title" id="musicTitleBar">Audio core</span>
+    <button class="panel-close" id="musicClose" title="Fechar" aria-label="Fechar">
+      <svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
   </div>
   <div class="music-body">
     <div class="music-art-visualizer">
@@ -162,7 +176,9 @@
 <div class="floating-panel reasoning-frame" id="reasoningFrame">
   <div class="floating-panel-topbar" id="reasoningTopbar">
     <span class="reasoning-title" id="reasoningTitle"></span>
-    <button class="icon-btn" id="reasoningClose" title="Fechar">✕</button>
+    <button class="panel-close" id="reasoningClose" title="Fechar" aria-label="Fechar">
+      <svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
   </div>
   <svg id="reasoningSvg" class="reasoning-svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet"></svg>
   <div class="reasoning-caption" id="reasoningCaption"></div>
@@ -175,7 +191,9 @@
       <button class="icon-btn" id="simPlayBtn" title="Pausar/retomar">PAUSAR</button>
       <button class="icon-btn" id="simRestartBtn" title="Reiniciar do início">REINICIAR</button>
       <input type="range" id="simSpeedRange" min="0.25" max="3" step="0.25" value="1" title="Velocidade da simulação">
-      <button class="icon-btn" id="simClose" title="Fechar">✕</button>
+      <button class="panel-close" id="simClose" title="Fechar" aria-label="Fechar">
+        <svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
     </div>
   </div>
   <svg id="simSvg" class="simulation-svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet"></svg>
@@ -677,8 +695,14 @@
         <line x1="8" y1="22" x2="16" y2="22"></line>
       </svg>
     </div>
-    <textarea class="cmd-input" placeholder="Digite um comando, fale com o JARVIS, ou use /help para ferramentas diretas…" rows="1"></textarea>
-    <button class="send-btn" id="sendBtn">enviar</button>
+  <textarea class="cmd-input" placeholder="Digite um comando" rows="1"></textarea>
+
+<button class="send-btn" id="sendBtn" aria-label="Enviar">
+  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="m22 2-7 20-4-9-9-4Z"/>
+    <path d="M22 2 11 13"/>
+  </svg>
+</button>
   </div>
 
 </div>

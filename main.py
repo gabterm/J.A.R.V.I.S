@@ -11,6 +11,7 @@ import sys
 import threading
 import time
 import uuid
+import webbrowser
 from tools.tools import TOOLS, TOOL_FUNCTIONS
 from openai import OpenAI
 from tools.jarvis_sounds import sounds
@@ -21,7 +22,6 @@ from tools.push import enviar_push
 from tools.ntfy_listener import escutar_ntfy
 from pathlib import Path
 import tools.proactive as proactive
-import webview
 
 client = OpenAI(
     api_key=os.getenv("OPENAI_API_KEY")
@@ -37,6 +37,9 @@ memory_lock = threading.Lock()
 
                                                                         
 MAX_TAMANHO_RESPOSTA_PUSH = 1000
+
+                                                                        
+encerrar_evento = threading.Event()
 
 
 def default_memory():
@@ -536,6 +539,7 @@ def loop_jarvis(memory):
         if user_input.lower() in ["sair", "exit", "quit"]:
             sounds.play("shutdown", block=True)
             print("\nJARVIS desligado.")
+            encerrar_evento.set()
             os._exit(0)
 
         try:
@@ -624,6 +628,7 @@ def main():
 
     from tools.mic_listener import escutar_microfone
     threading.Thread(target=escutar_microfone, daemon=True).start()
+    threading.Thread(target=escutar_terminal, daemon=True).start()
     threading.Thread(
         target=escutar_acoes_timeline,
         args=(memory,),
@@ -644,17 +649,29 @@ def main():
     ).start()
     proactive.iniciar_scheduler()
 
-    aguardar_servidor(ui_bridge.HOST, ui_bridge.PORT)
+    servidor_pronto = aguardar_servidor(ui_bridge.HOST, ui_bridge.PORT)
 
-    window = webview.create_window(
-        "J.A.R.V.I.S.",
-        f"http://{ui_bridge.HOST}:{ui_bridge.PORT}/",
-        width=1600,
-        height=900,
-        min_size=(960, 600),
-        background_color="#040c11",
-    )
-    webview.start()
+    url = f"http://{ui_bridge.HOST}:{ui_bridge.PORT}/"
+
+    if servidor_pronto:
+        print(f"🌐 Abrindo interface no navegador: {url}")
+        webbrowser.open(url)
+    else:
+        print(
+            f"⚠️  Servidor não respondeu a tempo. "
+            f"Tente abrir manualmente: {url}"
+        )
+
+    print("Digite 'sair' (aqui no terminal ou na aba do navegador) para encerrar.\n")
+
+                                                                        
+                                                                        
+    try:
+        while not encerrar_evento.is_set():
+            time.sleep(0.5)
+    except KeyboardInterrupt:
+        print("\nJARVIS interrompido (Ctrl+C).")
+
     os._exit(0)
 
 

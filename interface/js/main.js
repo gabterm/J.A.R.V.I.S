@@ -526,10 +526,13 @@ function abrirRecentes(lista) {
   recentFrame.style.top = '';
   recentFrame.style.margin = '';
 
-  recentBody.innerHTML = (lista || []).map(item => {
+  const recentes = (lista || []).slice(0, 20);
+
+  recentBody.innerHTML = recentes.map(item => {
     const thumb = item.thumbnail
       ? `<img class="recent-item-thumb" src="${item.thumbnail}" alt="" loading="lazy">`
       : `<div class="recent-item-thumb recent-item-thumb-empty"></div>`;
+
     return `
       <div class="recent-item" data-id="${item.video_id}">
         ${thumb}
@@ -537,8 +540,11 @@ function abrirRecentes(lista) {
           <div class="recent-item-title">${escapeXml(item.titulo)}</div>
           <div class="recent-item-artist">${escapeXml(item.artistas || '')}</div>
         </div>
+
         <button class="recent-item-play" type="button" title="Tocar" aria-label="Tocar">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><polygon points="6 3 20 12 6 21 6 3"></polygon></svg>
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <polygon points="6 3 20 12 6 21 6 3"></polygon>
+          </svg>
         </button>
       </div>
     `;
@@ -546,12 +552,17 @@ function abrirRecentes(lista) {
 
   recentBody.querySelectorAll('.recent-item').forEach(el => {
     el.addEventListener('click', () => {
-      if (!ws || ws.readyState !== WebSocket.OPEN) { setEstado('offline'); return; }
+      if (!ws || ws.readyState !== WebSocket.OPEN) {
+        setEstado('offline');
+        return;
+      }
+
       ws.send(JSON.stringify({
         type: 'tool_call',
         name: 'tocar_do_historico',
         args: { video_id: el.dataset.id },
       }));
+
       tocarSom('toggle');
     });
   });
@@ -858,10 +869,10 @@ let waveEstadoAtual = 'idle';
 let waveT = 0;
 
 const WAVE_PERFIS = {
-  idle:      { amp: 0.06, speed: 0.4,  ruido: 0.02 },
-  thinking:  { amp: 0.55, speed: 1.6,  ruido: 0.25 },
-  speaking:  { amp: 0.95, speed: 2.4,  ruido: 0.35 },
-  listening: { amp: 0.75, speed: 2.0,  ruido: 0.4  },
+  idle:      { amp: 0.06, speed: 1.5,  ruido: 0.02 },
+  thinking:  { amp: 0.55, speed: 3.0,  ruido: 0.25 },
+  speaking:  { amp: 0.95, speed: 4.4,  ruido: 0.35 },
+  listening: { amp: 0.75, speed: 3.0,  ruido: 0.4  },
   alert:     { amp: 0.6,  speed: 3.2,  ruido: 0.5  },
   offline:   { amp: 0,    speed: 0,    ruido: 0    },
 };

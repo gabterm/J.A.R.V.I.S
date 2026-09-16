@@ -48,7 +48,13 @@
         "desenvolvimento de tecnologia",
         "programar",
         "Hino do Santos",
-        "música rock metálico"
+        "música rock metálico",
+        "música de Rebzyyx",
+        "a música \"It's Been So Long\"",
+        "Iron Man",
+        "Black Sabbath",
+        "música de Hans Zimmer",
+        "trilha sonora de Interestelar"
     ],
     "conhecimentos_tecnicos": {
         "linguagens": [
@@ -225,7 +231,8 @@
         "Criar cada arquivo para testar se o fluxo da tela de staging de arquivo está funcionando",
         "ir para Guaratuba hoje",
         "Enviar uma notificação para o próprio celular",
-        "trabalhar com componentes eletrônicos e robótica no geral"
+        "trabalhar com componentes eletrônicos e robótica no geral",
+        "encontrar uma versão slowed + reverb de \"It's Been So Long\""
     ],
     "rotina": [
         "Está calibrando um modelo de síntese de voz.",
@@ -386,51 +393,58 @@
         "rock metálico",
         "ouvir música para dormir",
         "Receber as principais notícias por mensagem no celular",
-        "ouvir a música \"I Choose You\", de Hans Zimmer"
+        "ouvir a música \"I Choose You\", de Hans Zimmer",
+        "versões slowed + reverb",
+        "Ouvir “It’s Been So Long” em versão slowed + reverb",
+        "não quer a mesma de antes",
+        "ouvir músicas de Hans Zimmer da trilha sonora de Interestelar",
+        "música meio dark fantasy",
+        "música da Audiomachine",
+        "Prefere outra música da Audiomachine diferente da atual"
     ],
     "historico_recente": [
         {
-            "usuario": "jarvis",
-            "jarvis": "À disposição, senhor. O que precisa?"
+            "usuario": "outra que tambem nao seja essa",
+            "jarvis": "Não encontrei outra faixa da Audiomachine com essa busca. Posso tentar uma pesquisa mais específica por “Audiomachine epic music”."
         },
         {
-            "usuario": "liste musicas recentes",
-            "jarvis": "A música mais recente registrada é “Infinity”, de Jaymes Young. Já deixei tocando, senhor."
+            "usuario": "so say we all da audiomachine",
+            "jarvis": "Tocando “So Say We All”, da Audiomachine, senhor."
         },
         {
-            "usuario": "toque iron man do black sabath",
-            "jarvis": "Tocando Iron Man, do Black Sabbath, senhor."
+            "usuario": "a musica so say we all foi desenvolvida exclusivamente para o trailer de vingadores ultimato?",
+            "jarvis": "Não, senhor. “So Say We All”, da Audiomachine, não foi desenvolvida exclusivamente para o trailer de Vingadores: Ultimato.\n\nEla é uma faixa de catálogo da Audiomachine, lançada para uso em trailers, cinema, televisão e outras produções. Pode ter sido usada em materiais promocionais relacionados ao filme, mas isso não significa que tenha sido composta exclusivamente para ele."
         },
         {
-            "usuario": "abra o painel de muiscas recentes",
-            "jarvis": "Não tenho uma ação disponível para abrir um painel de músicas recentes, senhor. Posso tocar uma música específica pelo YouTube Music."
+            "usuario": "encontre outros contextos em que essa musica tenha sido usada",
+            "jarvis": "A pesquisa encontrou um bloqueio do Google e não retornou resultados confiáveis, senhor. Não vou inventar uma lista só para preencher o silêncio, seria uma aplicação curiosamente ruim da música.\n\nO que consigo afirmar com segurança é que “So Say We All” aparece associada ao catálogo de produção da Audiomachine, voltado para trailers, vídeos promocionais, televisão, documentários e conteúdos de internet. Não encontrei confirmação verificável de outros filmes ou campanhas específicas além da associação já mencionada com materiais de Vingadores: Ultimato.\n\nPosso continuar investigando por bases de dados de trilhas, vídeos e créditos específicos."
         },
         {
-            "usuario": "toque portals do alan silvestri",
-            "jarvis": "Tocando Portals, de Alan Silvestri, senhor."
+            "usuario": "sim",
+            "jarvis": "Tocando “So Say We All”, da Audiomachine, senhor."
         },
         {
-            "usuario": "toque portals do alan silvestri",
-            "jarvis": "Tocando Portals, de Alan Silvestri, senhor."
+            "usuario": "[NOTIFICAÇÃO AUTOMÁTICA DE WHATSAPP] Chegou uma mensagem nova de Matheus. Prévia: \"Tmnc\". Use read_whatsapp_chat para ler a conversa completa com Matheus. Avise o usuário sobre a mensagem, resuma o conteúdo dela em fala natural, e já sugira um rascunho de resposta chamando send_whatsapp_message com confirmado=false. Fale o rascunho sugerido e pergunte se pode enviar. Não chame send_whatsapp_message com confirmado=true nesta mesma resposta, mesmo que o rascunho pareça óbvio — a aprovação só vem em uma mensagem seguinte do usuário.",
+            "jarvis": "Senhor, chegou uma mensagem nova do Matheus com a prévia “Tmnc”. Não consegui abrir a conversa completa porque o WhatsApp retornou um erro técnico, então só tenho essa prévia.\n\nRascunho de resposta: “Recebi seu ‘Tmnc’. O que aconteceu?”\n\nPosso enviar?"
         },
         {
-            "usuario": "toque last son",
-            "jarvis": "Tocando Last Son, de David Fleming, senhor."
+            "usuario": "[NOTIFICAÇÃO AUTOMÁTICA DE WHATSAPP] Chegou uma mensagem nova de Matheus. Prévia: \"Não\". Use read_whatsapp_chat para ler a conversa completa com Matheus. Avise o usuário sobre a mensagem, resuma o conteúdo dela em fala natural, e já sugira um rascunho de resposta chamando send_whatsapp_message com confirmado=false. Fale o rascunho sugerido e pergunte se pode enviar. Não chame send_whatsapp_message com confirmado=true nesta mesma resposta, mesmo que o rascunho pareça óbvio — a aprovação só vem em uma mensagem seguinte do usuário.",
+            "jarvis": "Senhor, o Matheus enviou “Não”. Não consegui abrir a conversa completa porque o WhatsApp retornou um erro técnico.\n\nRascunho de resposta: “Recebi sua mensagem ‘Não’, mas não consegui abrir a conversa completa. O que você quis dizer?”\n\nPosso enviar?"
         },
         {
-            "usuario": "toque: https://www.youtube.com/watch?v=UbB6Ld7ySmc&list=RDUbB6Ld7ySmc&start_radio=1",
-            "jarvis": "Não encontrei a música a partir desse link. Envie o nome da faixa ou do artista, e eu pesquiso no YouTube Music."
+            "usuario": "[NOTIFICAÇÃO AUTOMÁTICA DE WHATSAPP] Chegou uma mensagem nova de Matheus. Prévia: \"Vai ficar massa\". Use read_whatsapp_chat para ler a conversa completa com Matheus. Avise o usuário sobre a mensagem, resuma o conteúdo dela em fala natural, e já sugira um rascunho de resposta chamando send_whatsapp_message com confirmado=false. Fale o rascunho sugerido e pergunte se pode enviar. Não chame send_whatsapp_message com confirmado=true nesta mesma resposta, mesmo que o rascunho pareça óbvio — a aprovação só vem em uma mensagem seguinte do usuário.",
+            "jarvis": "Senhor, o Matheus enviou “Vai ficar massa”. Não consegui abrir a conversa completa porque o WhatsApp retornou um erro técnico.\n\nRascunho de resposta: “Vi sua mensagem ‘Vai ficar massa’, mas não consegui abrir a conversa completa. Massa o quê exatamente?”\n\nPosso enviar?"
         },
         {
-            "usuario": "o titulo é exatamente \"\nPost Malone ft. 21 Savage - Rockstar - (Slowed/Reverb)\"",
-            "jarvis": "Tocando “rockstar”, de Post Malone com 21 Savage, senhor. A versão Slowed/Reverb não foi identificada com precisão, então deixei a faixa oficial."
+            "usuario": "jaevis",
+            "jarvis": "Sim, senhor. Estou aqui."
         },
         {
-            "usuario": "toque shield of pain",
-            "jarvis": "Tocando Shield of Pain, de Michael Giacchino, senhor."
+            "usuario": "que horas sao agora?",
+            "jarvis": "São seis e trinta e oito da tarde, senhor."
         }
     ],
-    "resumo_contexto": "O usuário solicitou a reprodução de “Iron Man”, do Black Sabbath, e JARVIS informou que a música estava sendo tocada. Posteriormente, chegou uma mensagem de Tia Ana com a prévia “Elas quem?”; JARVIS tentou ler a conversa, mas o WhatsApp retornou erro, impedindo a obtenção do contexto. JARVIS não inventou uma resposta nem enviou mensagem, oferecendo tentar novamente.",
+    "resumo_contexto": "O usuário continua interessado em músicas da Audiomachine com atmosfera dark fantasy; após ouvir “Dark Magic”, pediu outra faixa e JARVIS tocou “Rise of the Black Curtain”.",
     "timeline": [
         {
             "id": "277740a4-92e9-496a-978e-0f4c024d414a",
@@ -1312,6 +1326,90 @@
             "id": "fc7504f0-919f-417a-b8e1-e7a7a26e068d",
             "tipo": "rotina",
             "text": "Não organiza mais a vida em torno disso.",
+            "pinned": false
+        },
+        {
+            "id": "8bb1a5f4-ec65-4fc4-9392-7796157e55d3",
+            "tipo": "interesse",
+            "text": "música de Rebzyyx",
+            "pinned": false
+        },
+        {
+            "id": "7c04b9f2-af02-4725-8fac-7b04752b5a9e",
+            "tipo": "interesse",
+            "text": "a música \"It's Been So Long\"",
+            "pinned": false
+        },
+        {
+            "id": "1cdc95a5-e72c-4e0f-804f-381136f2feb7",
+            "tipo": "preferencia",
+            "text": "versões slowed + reverb",
+            "pinned": false
+        },
+        {
+            "id": "7b7b61cb-28a5-420b-a511-15cb247225ce",
+            "tipo": "objetivo",
+            "text": "encontrar uma versão slowed + reverb de \"It's Been So Long\"",
+            "pinned": false
+        },
+        {
+            "id": "bc542c94-907c-436d-830e-19fa22640a29",
+            "tipo": "preferencia",
+            "text": "Ouvir “It’s Been So Long” em versão slowed + reverb",
+            "pinned": false
+        },
+        {
+            "id": "bb4702ac-5d1d-4e12-8b66-c5e8999fcf94",
+            "tipo": "preferencia",
+            "text": "não quer a mesma de antes",
+            "pinned": false
+        },
+        {
+            "id": "e93d1544-136b-4a4e-8e07-07e0bf2ebc13",
+            "tipo": "interesse",
+            "text": "Iron Man",
+            "pinned": false
+        },
+        {
+            "id": "ffe39bfa-91a7-4ca1-9b40-1243c7742c1a",
+            "tipo": "interesse",
+            "text": "Black Sabbath",
+            "pinned": false
+        },
+        {
+            "id": "41da14c7-6f78-41ba-be7a-bbc413136fd7",
+            "tipo": "interesse",
+            "text": "música de Hans Zimmer",
+            "pinned": false
+        },
+        {
+            "id": "8184b3f2-7914-41c3-ba28-f5e587614bcb",
+            "tipo": "preferencia",
+            "text": "ouvir músicas de Hans Zimmer da trilha sonora de Interestelar",
+            "pinned": false
+        },
+        {
+            "id": "432a6ef6-6cd4-4d87-b5ac-0c88a29bcc4d",
+            "tipo": "interesse",
+            "text": "trilha sonora de Interestelar",
+            "pinned": false
+        },
+        {
+            "id": "95247b30-00b2-4682-b3d2-f276fdd692b6",
+            "tipo": "preferencia",
+            "text": "música meio dark fantasy",
+            "pinned": false
+        },
+        {
+            "id": "7d6609e2-ed66-4767-bfca-76f20350d49c",
+            "tipo": "preferencia",
+            "text": "música da Audiomachine",
+            "pinned": false
+        },
+        {
+            "id": "de936d67-9566-42ce-9a09-3d1d815256d4",
+            "tipo": "preferencia",
+            "text": "Prefere outra música da Audiomachine diferente da atual",
             "pinned": false
         }
     ]
