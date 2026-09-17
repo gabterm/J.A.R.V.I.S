@@ -404,47 +404,47 @@
     ],
     "historico_recente": [
         {
-            "usuario": "outra que tambem nao seja essa",
-            "jarvis": "Não encontrei outra faixa da Audiomachine com essa busca. Posso tentar uma pesquisa mais específica por “Audiomachine epic music”."
+            "usuario": "[NOTIFICAÇÃO AUTOMÁTICA DE WHATSAPP] Chegou uma mensagem nova de Carolina. Prévia: \"só que vou estar ocupada nos próximos 3 finais de semana\". Use read_whatsapp_chat para ler a conversa completa com Carolina. Avise o usuário sobre a mensagem, resuma o conteúdo dela em fala natural, e já sugira um rascunho de resposta chamando send_whatsapp_message com confirmado=false. Fale o rascunho sugerido e pergunte se pode enviar. Não chame send_whatsapp_message com confirmado=true nesta mesma resposta, mesmo que o rascunho pareça óbvio — a aprovação só vem em uma mensagem seguinte do usuário.",
+            "jarvis": "Senhor, a Carolina disse que estará ocupada nos próximos três finais de semana. Não consegui abrir a conversa completa porque o WhatsApp retornou um erro técnico.\n\nRascunho de resposta: “Entendi. Então deixamos para depois desses três próximos finais de semana. Quando você estiver livre, me avisa e combinamos.”\n\nPosso enviar?"
         },
         {
-            "usuario": "so say we all da audiomachine",
-            "jarvis": "Tocando “So Say We All”, da Audiomachine, senhor."
-        },
-        {
-            "usuario": "a musica so say we all foi desenvolvida exclusivamente para o trailer de vingadores ultimato?",
-            "jarvis": "Não, senhor. “So Say We All”, da Audiomachine, não foi desenvolvida exclusivamente para o trailer de Vingadores: Ultimato.\n\nEla é uma faixa de catálogo da Audiomachine, lançada para uso em trailers, cinema, televisão e outras produções. Pode ter sido usada em materiais promocionais relacionados ao filme, mas isso não significa que tenha sido composta exclusivamente para ele."
-        },
-        {
-            "usuario": "encontre outros contextos em que essa musica tenha sido usada",
-            "jarvis": "A pesquisa encontrou um bloqueio do Google e não retornou resultados confiáveis, senhor. Não vou inventar uma lista só para preencher o silêncio, seria uma aplicação curiosamente ruim da música.\n\nO que consigo afirmar com segurança é que “So Say We All” aparece associada ao catálogo de produção da Audiomachine, voltado para trailers, vídeos promocionais, televisão, documentários e conteúdos de internet. Não encontrei confirmação verificável de outros filmes ou campanhas específicas além da associação já mencionada com materiais de Vingadores: Ultimato.\n\nPosso continuar investigando por bases de dados de trilhas, vídeos e créditos específicos."
-        },
-        {
-            "usuario": "sim",
-            "jarvis": "Tocando “So Say We All”, da Audiomachine, senhor."
-        },
-        {
-            "usuario": "[NOTIFICAÇÃO AUTOMÁTICA DE WHATSAPP] Chegou uma mensagem nova de Matheus. Prévia: \"Tmnc\". Use read_whatsapp_chat para ler a conversa completa com Matheus. Avise o usuário sobre a mensagem, resuma o conteúdo dela em fala natural, e já sugira um rascunho de resposta chamando send_whatsapp_message com confirmado=false. Fale o rascunho sugerido e pergunte se pode enviar. Não chame send_whatsapp_message com confirmado=true nesta mesma resposta, mesmo que o rascunho pareça óbvio — a aprovação só vem em uma mensagem seguinte do usuário.",
-            "jarvis": "Senhor, chegou uma mensagem nova do Matheus com a prévia “Tmnc”. Não consegui abrir a conversa completa porque o WhatsApp retornou um erro técnico, então só tenho essa prévia.\n\nRascunho de resposta: “Recebi seu ‘Tmnc’. O que aconteceu?”\n\nPosso enviar?"
-        },
-        {
-            "usuario": "[NOTIFICAÇÃO AUTOMÁTICA DE WHATSAPP] Chegou uma mensagem nova de Matheus. Prévia: \"Não\". Use read_whatsapp_chat para ler a conversa completa com Matheus. Avise o usuário sobre a mensagem, resuma o conteúdo dela em fala natural, e já sugira um rascunho de resposta chamando send_whatsapp_message com confirmado=false. Fale o rascunho sugerido e pergunte se pode enviar. Não chame send_whatsapp_message com confirmado=true nesta mesma resposta, mesmo que o rascunho pareça óbvio — a aprovação só vem em uma mensagem seguinte do usuário.",
-            "jarvis": "Senhor, o Matheus enviou “Não”. Não consegui abrir a conversa completa porque o WhatsApp retornou um erro técnico.\n\nRascunho de resposta: “Recebi sua mensagem ‘Não’, mas não consegui abrir a conversa completa. O que você quis dizer?”\n\nPosso enviar?"
-        },
-        {
-            "usuario": "[NOTIFICAÇÃO AUTOMÁTICA DE WHATSAPP] Chegou uma mensagem nova de Matheus. Prévia: \"Vai ficar massa\". Use read_whatsapp_chat para ler a conversa completa com Matheus. Avise o usuário sobre a mensagem, resuma o conteúdo dela em fala natural, e já sugira um rascunho de resposta chamando send_whatsapp_message com confirmado=false. Fale o rascunho sugerido e pergunte se pode enviar. Não chame send_whatsapp_message com confirmado=true nesta mesma resposta, mesmo que o rascunho pareça óbvio — a aprovação só vem em uma mensagem seguinte do usuário.",
-            "jarvis": "Senhor, o Matheus enviou “Vai ficar massa”. Não consegui abrir a conversa completa porque o WhatsApp retornou um erro técnico.\n\nRascunho de resposta: “Vi sua mensagem ‘Vai ficar massa’, mas não consegui abrir a conversa completa. Massa o quê exatamente?”\n\nPosso enviar?"
-        },
-        {
-            "usuario": "jaevis",
+            "usuario": "jarvix",
             "jarvis": "Sim, senhor. Estou aqui."
         },
         {
-            "usuario": "que horas sao agora?",
-            "jarvis": "São seis e trinta e oito da tarde, senhor."
+            "usuario": "[NOTIFICAÇÃO AUTOMÁTICA DE WHATSAPP] Chegou uma mensagem nova de Carolina. Prévia: \"o vc vai fazer com isso?\". Use read_whatsapp_chat para ler a conversa completa com Carolina. Avise o usuário sobre a mensagem, resuma o conteúdo dela em fala natural, e já sugira um rascunho de resposta chamando send_whatsapp_message com confirmado=false. Fale o rascunho sugerido e pergunte se pode enviar. Não chame send_whatsapp_message com confirmado=true nesta mesma resposta, mesmo que o rascunho pareça óbvio — a aprovação só vem em uma mensagem seguinte do usuário.",
+            "jarvis": "Senhor, a Carolina perguntou: “O que você vai fazer com isso?”. Não consegui abrir a conversa completa por um erro técnico do WhatsApp.\n\nRascunho de resposta: “Recebi sua mensagem, mas não consegui abrir a conversa completa. Você pode me lembrar do que está falando?”\n\nPosso enviar?"
+        },
+        {
+            "usuario": "[NOTIFICAÇÃO AUTOMÁTICA DE WHATSAPP] Chegou uma mensagem nova de Carolina. Prévia: \"oq estiver mais barato\". Use read_whatsapp_chat para ler a conversa completa com Carolina. Avise o usuário sobre a mensagem, resuma o conteúdo dela em fala natural, e já sugira um rascunho de resposta chamando send_whatsapp_message com confirmado=false. Fale o rascunho sugerido e pergunte se pode enviar. Não chame send_whatsapp_message com confirmado=true nesta mesma resposta, mesmo que o rascunho pareça óbvio — a aprovação só vem em uma mensagem seguinte do usuário.",
+            "jarvis": "Senhor, a Carolina disse: “o que estiver mais barato”. Não consegui abrir a conversa completa por um erro técnico do WhatsApp.\n\nRascunho de resposta: “Recebi sua mensagem dizendo ‘o que estiver mais barato’, mas não consegui abrir a conversa completa. Você pode me lembrar do que está falando?”\n\nPosso enviar?"
+        },
+        {
+            "usuario": "[NOTIFICAÇÃO AUTOMÁTICA DE WHATSAPP] Chegou uma mensagem nova de Carolina. Prévia: \"se vc colocar arena jiujitsu já aparece\". Use read_whatsapp_chat para ler a conversa completa com Carolina. Avise o usuário sobre a mensagem, resuma o conteúdo dela em fala natural, e já sugira um rascunho de resposta chamando send_whatsapp_message com confirmado=false. Fale o rascunho sugerido e pergunte se pode enviar. Não chame send_whatsapp_message com confirmado=true nesta mesma resposta, mesmo que o rascunho pareça óbvio — a aprovação só vem em uma mensagem seguinte do usuário.",
+            "jarvis": "Senhor, a Carolina disse que, se você colocar “Arena Jiu-Jitsu”, o local já aparece. Não consegui abrir a conversa completa por um erro técnico do WhatsApp.\n\nRascunho de resposta: “Entendi. Se você colocar ‘Arena Jiu-Jitsu’, já aparece. Vou procurar por esse nome então.”\n\nPosso enviar?"
+        },
+        {
+            "usuario": "[NOTIFICAÇÃO AUTOMÁTICA DE WHATSAPP] Chegou uma mensagem nova de Carolina. Prévia: \"obrigada\". Use read_whatsapp_chat para ler a conversa completa com Carolina. Avise o usuário sobre a mensagem, resuma o conteúdo dela em fala natural, e já sugira um rascunho de resposta chamando send_whatsapp_message com confirmado=false. Fale o rascunho sugerido e pergunte se pode enviar. Não chame send_whatsapp_message com confirmado=true nesta mesma resposta, mesmo que o rascunho pareça óbvio — a aprovação só vem em uma mensagem seguinte do usuário.",
+            "jarvis": "Senhor, a Carolina mandou “obrigada”. Não consegui abrir a conversa completa porque o WhatsApp retornou um erro técnico.\n\nRascunho de resposta: “Imagina. Se precisar de mais alguma coisa, me avisa.”\n\nPosso enviar?"
+        },
+        {
+            "usuario": "[NOTIFICAÇÃO AUTOMÁTICA DE WHATSAPP] Chegou uma mensagem nova de Carolina. Prévia: \"obrigada\". Use read_whatsapp_chat para ler a conversa completa com Carolina. Avise o usuário sobre a mensagem, resuma o conteúdo dela em fala natural, e já sugira um rascunho de resposta chamando send_whatsapp_message com confirmado=false. Fale o rascunho sugerido e pergunte se pode enviar. Não chame send_whatsapp_message com confirmado=true nesta mesma resposta, mesmo que o rascunho pareça óbvio — a aprovação só vem em uma mensagem seguinte do usuário.",
+            "jarvis": "Senhor, a Carolina mandou “obrigada”. Não consegui abrir a conversa completa porque o WhatsApp retornou um erro técnico.\n\nRascunho de resposta: “Imagina. Se precisar de mais alguma coisa, me avisa.”\n\nPosso enviar?"
+        },
+        {
+            "usuario": "[NOTIFICAÇÃO AUTOMÁTICA DE WHATSAPP] Chegou uma mensagem nova de Carolina. Prévia: \"eita\". Use read_whatsapp_chat para ler a conversa completa com Carolina. Avise o usuário sobre a mensagem, resuma o conteúdo dela em fala natural, e já sugira um rascunho de resposta chamando send_whatsapp_message com confirmado=false. Fale o rascunho sugerido e pergunte se pode enviar. Não chame send_whatsapp_message com confirmado=true nesta mesma resposta, mesmo que o rascunho pareça óbvio — a aprovação só vem em uma mensagem seguinte do usuário.",
+            "jarvis": "Senhor, a Carolina mandou “eita”. Não consegui abrir a conversa completa porque o WhatsApp retornou um erro técnico.\n\nRascunho de resposta: “Recebi seu ‘eita’, mas não consegui abrir a conversa completa. Você pode me lembrar do que está falando?”\n\nPosso enviar?"
+        },
+        {
+            "usuario": "[NOTIFICAÇÃO AUTOMÁTICA DE WHATSAPP] Chegou uma mensagem nova de Carolina. Prévia: \"não mas n tem problema\". Use read_whatsapp_chat para ler a conversa completa com Carolina. Avise o usuário sobre a mensagem, resuma o conteúdo dela em fala natural, e já sugira um rascunho de resposta chamando send_whatsapp_message com confirmado=false. Fale o rascunho sugerido e pergunte se pode enviar. Não chame send_whatsapp_message com confirmado=true nesta mesma resposta, mesmo que o rascunho pareça óbvio — a aprovação só vem em uma mensagem seguinte do usuário.",
+            "jarvis": "Senhor, a Carolina disse: “não, mas não tem problema”. Não consegui abrir a conversa completa porque o WhatsApp mudou a estrutura da página.\n\nRascunho de resposta: “Tudo bem então. Se precisar de alguma coisa, me avisa. Posso enviar?”"
+        },
+        {
+            "usuario": "[NOTIFICAÇÃO AUTOMÁTICA DE WHATSAPP] Chegou uma mensagem nova de Carolina. Prévia: \"gracias\". Use read_whatsapp_chat para ler a conversa completa com Carolina. Avise o usuário sobre a mensagem, resuma o conteúdo dela em fala natural, e já sugira um rascunho de resposta chamando send_whatsapp_message com confirmado=false. Fale o rascunho sugerido e pergunte se pode enviar. Não chame send_whatsapp_message com confirmado=true nesta mesma resposta, mesmo que o rascunho pareça óbvio — a aprovação só vem em uma mensagem seguinte do usuário.",
+            "jarvis": "Senhor, a Carolina mandou “gracias”. Não consegui abrir a conversa completa porque o WhatsApp mudou a estrutura da página.\n\nRascunho de resposta: “De nada.”\n\nPosso enviar?"
         }
     ],
-    "resumo_contexto": "O usuário continua interessado em músicas da Audiomachine com atmosfera dark fantasy; após ouvir “Dark Magic”, pediu outra faixa e JARVIS tocou “Rise of the Black Curtain”.",
+    "resumo_contexto": "Matheus recebeu uma mensagem de Carolina dizendo que está com muita dor após comer bolo demais. JARVIS não conseguiu abrir a conversa completa devido a erro técnico e sugeriu responder com preocupação, recomendando descanso, água e atendimento médico se a dor fosse forte ou persistente, além de perguntar onde doía; aguardou aprovação de Matheus antes de enviar.",
     "timeline": [
         {
             "id": "277740a4-92e9-496a-978e-0f4c024d414a",

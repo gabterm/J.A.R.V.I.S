@@ -2,6 +2,7 @@ import os
 import re
 import subprocess
 import ssl
+import unicodedata
 import urllib.parse
 import webbrowser
 import xml.etree.ElementTree as ET
@@ -10,6 +11,7 @@ import math
 import time
 import threading
 from datetime import datetime
+from difflib import SequenceMatcher
 from pathlib import Path
 from urllib.request import urlopen, Request
 from zoneinfo import ZoneInfo
@@ -415,11 +417,6 @@ def _osrm_route(origem_lat, origem_lon, destino_lat, destino_lon, profile="drivi
 
 
 def get_distance(origem: str, destino: str, modo: str = "driving"):
-    # Cada etapa (geocode origem, geocode destino, rota) tem seu próprio
-    # try/except, em vez de um único try cobrindo a função inteira — assim,
-    # se algo falhar (rede, SSL, timeout), a mensagem de erro já diz
-    # exatamente em qual etapa foi, em vez de um erro genérico que obriga
-    # a adivinhar se foi o geocode ou o cálculo de rota.
     try:
         ponto_origem = _geocode_local(origem)
     except Exception as error:
@@ -437,7 +434,6 @@ def get_distance(origem: str, destino: str, modo: str = "driving"):
             "message": f"Local de origem não encontrado: {origem}",
         }
 
-    # Nominatim pede no máximo 1 requisição por segundo
     time.sleep(1)
 
     try:
@@ -508,17 +504,6 @@ def get_distance(origem: str, destino: str, modo: str = "driving"):
     }
 
 
-# ---------- busca de "lugar mais próximo por categoria", sem dicionário fixo ----------
-#
-# Em vez de mapear palavras-chave em português pra tags OSM (o que só
-# funcionaria pra um idioma e um conjunto finito de categorias), quem decide
-# a(s) tag(s) OSM corretas é o próprio modelo, no momento da chamada da
-# ferramenta — ele já conhece o esquema de tagging do OpenStreetMap, que é
-# padronizado e cobre o planeta inteiro, em qualquer idioma. Isso torna a
-# busca genuinamente universal: "chaveiro", "locksmith", "cerrajero",
-# "farmácia 24h", "pronto-socorro veterinário" etc. tudo cai no mesmo
-# mecanismo, sem precisar tocar no código pra cada categoria nova.
-
 _OVERPASS_MIRRORS = [
     "https://overpass-api.de/api/interpreter",
     "https://overpass.kumi.systems/api/interpreter",
@@ -578,22 +563,6 @@ def _overpass_request(query, tentativas_por_mirror=1):
 
 
 def _overpass_nearest(lat, lon, tags):
-    """
-    Busca o POI mais próximo de (lat, lon) que satisfaça QUALQUER uma das
-    tags OSM fornecidas (ex: [("shop","locksmith")]). Expande o raio de
-    busca progressivamente até encontrar algo ou esgotar as tentativas —
-    funciona tanto em centro de metrópole quanto em zona rural, em
-    qualquer lugar do planeta onde exista cobertura OSM (praticamente
-    universal). Ordena por distância real (haversine), não por
-    relevância textual.
-
-    Se TODAS as tentativas (todos os raios x todos os espelhos) falharem
-    por erro de rede/SSL/timeout — ou seja, nunca conseguimos nem uma
-    resposta válida do Overpass — a última exceção é relançada, para que
-    a função chamadora possa diferenciar "não achei nenhum lugar dessa
-    categoria" de "não consegui nem consultar o Overpass". Sem isso, um
-    problema de rede ficaria mascarado como resultado vazio.
-    """
     tags_validas = [t for t in (_parse_osm_tag(tag) for tag in tags) if t]
     if not tags_validas:
         return None, None
@@ -637,16 +606,6 @@ def _overpass_nearest(lat, lon, tags):
 
 
 def find_nearest_place(origem: str, categoria: str, tags: list, modo: str = "driving"):
-    """
-    Acha o estabelecimento/lugar mais próximo de uma categoria (definida
-    via tags OSM escolhidas pelo modelo) a partir de um ponto de origem,
-    e traça a rota até lá no mapa da interface. Funciona pra qualquer
-    categoria, em qualquer idioma, em qualquer lugar do planeta com
-    cobertura OpenStreetMap.
-    """
-    # Assim como em get_distance, cada etapa tem seu próprio try/except
-    # pra deixar claro em qual serviço externo (Nominatim, Overpass ou
-    # OSRM) uma eventual falha de rede/SSL aconteceu.
     try:
         ponto_origem = _geocode_local(origem)
     except Exception as error:
@@ -874,18 +833,6 @@ def open_website(url: str):
             "message": f"Não foi possível abrir o site: {error}",
         }
 
-
-# ============================================================
-# BUSCA / NAVEGAÇÃO WEB (search_web + browser_*)
-# ============================================================
-#
-# search_web e as funções browser_* abaixo delegam pro tools/web_agent.py,
-# que roda uma sessão de navegador real (Playwright + Chromium) numa
-# thread dedicada. Diferente do antigo browse_url (que só embutia uma URL
-# num iframe via proxy), essas ferramentas conseguem de fato navegar
-# dentro dos sites: clicar em links/botões, preencher campos, rolar,
-# voltar/avançar — e cada ação transmite um screenshot ao vivo pra
-# interface (evento 'browser_screenshot').
 
 def search_web(query: str):
     try:
@@ -1228,13 +1175,6 @@ def show_notification(title: str, message: str):
 
 
 def toggle_microphone(ativo: bool = None):
-    """
-    Liga ou desliga a escuta contínua do microfone real (o mesmo
-    controlado pelo botão de mic no HUD). Se 'ativo' não for informado,
-    inverte o estado atual. Sincroniza o botão de todas as interfaces
-    conectadas via broadcast, e o mic_listener.py passa a descartar (ou
-    voltar a processar) o áudio capturado imediatamente.
-    """
     try:
         if ativo is None:
             ativo = not ui_bridge.microfone_ativo.is_set()
@@ -1279,9 +1219,6 @@ def _validar_objeto_simulacao(obj, contexto):
     if tipo not in _TIPOS_OBJETO_SIMULACAO:
         return f"{contexto}: tipo de objeto inválido '{tipo}' (id={obj.get('id')})."
 
-    # linha usa x1/y1/x2/y2 em vez de x/y; onda pode não ter x/y próprio
-    # (a posição vem inteira dos params do movimento) — por isso x/y só
-    # são validados quando presentes, não são sempre obrigatórios aqui.
     for campo in ("x", "y", "x1", "y1", "x2", "y2"):
         valor = obj.get(campo)
         if valor is not None:
@@ -1323,12 +1260,6 @@ _PAUSA_QUADRO_SIMULACAO_SEM_NARRACAO = 1.0
 
 
 def _narrar_quadros_simulacao(quadros):
-    """
-    Espelha _narrar_quadros_raciocinio: manda o estado completo de cada
-    quadro ('simulation_frame') e fala a anotação de forma bloqueante,
-    então a animação avança exatamente no ritmo da narração. Usado só
-    no modo="cenas".
-    """
     for index, frame in enumerate(quadros):
         anotacao = frame.get("anotacao") or ""
 
@@ -1372,8 +1303,6 @@ def show_simulation(
         ui_bridge.broadcast({"type": "simulation_board", "titulo": titulo})
 
         if modo == "fisica":
-            # Uma mensagem só — o navegador anima sozinho, continuamente,
-            # sem o backend precisar reenviar frames.
             ui_bridge.broadcast({
                 "type": "simulation_scene",
                 "objetos": objetos,
@@ -1458,10 +1387,6 @@ def get_daily_news(query: str = "", limit: int = 5):
                 else None
             )
 
-            # A RSS do Google News não vem com imagem. Usamos o serviço
-            # gratuito de screenshot da WordPress (mshots), que gera uma
-            # miniatura da própria página da notícia a partir da URL —
-            # sem precisar de chave de API nem scraping adicional.
             image_url = (
                 "https://s.wordpress.com/mshots/v1/"
                 f"{urllib.parse.quote(link, safe='')}?w=500&h=300"
@@ -1502,6 +1427,126 @@ def get_daily_news(query: str = "", limit: int = 5):
         }
 
 
+# ============================================================
+# BUSCA DE MÚSICA (play_music) — auxiliares
+# ============================================================
+#
+# _detectar_versoes_pedidas / _titulo_tem_versao_indesejada: evitam que
+# play_music toque uma versão ao vivo/remix/cover/acústica quando o
+# usuário só pediu a música "normal". Se o próprio texto da busca já
+# menciona uma dessas variações (ex: "toca o remix de..."), ela deixa
+# de ser filtrada.
+#
+# _normalizar_texto / _pontuar_resultado: em vez de sempre pegar o
+# primeiro resultado "limpo" na ordem que o YTMusic devolve, calculamos
+# uma similaridade de texto entre a query e cada candidato (título +
+# artistas), pra escolher o que realmente mais bate com o que foi
+# pedido — cobrindo também pequenos erros de digitação, já que
+# SequenceMatcher não exige correspondência exata.
+#
+# _escolher_melhor_resultado: junta as duas coisas — separa candidatos
+# "limpos" dos indesejados, e dentro de cada grupo ordena pela
+# pontuação de similaridade, do maior pro menor.
+
+_PALAVRAS_VERSAO_INDESEJADA = {
+    "live": ["ao vivo", "live", "live session", "live at", "unplugged"],
+    "remix": ["remix", "rmx", "mashup"],
+    "cover": ["cover", "tribute", "tribute to"],
+    "acoustic": ["acústico", "acustico", "acoustic"],
+    "instrumental": ["instrumental", "karaoke", "karaokê"],
+    "alterado": ["slowed", "sped up", "nightcore", "8d audio"],
+}
+
+
+def _detectar_versoes_pedidas(query: str) -> set:
+    """Se o usuário já pediu explicitamente uma dessas variações no
+    texto da busca, ela deixa de ser 'indesejada' e passa a ser aceita."""
+    query_lower = query.lower()
+    return {
+        categoria
+        for categoria, termos in _PALAVRAS_VERSAO_INDESEJADA.items()
+        if any(termo in query_lower for termo in termos)
+    }
+
+
+def _titulo_tem_versao_indesejada(titulo: str, permitidas: set) -> bool:
+    titulo_lower = titulo.lower()
+    return any(
+        termo in titulo_lower
+        for categoria, termos in _PALAVRAS_VERSAO_INDESEJADA.items()
+        if categoria not in permitidas
+        for termo in termos
+    )
+
+
+def _normalizar_texto(texto: str) -> str:
+    """Remove acentos/pontuação e deixa em minúsculo, pra comparar
+    títulos sem essas variações atrapalharem a similaridade."""
+    if not texto:
+        return ""
+    sem_acento = unicodedata.normalize("NFKD", texto)
+    sem_acento = "".join(c for c in sem_acento if not unicodedata.combining(c))
+    return re.sub(r"[^a-z0-9 ]", " ", sem_acento.lower()).strip()
+
+
+def _pontuar_resultado(resultado, query_normalizada):
+    titulo = _normalizar_texto(resultado.get("title", ""))
+    artistas = _normalizar_texto(
+        " ".join(a["name"] for a in (resultado.get("artists") or []))
+    )
+    texto_completo = f"{titulo} {artistas}".strip()
+
+    pontuacao = SequenceMatcher(None, query_normalizada, texto_completo).ratio()
+
+    # bônus quando um está quase contido no outro (ex: query só com o
+    # nome da música, sem o artista, ou vice-versa)
+    if titulo and titulo in query_normalizada:
+        pontuacao += 0.2
+    if query_normalizada and query_normalizada in texto_completo:
+        pontuacao += 0.1
+
+    return pontuacao
+
+
+def _escolher_melhor_resultado(resultados, query):
+    """Percorre os resultados priorizando os que não são versões
+    indesejadas (live/remix/cover/etc, a menos que pedidas
+    explicitamente) e, dentro desse critério, os mais parecidos com a
+    query. Se TODOS forem versões alternativas (ex: a música só existe
+    ao vivo), cai de volta pro melhor deles em vez de falhar."""
+    if not resultados:
+        return None
+
+    permitidas = _detectar_versoes_pedidas(query)
+    query_normalizada = _normalizar_texto(query)
+
+    candidatos = [
+        (
+            _titulo_tem_versao_indesejada(r.get("title", ""), permitidas),
+            _pontuar_resultado(r, query_normalizada),
+            r,
+        )
+        for r in resultados
+    ]
+
+    # False (não indesejada) vem antes de True; dentro de cada grupo,
+    # maior pontuação primeiro
+    candidatos.sort(key=lambda c: (c[0], -c[1]))
+
+    return candidatos[0][2]
+
+
+def _melhorar_resolucao_thumbnail(url: str, tamanho: int = 544) -> str:
+    """
+    Troca o sufixo de tamanho (wN-hN) presente nas URLs de thumbnail do
+    YT Music/Google por um valor maior. Os resultados de busca do
+    ytmusicapi costumam vir com thumbnails pequenas (ex: 120x120), então
+    mesmo pegando a última da lista a imagem sai granulada no HUD — isso
+    força uma resolução alta sem precisar de outra chamada à API.
+    """
+    if not url:
+        return url
+    return re.sub(r"w\d+-h\d+", f"w{tamanho}-h{tamanho}", url)
 
 
 _ytmusic_client = None
@@ -1520,10 +1565,10 @@ def play_music(query: str):
     try:
         client = _get_ytmusic_client()
 
-        results = client.search(query, filter="songs", limit=1)
+        results = client.search(query, filter="songs", limit=10, ignore_spelling=False)
 
         if not results:
-            results = client.search(query, filter="videos", limit=1)
+            results = client.search(query, filter="videos", limit=10, ignore_spelling=False)
 
         if not results:
             return {
@@ -1531,7 +1576,14 @@ def play_music(query: str):
                 "message": f"Nenhuma música encontrada para: {query}",
             }
 
-        top_result = results[0]
+        top_result = _escolher_melhor_resultado(results, query)
+
+        if not top_result:
+            return {
+                "success": False,
+                "message": f"Nenhuma música encontrada para: {query}",
+            }
+
         video_id = top_result.get("videoId")
 
         if not video_id:
@@ -1545,7 +1597,10 @@ def play_music(query: str):
             artist["name"] for artist in top_result.get("artists", [])
         )
         thumbnails = top_result.get("thumbnails") or []
-        thumbnail = thumbnails[-1]["url"] if thumbnails else None
+        thumbnail = (
+            _melhorar_resolucao_thumbnail(thumbnails[-1]["url"])
+            if thumbnails else None
+        )
 
         resultado = music_player.tocar(
             video_id, watch_url, top_result.get("title"), artists, thumbnail
@@ -1622,24 +1677,10 @@ def _validate_tactical_frame(frame, index):
     return None
 
 
-# Pausa usada entre quadros que não têm nenhuma anotação para narrar —
-# sem isso a animação pularia instantaneamente pra esses instantes.
 _PAUSA_QUADRO_SEM_NARRACAO = 1.2
 
 
 def _narrar_quadros_taticos(quadros):
-    """
-    Percorre os quadros em ordem e, para cada um:
-      1. Envia o evento 'tactical_frame' (índice + anotação) — é isso que
-         faz a interface avançar a animação para aquele instante.
-      2. Fala a anotação daquele instante pelo Fish Audio, bloqueando até
-         o áudio terminar.
-
-    Como o passo 2 é bloqueante, a duração de cada quadro na tela é
-    exatamente a duração da fala daquele instante — a animação fica
-    sincronizada com a narração por construção, não por um timer fixo.
-    """
-
     for index, frame in enumerate(quadros):
         anotacao = frame.get("anotacao") or ""
 
@@ -1767,11 +1808,6 @@ _PAUSA_QUADRO_RACIOCINIO_SEM_NARRACAO = 1.0
 
 
 def _narrar_quadros_raciocinio(quadros):
-    """
-    Espelha _narrar_quadros_taticos: envia o estado completo do quadro
-    ('reasoning_frame') e fala a anotação de forma bloqueante, então a
-    animação avança exatamente no ritmo da narração.
-    """
     for index, frame in enumerate(quadros):
         anotacao = frame.get("anotacao") or ""
 
@@ -1805,9 +1841,6 @@ def show_reasoning_board(titulo: str, quadros: list):
             }
 
     try:
-        # Diferente do tático, o board não manda o conteúdo completo de
-        # antemão — só abre o overlay. Cada quadro chega via
-        # 'reasoning_frame' já narrado, redesenhando o SVG do zero.
         ui_bridge.broadcast({
             "type": "reasoning_board",
             "titulo": titulo,
@@ -1831,16 +1864,6 @@ def show_reasoning_board(titulo: str, quadros: list):
             "message": f"Não foi possível exibir o quadro de raciocínio: {error}",
         }
 
-
-# ============================================================
-# WHATSAPP (list_unread_whatsapp / read_whatsapp_chat / send_whatsapp_message)
-# ============================================================
-#
-# Delegam pro tools/whatsapp_agent.py, que mantém uma sessão persistente
-# do WhatsApp Web via Playwright (mesmo padrão do web_agent.py) e roda um
-# poller em background que notifica (fala + broadcast) sobre mensagens
-# novas. O envio (send_whatsapp_message) só é efetivado com
-# confirmado=True — ver REGRA DE OURO no prompt.txt.
 
 def list_unread_whatsapp():
     return whatsapp_agent.list_unread_whatsapp()
