@@ -64,6 +64,37 @@ async def javascript():
 async def index():
     return FileResponse(HTML_FILE)
 
+
+# ============================================================
+# WEBHOOK DO WHATSAPP (Evolution API)
+# ============================================================
+#
+# A Evolution API chama esta rota (POST) toda vez que chega um evento
+# configurado no webhook da instância — o que importa aqui é
+# "messages.upsert" (mensagem nova). Repassamos o payload cru pra
+# tools.whatsapp_agent.processar_evento_webhook, que decide o que fazer
+# (dedup, filtrar grupo/echo, montar a instrução sintética e colocar em
+# mensagens_entrada).
+#
+# Fica em thread separada via asyncio.to_thread porque
+# processar_evento_webhook faz uma chamada síncrona (broadcast +
+# queue.put) — nada bloqueante de verdade, mas assim não corre risco de
+# travar o loop de eventos do FastAPI se algo demorar.
+@app.post("/webhook/whatsapp")
+async def whatsapp_webhook(request: Request):
+    payload = await request.json()
+
+    # IMPORTANTE: import tardio, não no topo do arquivo — mesmo motivo
+    # do TOOL_FUNCTIONS mais abaixo: tools.whatsapp_agent importa
+    # ui_bridge (pra broadcast e mensagens_entrada), então um import no
+    # topo criaria import circular.
+    import tools.whatsapp_agent as whatsapp_agent
+
+    await asyncio.to_thread(whatsapp_agent.processar_evento_webhook, payload)
+
+    return {"status": "ok"}
+
+
 _HEADERS_A_REMOVER = {
     "x-frame-options",
     "content-security-policy",

@@ -1,467 +1,397 @@
 """
-tools/web_agent.py
+tools/whatsapp_agent.py
 
-Navegação de verdade dentro de sites — não só "abrir" uma URL, mas
-clicar em links/botões, preencher campos, rolar a página, ler o texto
-visível e voltar/avançar, tudo numa sessão de navegador real (Playwright
-+ Chromium) que persiste entre chamadas.
+Integração com WhatsApp via Evolution API (REST + webhook), substituindo
+a versão anterior baseada em Playwright/WhatsApp Web.
 
-POR QUE UMA THREAD DEDICADA:
-Playwright (API síncrona) exige que todas as chamadas relativas a um
-mesmo browser/page aconteçam na MESMA thread onde ele foi criado. Como
-as tools do JARVIS rodam via asyncio.to_thread (que pode reaproveitar
-threads diferentes a cada chamada), não dá pra chamar o Playwright
-direto de dentro de tools.py sem correr o risco de cair em outra thread
-e quebrar tudo.
+Requer no .env:
+  EVOLUTION_API_URL      - ex: http://localhost:8080 ou https://evo.seudominio.com
+  EVOLUTION_API_KEY      - apikey da instância (ou global, dependendo da config)
+  EVOLUTION_INSTANCE     - nome da instância criada no Evolution Manager
+  WHATSAPP_WEBHOOK_URL   - (opcional) URL pública completa que a Evolution API
+                           deve chamar quando chegar mensagem, ex:
+                           https://seu-tunel.ngrok-free.app/webhook/whatsapp
+                           Só é usada por _configurar_webhook_best_effort(); se
+                           não tiver, configure manualmente no Evolution Manager
+                           (aba Webhook da instância), evento MESSAGES_UPSERT.
 
-A solução: uma única thread "dona" do navegador, rodando pra sempre,
-recebendo comandos por uma fila e devolvendo o resultado por outra. As
-funções públicas deste módulo (browser_open, browser_click, etc.) só
-empacotam o pedido e esperam a resposta — podem ser chamadas de
-qualquer thread sem problema.
+IMPORTANTE — endereçamento de contato:
+Diferente da versão via WhatsApp Web (que buscava por nome na UI), a
+Evolution API manda mensagem pra um NÚMERO, não pra um nome. Por isso
+toda função aqui aceita `contato` como:
+  - número com DDI (ex: "5511999999999" ou "+55 11 99999-9999"), OU
+  - remoteJid já resolvido (ex: "5511999999999@s.whatsapp.net"), OU
+  - um nome — nesse caso _resolver_contato tenta achar o remoteJid via
+    POST /chat/findContacts. Isso depende do contato já ter conversado
+    com essa instância (ou estar salvo), e pode ser ambíguo ou falhar.
+    Prefira sempre que possível passar o número.
 
-MONITORAMENTO DE MENSAGENS (WhatsApp Web):
-Além de comandos avulsos, a mesma thread também pode ficar de olho no
-WhatsApp Web em segundo plano. Isso é feito trocando o `_comandos.get()`
-bloqueante por um `_comandos.get(timeout=intervalo)`: enquanto não chega
-nenhum comando novo, o timeout estoura periodicamente e a thread
-aproveita a "folga" pra checar se algum chat ganhou mensagens não lidas
-novas. Assim o monitoramento não bloqueia nem compete com comandos
-normais (clicar, digitar, etc.) — eles continuam tendo prioridade.
+IMPORTANTE — versões da Evolution API:
+Os endpoints e nomes de campo abaixo (sendText, findMessages, findChats,
+findContacts, formato do payload de webhook messages.upsert) foram
+conferidos contra relatos/issues da linha v2.x (fork atendai/evolution-api,
+a mais comum hoje). Forks e versões antigas (v1.x) usam schemas um pouco
+diferentes (ex: "textMessage": {"text": ...} em vez de "text": ... direto
+no sendText). O nome do campo de "não lidas" em findChats também não é
+100% padronizado entre versões — list_unread_whatsapp tenta várias
+variantes conhecidas. Se algo der 400/500, teste o payload direto no
+Swagger/Postman/Insomnia da sua instância antes de assumir bug de lógica
+aqui.
+
+IMPORTANTE — modelo de notificação (mesma ideia da versão anterior):
+Em vez de pollar o DOM, o endpoint POST /webhook/whatsapp em
+tools/ui_bridge.py recebe o evento messages.upsert da Evolution API e
+chama processar_evento_webhook(), que injeta uma instrução sintética em
+ui_bridge.mensagens_entrada — a mesma fila usada pelo microfone e pelo
+terminal. Isso faz a notificação passar pelo ciclo normal do ask_jarvis
+em main.py: o LLM chama read_whatsapp_chat, resume pro usuário, e já
+sugere um rascunho de resposta via send_whatsapp_message com
+confirmado=false.
+
+Mensagens de grupo (remoteJid terminado em "@g.us") são ignoradas por
+padrão em processar_evento_webhook — remova o filtro se quiser notificar
+para grupos também.
+
+Modelo de segurança do envio (mantido igual):
+send_whatsapp_message só realiza o envio de fato se confirmado=True,
+setado pelo LLM somente depois que o usuário confirmou verbalmente, em
+um turno de conversa POSTERIOR ao turno em que a mensagem recebida foi
+lida/resumida (ver REGRA DE OURO no prompt.txt).
 """
 
-import base64
-import queue
-import threading
+import os
+import re
 
-import tools.ui_bridge as ui_bridge
+import httpx
 
-_comandos = queue.Queue()
-_worker_iniciado = False
-_lock_worker = threading.Lock()
+EVOLUTION_API_URL = os.getenv("EVOLUTION_API_URL", "").rstrip("/")
+EVOLUTION_API_KEY = os.getenv("EVOLUTION_API_KEY", "")
+EVOLUTION_INSTANCE = os.getenv("EVOLUTION_INSTANCE", "")
+WHATSAPP_WEBHOOK_URL = os.getenv("WHATSAPP_WEBHOOK_URL", "")
 
-VIEWPORT = {"width": 1280, "height": 800}
-TIMEOUT_PADRAO_MS = 15000
-MAX_TEXTO_RETORNADO = 4000  # caracteres — evita estourar o contexto do modelo
+TIMEOUT_SEGUNDOS = 20
 
-INTERVALO_MONITORAMENTO_PADRAO_S = 7  # "quase tempo real" sem martelar a página
-
-
-def _garantir_worker_rodando():
-    global _worker_iniciado
-    with _lock_worker:
-        if not _worker_iniciado:
-            _worker_iniciado = True
-            threading.Thread(target=_worker_loop, daemon=True).start()
+# Dedup de eventos de webhook (a Evolution API pode reentregar o mesmo
+# evento em retries). Cresce sem limite ao longo da execução — se o
+# processo ficar rodando por muito tempo, considere trocar por um
+# deque/LRU com tamanho máximo.
+_ja_notificados = set()
 
 
-def _enviar_comando(acao, **kwargs):
-    _garantir_worker_rodando()
-    resposta_fila = queue.Queue(maxsize=1)
-    _comandos.put({"acao": acao, "args": kwargs, "resposta": resposta_fila})
-    return resposta_fila.get()
-
-
-def _worker_loop():
-    from playwright.sync_api import sync_playwright
-
-    with sync_playwright() as p:
-        browser = None
-        context = None
-        page = None
-
-        # --- estado do monitoramento de WhatsApp (vive só nesta thread) ---
-        monitorando = False
-        intervalo_monitoramento = INTERVALO_MONITORAMENTO_PADRAO_S
-        estado_chats = {}  # nome do chat -> quantidade de não lidas na última checagem
-        primeira_checagem = True  # evita notificar mensagens que já existiam antes de ligar o monitor
-
-        def _garantir_pagina():
-            nonlocal browser, context, page
-            if browser is None:
-                browser = p.chromium.launch(headless=True)
-                context = browser.new_context(viewport=VIEWPORT)
-                page = context.new_page()
-                page.set_default_timeout(TIMEOUT_PADRAO_MS)
-            return page
-
-        while True:
-            try:
-                # Se o monitoramento está ligado, não bloqueia pra sempre:
-                # estoura o timeout de tempos em tempos pra dar tempo de checar
-                # o WhatsApp. Se não está ligado, comportamento é o de sempre
-                # (espera indefinidamente pelo próximo comando).
-                timeout = intervalo_monitoramento if monitorando else None
-                comando = _comandos.get(timeout=timeout)
-            except queue.Empty:
-                if monitorando and page is not None:
-                    try:
-                        if _pagina_e_whatsapp(page):
-                            novo_estado, novidades = _checar_novas_mensagens_whatsapp(
-                                page, estado_chats, ignorar_notificacao=primeira_checagem
-                            )
-                            estado_chats = novo_estado
-                            primeira_checagem = False
-                            for novidade in novidades:
-                                _notificar_nova_mensagem(novidade)
-                    except Exception as error:
-                        # Uma falha ao checar não deve derrubar o monitoramento;
-                        # só loga (via ui_bridge) e tenta de novo na próxima volta.
-                        ui_bridge.broadcast({
-                            "type": "browser_monitor_erro",
-                            "message": f"Falha ao checar novas mensagens: {error}",
-                        })
-                continue
-
-            acao = comando["acao"]
-            args = comando["args"]
-            resposta_fila = comando["resposta"]
-
-            try:
-                if acao == "abrir":
-                    pg = _garantir_pagina()
-                    pg.goto(args["url"], wait_until="domcontentloaded")
-                    resultado = _snapshot(pg)
-
-                elif acao == "clicar":
-                    pg = _garantir_pagina()
-                    alvo = _localizar(pg, args["alvo"])
-                    alvo.click(timeout=TIMEOUT_PADRAO_MS)
-                    pg.wait_for_load_state("domcontentloaded", timeout=TIMEOUT_PADRAO_MS)
-                    resultado = _snapshot(pg)
-
-                elif acao == "digitar":
-                    pg = _garantir_pagina()
-                    alvo = _localizar(pg, args["alvo"])
-                    alvo.fill(args["texto"])
-                    if args.get("enter"):
-                        alvo.press("Enter")
-                        pg.wait_for_load_state("domcontentloaded", timeout=TIMEOUT_PADRAO_MS)
-                    resultado = _snapshot(pg)
-
-                elif acao == "rolar":
-                    pg = _garantir_pagina()
-                    delta = args.get("quantidade", 800)
-                    if args.get("direcao") == "cima":
-                        delta = -delta
-                    pg.mouse.wheel(0, delta)
-                    resultado = _snapshot(pg)
-
-                elif acao == "voltar":
-                    pg = _garantir_pagina()
-                    pg.go_back(wait_until="domcontentloaded")
-                    resultado = _snapshot(pg)
-
-                elif acao == "avancar":
-                    pg = _garantir_pagina()
-                    pg.go_forward(wait_until="domcontentloaded")
-                    resultado = _snapshot(pg)
-
-                elif acao == "ler":
-                    pg = _garantir_pagina()
-                    resultado = _snapshot(pg, incluir_texto_completo=True)
-
-                elif acao == "monitorar_whatsapp_ligar":
-                    pg = _garantir_pagina()
-                    monitorando = True
-                    intervalo_monitoramento = args.get("intervalo_segundos") or INTERVALO_MONITORAMENTO_PADRAO_S
-                    estado_chats = {}
-                    primeira_checagem = True
-                    resultado = {
-                        "success": True,
-                        "message": (
-                            f"Monitoramento do WhatsApp Web ligado "
-                            f"(checando a cada {intervalo_monitoramento}s)."
-                        ),
-                    }
-
-                elif acao == "monitorar_whatsapp_desligar":
-                    monitorando = False
-                    resultado = {"success": True, "message": "Monitoramento do WhatsApp Web desligado."}
-
-                elif acao == "fechar":
-                    if browser:
-                        browser.close()
-                        browser = None
-                        context = None
-                        page = None
-                    monitorando = False
-                    resultado = {"success": True, "message": "Sessão de navegação encerrada."}
-
-                else:
-                    resultado = {"success": False, "message": f"Ação desconhecida: {acao}"}
-
-            except Exception as error:
-                resultado = {"success": False, "message": str(error)}
-
-            resposta_fila.put(resultado)
-
-
-def _localizar(page, alvo: str):
-    """
-    Acha um elemento clicável/preenchível a partir de uma descrição em
-    linguagem natural OU de um seletor CSS explícito, nessa ordem:
-      1. Parece seletor CSS ('#id', '.classe', '[atributo]') → usa direto.
-      2. Texto visível (get_by_text) — cobre a maioria dos links/botões.
-      3. role + nome acessível (get_by_role) — botões/campos com aria-label.
-      4. placeholder — campos de busca/formulário.
-      5. label associado ao campo.
-    Isso deixa o modelo descrever o que "vê" na tela ("botão Entrar",
-    "campo de busca") em vez de precisar inspecionar HTML.
-    """
-    alvo = alvo.strip()
-
-    parece_seletor = alvo.startswith(("#", ".", "[")) or (
-        " " in alvo and any(c in alvo for c in ("#", ".", "[", ">"))
+def _cliente():
+    if not (EVOLUTION_API_URL and EVOLUTION_API_KEY and EVOLUTION_INSTANCE):
+        raise RuntimeError(
+            "Configuração da Evolution API incompleta — verifique "
+            "EVOLUTION_API_URL, EVOLUTION_API_KEY e EVOLUTION_INSTANCE no .env."
+        )
+    return httpx.Client(
+        base_url=EVOLUTION_API_URL,
+        headers={"apikey": EVOLUTION_API_KEY, "Content-Type": "application/json"},
+        timeout=TIMEOUT_SEGUNDOS,
     )
-    if parece_seletor:
-        locator = page.locator(alvo).first
-        if locator.count() > 0:
-            return locator
 
-    tentativas = (
-        lambda: page.get_by_role("button", name=alvo, exact=False),
-        lambda: page.get_by_role("link", name=alvo, exact=False),
-        lambda: page.get_by_placeholder(alvo, exact=False),
-        lambda: page.get_by_label(alvo, exact=False),
-        lambda: page.get_by_text(alvo, exact=False),
+
+def _somente_digitos(texto):
+    return re.sub(r"\D", "", texto or "")
+
+
+def _parece_numero(contato):
+    # Heurística: se sobrarem pelo menos 8 dígitos depois de tirar tudo
+    # que não é número, tratamos como telefone, não como nome.
+    return len(_somente_digitos(contato)) >= 8
+
+
+def _numero_do_jid(remote_jid):
+    return remote_jid.split("@")[0]
+
+
+def _resolver_contato(contato):
+    """
+    Retorna o remoteJid (ex: '5511999999999@s.whatsapp.net') a partir
+    de um número, de um remoteJid já pronto, ou de um nome.
+    """
+    if "@" in contato:
+        return contato
+
+    if _parece_numero(contato):
+        return f"{_somente_digitos(contato)}@s.whatsapp.net"
+
+    with _cliente() as cliente:
+        resposta = cliente.post(
+            f"/chat/findContacts/{EVOLUTION_INSTANCE}",
+            json={"where": {"pushName": contato}},
+        )
+        resposta.raise_for_status()
+        contatos = resposta.json() or []
+
+    contato_lower = contato.strip().lower()
+    correspondentes = [
+        c for c in contatos
+        if contato_lower in (c.get("pushName") or "").strip().lower()
+    ]
+
+    if not correspondentes:
+        raise RuntimeError(
+            f"Não encontrei nenhum contato chamado '{contato}' na "
+            "Evolution API. Tente passar o número com DDI, ex: "
+            "'5511999999999'."
+        )
+
+    if len(correspondentes) > 1:
+        nomes = ", ".join(c.get("pushName", "?") for c in correspondentes)
+        raise RuntimeError(
+            f"Encontrei mais de um contato parecido com '{contato}': "
+            f"{nomes}. Seja mais específico ou use o número direto."
+        )
+
+    remote_jid = correspondentes[0].get("remoteJid")
+    if not remote_jid:
+        raise RuntimeError(f"Contato '{contato}' encontrado, mas sem remoteJid.")
+    return remote_jid
+
+
+def _extrair_texto(message):
+    """
+    O corpo da mensagem muda de formato conforme o tipo (texto simples,
+    resposta citada, legenda de mídia etc.). Cobre os formatos mais
+    comuns antes de desistir.
+    """
+    if not isinstance(message, dict):
+        return ""
+    return (
+        message.get("conversation")
+        or (message.get("extendedTextMessage") or {}).get("text")
+        or (message.get("imageMessage") or {}).get("caption")
+        or (message.get("videoMessage") or {}).get("caption")
+        or ""
     )
-    for tentativa in tentativas:
-        try:
-            locator = tentativa().first
-            if locator.count() > 0:
-                return locator
-        except Exception:
-            continue
-
-    raise ValueError(f"Não encontrei nenhum elemento correspondente a: '{alvo}'")
 
 
-def _snapshot(page, incluir_texto_completo=False):
-
-    titulo = page.title()
-    url = page.url
-
+def start_whatsapp_session():
+    """
+    Só confere se a instância está conectada e tenta (best-effort)
+    configurar o webhook se WHATSAPP_WEBHOOK_URL estiver setada. Não
+    sobe nenhuma thread/browser dedicada — quem fala com o WhatsApp
+    agora é a Evolution API, que roda como serviço separado.
+    """
     try:
-        texto = page.inner_text("body")
-    except Exception:
-        texto = ""
+        with _cliente() as cliente:
+            resposta = cliente.get(f"/instance/connectionState/{EVOLUTION_INSTANCE}")
+            resposta.raise_for_status()
+            estado = resposta.json()
+    except Exception as error:
+        return {
+            "success": False,
+            "message": f"Não consegui falar com a Evolution API: {error}",
+        }
 
-    texto_recortado = texto.strip()
-    limite = MAX_TEXTO_RETORNADO if incluir_texto_completo else 1200
-    if len(texto_recortado) > limite:
-        texto_recortado = texto_recortado[:limite] + "…"
-
-    screenshot_b64 = None
-    try:
-        screenshot_bytes = page.screenshot(type="jpeg", quality=70)
-        screenshot_b64 = base64.b64encode(screenshot_bytes).decode("ascii")
-    except Exception:
-        pass
-
-    if screenshot_b64:
-        ui_bridge.broadcast({
-            "type": "browser_screenshot",
-            "titulo": titulo,
-            "url": url,
-            "imagem_base64": screenshot_b64,
-        })
+    if WHATSAPP_WEBHOOK_URL:
+        _configurar_webhook_best_effort()
 
     return {
         "success": True,
-        "titulo": titulo,
-        "url": url,
-        "texto_visivel": texto_recortado,
+        "message": "Sessão do WhatsApp (Evolution API) verificada.",
+        "estado": estado,
     }
 
 
-# ============================================================
-# MONITORAMENTO DE NOVAS MENSAGENS (WhatsApp Web)
-# ============================================================
-
-def _pagina_e_whatsapp(page) -> bool:
+def _configurar_webhook_best_effort():
+    """
+    Tenta registrar o webhook automaticamente. O schema varia entre
+    versões da Evolution API — se der erro, só loga um aviso e segue;
+    configure manualmente pelo Evolution Manager (aba Webhook da
+    instância) apontando pra WHATSAPP_WEBHOOK_URL com o evento
+    MESSAGES_UPSERT habilitado.
+    """
     try:
-        return "web.whatsapp.com" in (page.url or "")
-    except Exception:
-        return False
-
-
-def _checar_novas_mensagens_whatsapp(page, estado_anterior: dict, ignorar_notificacao: bool):
-    """
-    Lê a lista de conversas do WhatsApp Web e extrai, pra cada uma,
-    o nome do chat e o número de mensagens não lidas.
-
-    Por que não usar um seletor CSS fixo tipo '.badge-unread': a
-    WhatsApp Web muda os nomes de classe com frequência, o que quebraria
-    isso a cada atualização deles. Em vez disso:
-      - o NOME do chat vem do atributo `title` (mais estável, é usado
-        pra acessibilidade/tooltip);
-      - a CONTAGEM de não lidas vem do primeiro <span> dentro da linha
-        cujo texto seja só dígitos — o número em si aparece igual
-        independente do idioma da interface (só o aria-label ao redor
-        muda: "3 unread messages" / "3 mensagens não lidas" etc.).
-
-    Isso é mais resistente a mudanças de layout, mas ainda pode quebrar
-    se a WhatsApp Web mudar a estrutura da lista de conversas — nesse
-    caso normalmente basta ajustar o seletor '#pane-side [role="row"]'
-    abaixo pro que estiver atual.
-    """
-    linhas = page.evaluate(
-        """
-        () => {
-            const linhas = Array.from(
-                document.querySelectorAll('#pane-side [role="listitem"], #pane-side [role="row"]')
-            );
-            const resultado = [];
-            for (const linha of linhas) {
-                const tituloEl = linha.querySelector('span[title]');
-                const titulo = tituloEl
-                    ? tituloEl.getAttribute('title')
-                    : (linha.textContent || '').trim().slice(0, 40);
-                if (!titulo) continue;
-
-                let naoLidas = 0;
-                const spans = linha.querySelectorAll('span');
-                for (const s of spans) {
-                    const texto = (s.textContent || '').trim();
-                    if (/^\\d+$/.test(texto)) {
-                        naoLidas = parseInt(texto, 10);
-                        break;
+        with _cliente() as cliente:
+            cliente.post(
+                f"/webhook/set/{EVOLUTION_INSTANCE}",
+                json={
+                    "webhook": {
+                        "url": WHATSAPP_WEBHOOK_URL,
+                        "enabled": True,
+                        "events": ["MESSAGES_UPSERT"],
                     }
-                }
-                resultado.push({ titulo, naoLidas });
-            }
-            return resultado;
-        }
-        """
-    )
+                },
+            )
+    except Exception as error:
+        print(
+            "⚠️  Não consegui configurar o webhook automaticamente "
+            f"({error}). Configure manualmente no Evolution Manager: "
+            f"URL = {WHATSAPP_WEBHOOK_URL}, evento MESSAGES_UPSERT."
+        )
 
-    novo_estado = {}
-    novidades = []
 
-    for linha in linhas:
-        titulo = linha["titulo"]
-        nao_lidas = linha["naoLidas"]
-        novo_estado[titulo] = nao_lidas
+def list_unread_whatsapp():
+    try:
+        with _cliente() as cliente:
+            resposta = cliente.post(
+                f"/chat/findChats/{EVOLUTION_INSTANCE}",
+                json={},
+            )
+            resposta.raise_for_status()
+            chats = resposta.json() or []
+    except Exception as error:
+        return {"success": False, "message": f"Não foi possível listar mensagens: {error}"}
 
-        if ignorar_notificacao:
-            continue  # primeira leitura só estabelece a base, não avisa de nada
+    resultado = []
+    for chat in chats:
+        # Nome do campo de "não lidas" varia entre versões/forks.
+        nao_lidas = (
+            chat.get("unreadCount")
+            or chat.get("unreadMessages")
+            or chat.get("unread_count")
+            or 0
+        )
+        if not nao_lidas:
+            continue
+        resultado.append({
+            "nome": chat.get("pushName") or chat.get("name") or chat.get("remoteJid"),
+            "remoteJid": chat.get("remoteJid"),
+            "naoLidas": str(nao_lidas),
+        })
 
-        anterior = estado_anterior.get(titulo, 0)
-        if nao_lidas > anterior:
-            novidades.append({
-                "chat": titulo,
-                "mensagens_novas": nao_lidas - anterior,
-                "total_nao_lidas": nao_lidas,
+    return {"success": True, "count": len(resultado), "chats": resultado}
+
+
+def read_whatsapp_chat(contato: str, quantidade: int = 5):
+    try:
+        remote_jid = _resolver_contato(contato)
+
+        with _cliente() as cliente:
+            resposta = cliente.post(
+                f"/chat/findMessages/{EVOLUTION_INSTANCE}",
+                json={
+                    "where": {"key": {"remoteJid": remote_jid}},
+                    "limit": quantidade,
+                },
+            )
+            resposta.raise_for_status()
+            dados = resposta.json()
+
+        # Algumas versões retornam lista direta, outras dentro de
+        # {"messages": {"records": [...]}} — cobre as duas.
+        if isinstance(dados, dict):
+            bloco_mensagens = dados.get("messages")
+            registros = (
+                bloco_mensagens.get("records")
+                if isinstance(bloco_mensagens, dict)
+                else bloco_mensagens
+            ) or []
+        else:
+            registros = dados or []
+
+        mensagens = []
+        for m in registros[-quantidade:]:
+            key = m.get("key", {})
+            texto = _extrair_texto(m.get("message", {}))
+            mensagens.append({
+                "texto": texto or "[mídia/sem texto]",
+                "de": "você" if key.get("fromMe") else contato,
             })
 
-    return novo_estado, novidades
+        return {"success": True, "contato": contato, "mensagens": mensagens}
+    except Exception as error:
+        return {
+            "success": False,
+            "message": f"Não foi possível ler a conversa com {contato}: {error}",
+        }
 
 
-def _notificar_nova_mensagem(novidade: dict):
+def send_whatsapp_message(contato: str, texto: str, confirmado: bool = False):
+    if not confirmado:
+        return {
+            "success": True,
+            "enviado": False,
+            "preview": {"contato": contato, "texto": texto},
+            "message": (
+                f"Rascunho pronto para {contato}: \"{texto}\". "
+                "NÃO envie ainda — leia este rascunho em voz alta pro "
+                "usuário e só chame esta ferramenta de novo com "
+                "confirmado=true depois que ele confirmar explicitamente."
+            ),
+        }
+
+    try:
+        remote_jid = _resolver_contato(contato)
+        numero = _numero_do_jid(remote_jid)
+
+        with _cliente() as cliente:
+            resposta = cliente.post(
+                f"/message/sendText/{EVOLUTION_INSTANCE}",
+                json={"number": numero, "text": texto},
+            )
+            resposta.raise_for_status()
+
+        return {
+            "success": True,
+            "enviado": True,
+            "contato": contato,
+            "message": f"Mensagem enviada para {contato}.",
+        }
+    except Exception as error:
+        return {
+            "success": False,
+            "enviado": False,
+            "message": f"Não foi possível enviar a mensagem: {error}",
+        }
+
+
+def processar_evento_webhook(payload):
     """
-    Publica o evento de nova mensagem pro resto do JARVIS ouvir.
-
-    Este módulo só sabe conversar com `ui_bridge` — ele NÃO sabe como o
-    seu JARVIS toca voz (TTS). Por isso o evento carrega:
-      - os dados brutos (chat, quantidade), pra UI montar um toast/badge;
-      - um campo `falar` = True e um `texto_para_falar` já pronto, pra
-        onde quer que você trate a fala (loop principal do assistente,
-        outro listener de ui_bridge, etc.) só pegar o texto e mandar
-        pro TTS sem precisar remontar a frase.
-
-    Se o seu `ui_bridge` já tem um jeito de "falar" diretamente (por
-    exemplo `ui_bridge.falar(texto)`), é só trocar/adicionar a chamada
-    aqui.
+    Chamado por tools/ui_bridge.py quando chega POST em /webhook/whatsapp.
+    Espera o formato padrão de evento da Evolution API:
+      {"event": "messages.upsert", "instance": "...", "data": {...}}
     """
-    chat = novidade["chat"]
-    qtd = novidade["mensagens_novas"]
+    if not isinstance(payload, dict):
+        return
 
-    if qtd == 1:
-        texto = f"Você tem uma mensagem nova de {chat}."
-    else:
-        texto = f"Você tem {qtd} mensagens novas de {chat}."
+    if payload.get("event") != "messages.upsert":
+        return
+
+    dados = payload.get("data") or {}
+    key = dados.get("key") or {}
+
+    if key.get("fromMe"):
+        return  # mensagem enviada por nós mesmos, ignora
+
+    remote_jid = key.get("remoteJid", "")
+    if not remote_jid or remote_jid.endswith("@g.us"):
+        return  # sem remoteJid, ou mensagem de grupo (ignorada por padrão)
+
+    message_id = key.get("id")
+    if not message_id or message_id in _ja_notificados:
+        return
+    _ja_notificados.add(message_id)
+
+    numero = _numero_do_jid(remote_jid)
+    nome = dados.get("pushName") or numero
+    texto = _extrair_texto(dados.get("message") or {})
+
+    # Import local pra evitar import circular — ui_bridge importa este
+    # módulo pra registrar a rota do webhook (mesmo padrão já usado
+    # dentro do websocket_endpoint em ui_bridge.py para TOOL_FUNCTIONS).
+    import tools.ui_bridge as ui_bridge
 
     ui_bridge.broadcast({
-        "type": "whatsapp_nova_mensagem",
-        "chat": chat,
-        "mensagens_novas": qtd,
-        "total_nao_lidas": novidade["total_nao_lidas"],
-        "falar": True,
-        "texto_para_falar": texto,
+        "type": "whatsapp_message",
+        "nome": nome,
+        "preview": texto,
     })
 
+    instrucao = (
+        "[NOTIFICAÇÃO AUTOMÁTICA DE WHATSAPP] Chegou uma mensagem nova "
+        f"de {nome} (número {numero}). Prévia: \"{texto}\". Use "
+        f"read_whatsapp_chat com contato=\"{numero}\" para ler a "
+        "conversa completa. Avise o usuário sobre a mensagem, resuma "
+        "o conteúdo dela em fala natural, e já sugira um rascunho de "
+        f"resposta chamando send_whatsapp_message com contato=\"{numero}\" "
+        "e confirmado=false. Fale o rascunho sugerido e pergunte se "
+        "pode enviar. Não chame send_whatsapp_message com "
+        "confirmado=true nesta mesma resposta, mesmo que o rascunho "
+        "pareça óbvio — a aprovação só vem em uma mensagem seguinte "
+        "do usuário."
+    )
 
-# ============================================================
-# API PÚBLICA (chamada pelas tools em tools.py)
-# ============================================================
-
-def browser_open(url: str):
-    if not url.startswith(("http://", "https://")):
-        url = "https://" + url
-    resultado = _enviar_comando("abrir", url=url)
-    if resultado.get("success"):
-        resultado["message"] = f"Página aberta: {resultado.get('titulo') or url}"
-    return resultado
-
-
-def browser_click(alvo: str):
-    resultado = _enviar_comando("clicar", alvo=alvo)
-    if resultado.get("success"):
-        resultado["message"] = f"Cliquei em '{alvo}'. Agora em: {resultado.get('titulo')}"
-    return resultado
-
-
-def browser_type(alvo: str, texto: str, enter: bool = False):
-    resultado = _enviar_comando("digitar", alvo=alvo, texto=texto, enter=enter)
-    if resultado.get("success"):
-        resultado["message"] = f"Digitei em '{alvo}'."
-    return resultado
-
-
-def browser_scroll(direcao: str = "baixo", quantidade: int = 800):
-    resultado = _enviar_comando("rolar", direcao=direcao, quantidade=quantidade)
-    if resultado.get("success"):
-        resultado["message"] = f"Rolei a página para {direcao}."
-    return resultado
-
-
-def browser_back():
-    resultado = _enviar_comando("voltar")
-    if resultado.get("success"):
-        resultado["message"] = f"Voltei para: {resultado.get('titulo')}"
-    return resultado
-
-
-def browser_forward():
-    resultado = _enviar_comando("avancar")
-    if resultado.get("success"):
-        resultado["message"] = f"Avancei para: {resultado.get('titulo')}"
-    return resultado
-
-
-def browser_read():
-    resultado = _enviar_comando("ler")
-    if resultado.get("success"):
-        resultado["message"] = "Conteúdo da página lido."
-    return resultado
-
-
-def browser_monitorar_whatsapp(ativar: bool = True, intervalo_segundos: int = INTERVALO_MONITORAMENTO_PADRAO_S):
-    """
-    Liga/desliga o monitoramento de novas mensagens do WhatsApp Web.
-
-    Pré-requisito: a página atual (aberta com browser_open) precisa ser
-    o web.whatsapp.com e já estar logada (QR code escaneado). Enquanto
-    ligado, a cada `intervalo_segundos` a thread do navegador confere se
-    algum chat ganhou mensagens não lidas novas e, se sim, publica um
-    evento `whatsapp_nova_mensagem` via ui_bridge (com aviso pra UI e um
-    texto pronto pra ser falado).
-    """
-    if ativar:
-        return _enviar_comando("monitorar_whatsapp_ligar", intervalo_segundos=intervalo_segundos)
-    return _enviar_comando("monitorar_whatsapp_desligar")
-
-
-def browser_close():
-    return _enviar_comando("fechar")
+    ui_bridge.mensagens_entrada.put(instrucao)

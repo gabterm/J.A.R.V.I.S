@@ -212,7 +212,7 @@ def _loop_scheduler():
                         threading.Thread(target=run_routine, args=(nome_rotina,), daemon=True).start()
 
         except Exception as error:
-            print(f"⚠️  Erro no scheduler proativo: {error}")
+            print(f"⚠️Erro no scheduler proativo: {error}")
 
         time.sleep(INTERVALO_CHECAGEM_SEGUNDOS)
 
