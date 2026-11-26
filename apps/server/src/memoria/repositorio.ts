@@ -107,6 +107,11 @@ export class RepositorioMemoria {
     await this.pool.query("INSERT INTO episodios (resumo, embedding) VALUES ($1, $2)", [resumo, vetor(embedding)]);
   }
 
+  async lembrancasRecentes(limite = 3): Promise<Lembranca[]> {
+    const { rows } = await this.pool.query("SELECT resumo, criado_em FROM episodios ORDER BY id DESC LIMIT $1", [limite]);
+    return z.array(linhaLembranca).parse(rows).map((r) => ({ resumo: r.resumo, criadoEm: r.criado_em }));
+  }
+
   async buscarLembrancas(embedding: readonly number[], limite = 3, distanciaMaxima = 0.6): Promise<Lembranca[]> {
     const { rows } = await this.pool.query(
       `SELECT resumo, criado_em FROM (

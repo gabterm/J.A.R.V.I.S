@@ -96,9 +96,18 @@ Seu diferencial é se adaptar a ela: siga "Como falar com a pessoa" e "Evitar" �
 personalizar sem recitar o que sabe. Itens marcados (incerto) são palpites: não os trate como certeza; se
 for relevante, confirme de forma natural. Se a pessoa corrigir algo sobre ela, aceite sem discutir.`;
 
+const VOZ = `Esta conversa é por voz: fale de forma natural e curta, como numa conversa, sem listas nem
+markdown. Se a pessoa interromper, pare e escute.`;
+
 /** Monta as instruções do modelo com o perfil e as lembranças relevantes. */
-export function montarInstrucoes(itens: readonly ItemPerfil[], lembrancas: readonly Lembranca[], agora: Date, fuso: string): string {
-  const partes = [BASE];
+export function montarInstrucoes(
+  itens: readonly ItemPerfil[],
+  lembrancas: readonly Lembranca[],
+  agora: Date,
+  fuso: string,
+  canal: "texto" | "voz" = "texto",
+): string {
+  const partes = canal === "voz" ? [BASE, VOZ] : [BASE];
   const quando = new Intl.DateTimeFormat("pt-BR", { dateStyle: "full", timeStyle: "short", timeZone: fuso }).format(agora);
   partes.push(`Agora: ${quando}.`);
 

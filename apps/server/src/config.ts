@@ -3,6 +3,8 @@ import { z } from "zod";
 const esquema = z.object({
   OPENAI_API_KEY: z.string().min(1, "OPENAI_API_KEY não configurada"),
   OPENAI_MODEL: z.string().min(1).default("gpt-5.6-luna"),
+  OPENAI_REALTIME_MODEL: z.string().min(1).default("gpt-realtime-2.1"),
+  OPENAI_REALTIME_VOICE: z.string().min(1).default("cedar"),
   OPENAI_EMBEDDING_MODEL: z.string().min(1).default("text-embedding-3-small"),
   DATABASE_URL: z.string().min(1, "DATABASE_URL não configurada"),
   TZ_PESSOA: z.string().min(1).default("America/Sao_Paulo"),

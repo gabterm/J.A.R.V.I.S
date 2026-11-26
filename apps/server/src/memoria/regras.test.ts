@@ -63,3 +63,9 @@ test("instruções agrupam por categoria e marcam o incerto", () => {
   assert.match(texto, /- Quer correr 10 km \(incerto\)/);
   assert.match(texto, /20\/11\/2026\) Combinou de revisar o currículo/);
 });
+
+test("instruções de voz pedem fala curta e sem markdown", () => {
+  const texto = montarInstrucoes([], [], new Date("2026-11-26T12:00:00Z"), "America/Sao_Paulo", "voz");
+  assert.match(texto, /conversa é por voz/);
+  assert.doesNotMatch(montarInstrucoes([], [], new Date(), "America/Sao_Paulo"), /conversa é por voz/);
+});

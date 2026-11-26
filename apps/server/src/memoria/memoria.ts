@@ -54,6 +54,18 @@ export class Memoria {
   }
 
   /** Guarda a troca para a reflexão. Não derruba a resposta já dada: falha só vai para o log. */
+  /** Para a voz não há a mensagem antes da sessão: vão o perfil e as lembranças mais recentes. */
+  async instrucoesParaVoz(): Promise<string> {
+    const [itens, lembrancas] = await Promise.all([this.repo.listarPerfil(), this.repo.lembrancasRecentes(3)]);
+    return montarInstrucoes(itens, lembrancas, new Date(), this.opcoes.fuso, "voz");
+  }
+
+  /** Uma fala da conversa por voz (transcrita no app). */
+  async registrarFala(papel: "user" | "jarvis", texto: string): Promise<void> {
+    await this.repo.registrarMensagem(papel, texto);
+    this.agendarReflexao();
+  }
+
   async registrarTroca(pergunta: string, resposta: string): Promise<void> {
     try {
       await this.repo.registrarMensagem("user", pergunta);

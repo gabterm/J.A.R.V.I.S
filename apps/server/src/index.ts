@@ -9,6 +9,7 @@ import { Conversa } from "./assistente.js";
 import { criarPool, migrar } from "./db.js";
 import { Memoria, nomeDoErro } from "./memoria/memoria.js";
 import { RepositorioMemoria } from "./memoria/repositorio.js";
+import { criarSessaoDeVoz } from "./voz.js";
 
 const PRAZO_AUTH_MS = 5_000;
 
@@ -117,6 +118,24 @@ app.get("/ws", { websocket: true }, (socket, req) => {
         });
         return;
       }
+      case "voz_iniciar": {
+        memoria
+          .instrucoesParaVoz()
+          .then((instrucoes) =>
+            criarSessaoDeVoz(openai, { modelo: config.OPENAI_REALTIME_MODEL, voz: config.OPENAI_REALTIME_VOICE, instrucoes }),
+          )
+          .then((sessao) => enviar(socket, { type: "voz_sessao", ...sessao }))
+          .catch((erro: unknown) => {
+            req.log.error({ tipo: nomeDoErro(erro) }, "falha ao abrir sessão de voz");
+            enviar(socket, { type: "voz_erro", text: "Não consegui abrir a voz agora." });
+          });
+        return;
+      }
+      case "voz_transcricao":
+        memoria.registrarFala(msg.papel, msg.texto).catch((erro: unknown) => {
+          req.log.error({ tipo: nomeDoErro(erro) }, "falha ao guardar fala");
+        });
+        return;
       case "mic_toggle":
       case "tool_call":
         enviar(socket, { type: "event", level: "info", text: `"${msg.type}" ainda não existe na versão nova.` });

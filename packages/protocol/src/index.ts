@@ -31,6 +31,10 @@ export const mensagemDoCliente = z.discriminatedUnion("type", [
   z.object({ type: z.literal("auth"), token: z.string().min(1).max(512) }),
   z.object({ type: z.literal("command"), text: z.string().trim().min(1).max(8000) }),
   z.object({ type: z.literal("mic_toggle"), ativo: z.boolean() }),
+  /** Pede uma chave temporária para conversar por voz direto com a OpenAI (WebRTC). */
+  z.object({ type: z.literal("voz_iniciar") }),
+  /** O que foi dito na conversa por voz, para a memória. */
+  z.object({ type: z.literal("voz_transcricao"), papel: z.enum(["user", "jarvis"]), texto: z.string().trim().min(1).max(8000) }),
   z.object({
     type: z.literal("tool_call"),
     name: z.string().min(1).max(100),
@@ -51,4 +55,6 @@ export type EventoDoServidor =
   | { type: "event"; level: Nivel; text: string }
   | { type: "notification"; level: Nivel; text: string }
   | { type: "subsystem"; name: string; active: boolean; persist?: boolean }
-  | { type: "perfil"; itens: ItemPerfil[] };
+  | { type: "perfil"; itens: ItemPerfil[] }
+  | { type: "voz_sessao"; segredo: string; expiraEm: number; modelo: string }
+  | { type: "voz_erro"; text: string };
