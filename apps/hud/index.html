@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#040c11">
+<title>J.A.R.V.I.S.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700;800&family=Share+Tech+Mono&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/src/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+</head>
+<body>
+
+<canvas id="bgCanvas"></canvas>
+<div class="bg-grid"></div>
+<div class="scanlines"></div>
+<div class="noise"></div>
+<div class="vignette"></div>
+<div id="notifications"></div>
+
+<div class="hud-frame hud-frame-tl"></div>
+<div class="hud-frame hud-frame-tr"></div>
+<div class="hud-frame hud-frame-bl"></div>
+<div class="hud-frame hud-frame-br"></div>
+
+<div class="floating-panel media-frame" id="mediaFrame">
+  <div class="floating-panel-topbar" id="mediaTopbar">
+    <span class="floating-panel-title" id="mediaTitle"></span>
+    <div class="media-actions">
+      <button class="icon-btn" id="mediaOpenExternal" title="Abrir no navegador do sistema">EXTERNO</button>
+      <button class="panel-close" id="mediaClose" title="Fechar" aria-label="Fechar">
+        <svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+  </div>
+  <iframe id="mediaIframe" class="media-iframe"
+          allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>
+  <div class="media-blocked" id="mediaBlocked" style="display:none;">
+    Este site bloqueia exibição embutida (X-Frame-Options).
+    <button class="icon-btn" id="mediaBlockedOpen">ABRIR EXTERNAMENTE</button>
+  </div>
+</div>
+
+<!-- Painel de notícias — card flutuante, sem overlay full-screen -->
+<div class="floating-panel news-frame" id="newsFrame">
+  <div class="floating-panel-topbar" id="newsTopbar">
+    <span class="floating-panel-title" id="newsTitle">Notícias</span>
+    <button class="panel-close" id="newsClose" title="Fechar" aria-label="Fechar">
+      <svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+  <div class="news-body" id="newsBody"></div>
+</div>
+
+<div class="floating-panel perfil-frame" id="perfilFrame">
+  <div class="floating-panel-topbar" id="perfilTopbar">
+    <span class="floating-panel-title">O que sei sobre você</span>
+    <button class="panel-close" id="perfilClose" title="Fechar" aria-label="Fechar">
+      <svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+  <div class="perfil-body" id="perfilBody"></div>
+  <form class="perfil-add" id="perfilAdd">
+    <label class="sr-only" for="perfilAddCategoria">Categoria</label>
+    <select id="perfilAddCategoria" class="perfil-select">
+      <option value="estilo">Como falar comigo</option>
+      <option value="evitar">Evitar</option>
+      <option value="preferencia">Preferência</option>
+      <option value="traco">Personalidade</option>
+      <option value="rotina">Rotina</option>
+      <option value="objetivo">Objetivo</option>
+      <option value="fato">Fato</option>
+    </select>
+    <label class="sr-only" for="perfilAddTexto">O que o JARVIS deve saber</label>
+    <input id="perfilAddTexto" class="perfil-input" maxlength="500" placeholder="Ex.: prefiro respostas curtas" required>
+    <button type="submit" class="perfil-btn">Adicionar</button>
+  </form>
+</div>
+
+<div class="floating-panel recent-frame" id="recentFrame">
+  <div class="floating-panel-topbar" id="recentTopbar">
+    <span class="floating-panel-title" id="recentTitle">Recentes</span>
+    <button class="panel-close" id="recentClose" title="Fechar" aria-label="Fechar">
+      <svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+  <div class="recent-body" id="recentBody"></div>
+</div>
+
+<div class="floating-panel weather-frame" id="weatherFrame">
+  <div class="floating-panel-topbar" id="weatherTopbar">
+    <span class="floating-panel-title" id="weatherLocal">Clima</span>
+    <button class="panel-close" id="weatherClose" title="Fechar" aria-label="Fechar">
+      <svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+  <div class="weather-body">
+    <div class="weather-main">
+      <div class="weather-temp" id="weatherTemp"></div>
+      <div class="weather-icon" id="weatherIcon"></div>
+    </div>
+    <div class="weather-condicao" id="weatherCondicao"></div>
+    <div class="weather-grid">
+      <div class="weather-stat">
+        <span class="weather-stat-label">Sensação</span>
+        <span class="weather-stat-value" id="weatherSensacao"></span>
+      </div>
+      <div class="weather-stat">
+        <span class="weather-stat-label">Umidade</span>
+        <span class="weather-stat-value" id="weatherUmidade"></span>
+      </div>
+      <div class="weather-stat">
+        <span class="weather-stat-label">Vento</span>
+        <span class="weather-stat-value" id="weatherVento"></span>
+      </div>
+      <div class="weather-stat">
+        <span class="weather-stat-label">Mín/Máx</span>
+        <span class="weather-stat-value" id="weatherMinMax"></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="floating-panel browser-frame" id="browserFrame">
+  <div class="floating-panel-topbar" id="browserTopbar">
+    <span class="browser-title" id="browserTitle"></span>
+    <span class="browser-url" id="browserUrl"></span>
+    <button class="panel-close" id="browserClose" title="Fechar" aria-label="Fechar">
+      <svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+  <img id="browserScreenshot" class="browser-screenshot" alt="Navegação ao vivo" />
+</div>
+
+<div class="floating-panel map-frame" id="mapFrame">
+  <div class="floating-panel-topbar" id="mapTopbar">
+    <span class="floating-panel-title" id="mapTitle">Rota</span>
+    <button class="panel-close" id="mapClose" title="Fechar" aria-label="Fechar">
+      <svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+  <div id="mapContainer" class="map-container"></div>
+  <div class="map-caption" id="mapCaption"></div>
+</div>
+
+<div class="floating-panel music-frame" id="musicFrame">
+  <div class="floating-panel-topbar" id="musicTopbar">
+    <span class="floating-panel-title" id="musicTitleBar">Audio core</span>
+    <button class="panel-close" id="musicClose" title="Fechar" aria-label="Fechar">
+      <svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+  <div class="music-body">
+    <div class="music-art-visualizer">
+      <img id="musicThumb" class="music-thumb" alt="" />
+      <div class="music-visualizer" id="musicVisualizer"></div>
+    </div>
+    <div class="music-meta">
+      <div class="music-title" id="musicTitle"></div>
+      <div class="music-artist" id="musicArtist"></div>
+    </div>
+    <div class="music-progress-row">
+      <span class="music-time" id="musicTimeAtual">0:00</span>
+      <input type="range" id="musicSeek" class="music-seek" min="0" max="100" value="0" step="0.1">
+      <span class="music-time" id="musicTimeTotal">0:00</span>
+    </div>
+    <div class="music-controls">
+      <button
+  class="icon-btn music-btn"
+  id="musicPlayPause"
+  title="Pausar/Tocar"
+  aria-label="Pausar/Tocar"
+>
+  <svg class="music-control-icon music-icon-play" viewBox="0 0 24 24" aria-hidden="true">
+    <polygon points="6 3 20 12 6 21 6 3"></polygon>
+  </svg>
+
+  <svg class="music-control-icon music-icon-pause" viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M9 6v12M15 6v12"></path>
+  </svg>
+</button>
+
+<button
+  class="icon-btn music-btn"
+  id="musicStop"
+  title="Parar"
+  aria-label="Parar"
+>
+  <svg class="music-control-icon music-icon-stop" viewBox="0 0 24 24" aria-hidden="true">
+    <rect x="7" y="7" width="10" height="10"></rect>
+  </svg>
+</button>
+    </div>
+  </div>
+</div>
+
+<audio id="jarvisAudio" preload="auto" style="display:none"></audio>
+
+<div class="floating-panel reasoning-frame" id="reasoningFrame">
+  <div class="floating-panel-topbar" id="reasoningTopbar">
+    <span class="reasoning-title" id="reasoningTitle"></span>
+    <button class="panel-close" id="reasoningClose" title="Fechar" aria-label="Fechar">
+      <svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+  <svg id="reasoningSvg" class="reasoning-svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet"></svg>
+  <div class="reasoning-caption" id="reasoningCaption"></div>
+</div>
+
+<div class="floating-panel simulation-frame" id="simFrame">
+  <div class="floating-panel-topbar" id="simTopbar">
+    <span class="simulation-title" id="simTitle"></span>
+    <div class="simulation-controls">
+      <button class="icon-btn" id="simPlayBtn" title="Pausar/retomar">PAUSAR</button>
+      <button class="icon-btn" id="simRestartBtn" title="Reiniciar do início">REINICIAR</button>
+      <input type="range" id="simSpeedRange" min="0.25" max="3" step="0.25" value="1" title="Velocidade da simulação">
+      <button class="panel-close" id="simClose" title="Fechar" aria-label="Fechar">
+        <svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+  </div>
+  <svg id="simSvg" class="simulation-svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet"></svg>
+  <div class="simulation-caption" id="simCaption"></div>
+</div>
+
+<div class="boot-overlay" id="bootOverlay">
+  <div class="boot-logo">J·A·R·V·I·S</div>
+  <div class="boot-line"><span id="bootText"></span><span class="cursor"></span></div>
+  <div class="boot-bar"><div class="boot-bar-fill" id="bootBarFill"></div></div>
+</div>
+
+<div class="app">
+
+  <div class="topbar">
+    <div class="tb-brand">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="4" y="4" width="16" height="16" rx="2"></rect>
+        <rect x="9" y="9" width="6" height="6"></rect>
+        <path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 14h3M1 9h3M1 14h3"></path>
+      </svg>
+      <span id="wordmark">JARVIS OS v1.0</span>
+    </div>
+    <div class="divider"></div>
+    <div class="tb-item"><span class="tb-label">USER:</span><span class="tb-value" id="operatorName">GABTERM</span></div>
+    <div class="tb-item"><span class="tb-label">STATUS:</span><span class="tb-value ok" id="secureLinkLabel">online</span><span class="tb-dot"></span></div>
+    <div class="tb-item"><span class="tb-label">UPTIME:</span><span class="tb-value" id="uptime">00:00:00</span></div>
+    <div class="divider"></div>
+    <div class="tb-item tb-item-muted"><span class="tb-label">LAN</span><span class="tb-value" id="tbLan">192.168.1.103</span></div>
+    <div class="tb-item tb-item-muted"><span class="tb-label">PWR</span><span class="tb-value" id="tbPwr">98%</span></div>
+    <div class="tb-spacer"></div>
+    <div class="status-pill" id="statusPill"><div class="dot"></div><span id="statusPillText">online</span></div>
+    <div class="settings-toggle" id="settingsToggle" title="Personalização">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </div>
+  </div>
+
+  <div class="settings-drawer" id="settingsDrawer">
+    <div>
+      <div class="settings-section-title">TEMA</div>
+      <div class="theme-swatches">
+        <div class="swatch selected" data-theme="cyan" title="Ciano"></div>
+        <div class="swatch" data-theme="amber" title="Âmbar"></div>
+        <div class="swatch" data-theme="violet" title="Violeta"></div>
+        <div class="swatch" data-theme="red" title="Vermelho"></div>
+      </div>
+    </div>
+    <div class="settings-row">
+      <span class="settings-label">Som de interface</span>
+      <div class="mini-switch on" id="soundSwitch"><div class="knob"></div></div>
+    </div>
+  </div>
+
+  <!-- Dock vertical de apps — hoje: Terminal e Logs. Futuro: mais apps aqui. -->
+  <div class="app-dock" id="appDock">
+    <button class="dock-btn active" id="dockTerminalBtn" type="button" data-app="terminal" title="Fechar Direct Access">
+      <svg class="terminal-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <polyline points="4 17 10 11 4 5"></polyline>
+        <line x1="12" y1="19" x2="20" y2="19"></line>
+      </svg>
+    </button>
+    <button class="dock-btn active" id="dockLogsBtn" type="button" data-app="logs" title="Fechar System Logs">
+      <svg class="terminal-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+      </svg>
+    </button>
+  </div>
+
+  <svg width="0" height="0" style="position:absolute">
+    <defs>
+      <radialGradient id="sweepGrad" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="var(--cyan)" stop-opacity="0"/>
+        <stop offset="100%" stop-color="var(--cyan)" stop-opacity=".35"/>
+      </radialGradient>
+    </defs>
+  </svg>
+
+  <div class="main">
+
+    <div class="panel clock-panel">
+      <span class="clock-format-toggle" id="clockFormatToggle" title="Alternar formato">24H</span>
+            <div class="clock-stage mode-idle" id="clockStage">
+        <div class="clock-halo"></div>
+
+        <svg class="jarvis-core-svg core-blueprint" viewBox="0 0 512 512" aria-hidden="true">
+          <g>
+            <circle class="bp-line" cx="256" cy="256" r="221"/>
+            <circle class="bp-fine" cx="256" cy="256" r="228"/>
+            <circle class="bp-fine" cx="256" cy="256" r="164"/>
+            <circle class="bp-fine" cx="256" cy="256" r="124"/>
+            <path class="bp-line" d="M40 130H154V82H227"/>
+            <path class="bp-line" d="M44 370H118V419H202"/>
+            <path class="bp-line" d="M358 79H420V133H471"/>
+            <path class="bp-line" d="M349 433H409V382H473"/>
+            <rect class="bp-box" x="73" y="95" width="62" height="25"/>
+            <rect class="bp-box" x="382" y="103" width="54" height="31"/>
+            <rect class="bp-box" x="78" y="382" width="71" height="23"/>
+            <rect class="bp-box" x="366" y="375" width="65" height="27"/>
+            <path class="bp-fine" d="M92 256h50M370 256h50M256 89v43M256 380v43"/>
+            <path class="bp-fine" d="M108 184h32v-20h37M404 182h-31v-20h-35"/>
+            <path class="bp-fine" d="M105 328h33v22h39M407 330h-35v20h-35"/>
+            <text x="83" y="106">SYS.ARCH / 07</text>
+            <text x="391" y="116">CORE.MAP</text>
+            <text x="87" y="397">VECTOR / 04</text>
+            <text x="375" y="390">NEURAL.MX</text>
+            <text x="232" y="72">JARVIS / CORE</text>
+            <text x="31" y="252">X-0048</text>
+            <text x="427" y="252">Y-0193</text>
+            <text x="230" y="449">NEXUS / 01</text>
+          </g>
+        </svg>
+
+        <svg class="jarvis-core-svg clock-ring-outer" viewBox="0 0 512 512" aria-hidden="true">
+          <defs>
+            <filter id="coreGlowOuter" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur stdDeviation="2.2" result="b"/>
+              <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+          <g fill="none" stroke-linecap="round">
+            <circle class="outer-dark" cx="256" cy="256" r="220"/>
+            <circle class="outer-hair" cx="256" cy="256" r="215"/>
+            <circle class="outer-edge" cx="256" cy="256" r="201"/>
+            <path class="outer-bright" d="M89 167A202 202 0 0 1 391 103"/>
+            <path class="outer-edge" d="M399 108A202 202 0 0 1 452 226"/>
+            <path class="outer-bright" d="M452 246A202 202 0 0 1 419 344"/>
+            <path class="outer-edge" d="M407 365A202 202 0 0 1 291 456"/>
+            <path class="outer-bright" d="M265 458A202 202 0 0 1 116 391"/>
+            <path class="outer-edge" d="M98 375A202 202 0 0 1 62 282"/>
+            <path class="outer-bright" d="M63 258A202 202 0 0 1 78 202"/>
+            <path class="outer-highlight" d="M118 123A185 185 0 0 1 215 78"/>
+            <path class="outer-highlight" d="M302 76A185 185 0 0 1 393 122"/>
+            <path class="outer-highlight" d="M435 178A185 185 0 0 1 447 245"/>
+            <path class="outer-highlight" d="M394 390A185 185 0 0 1 319 431"/>
+            <path class="outer-highlight" d="M188 433A185 185 0 0 1 119 394"/>
+          </g>
+          <g class="outer-hardware">
+            <path d="M71 188l10-31 21 7-8 31z"/>
+            <path d="M414 126l20 17-10 23-22-16z"/>
+            <path d="M430 318l21 4-5 27-23-4z"/>
+            <path d="M334 429l19 13-14 18-20-13z"/>
+            <path d="M153 430l8 24-24 8-8-24z"/>
+            <path d="M63 315l22-5 5 26-23 5z"/>
+          </g>
+          <g class="outer-micro">
+            <circle cx="78" cy="208" r="2"/><circle cx="85" cy="185" r="1.4"/>
+            <circle cx="427" cy="153" r="2"/><circle cx="441" cy="183" r="1.2"/>
+            <circle cx="438" cy="348" r="2"/><circle cx="403" cy="382" r="1.5"/>
+            <circle cx="348" cy="440" r="1.7"/><circle cx="131" cy="425" r="1.8"/>
+            <circle cx="82" cy="339" r="1.4"/>
+          </g>
+        </svg>
+
+        <svg class="jarvis-core-svg clock-ring-ticks" viewBox="0 0 512 512" aria-hidden="true">
+          <g><line class="major" x1="256.00" y1="78.00" x2="256.00" y2="66.00"/>
+<line class="minor" x1="262.42" y1="72.11" x2="262.53" y2="69.11"/>
+<line class="minor" x1="268.84" y1="72.45" x2="269.04" y2="69.46"/>
+<line class="minor" x1="275.23" y1="73.01" x2="275.55" y2="70.02"/>
+<line class="minor" x1="281.61" y1="73.79" x2="282.03" y2="70.82"/>
+<line class="medium" x1="287.43" y1="77.75" x2="288.65" y2="70.86"/>
+<line class="minor" x1="294.26" y1="76.02" x2="294.88" y2="73.09"/>
+<line class="minor" x1="300.51" y1="77.47" x2="301.24" y2="74.55"/>
+<line class="minor" x1="306.72" y1="79.13" x2="307.54" y2="76.24"/>
+<line class="minor" x1="312.86" y1="81.01" x2="313.79" y2="78.15"/>
+<line class="medium" x1="317.91" y1="85.92" x2="320.30" y2="79.34"/>
+<line class="minor" x1="324.93" y1="85.40" x2="326.05" y2="82.62"/>
+<line class="minor" x1="330.84" y1="87.91" x2="332.06" y2="85.17"/>
+<line class="minor" x1="336.66" y1="90.62" x2="337.98" y2="87.93"/>
+<line class="minor" x1="342.38" y1="93.54" x2="343.79" y2="90.89"/>
+<line class="major" x1="345.00" y1="101.85" x2="351.00" y2="91.46"/>
+<line class="minor" x1="353.51" y1="99.96" x2="355.09" y2="97.42"/>
+<line class="minor" x1="358.89" y1="103.46" x2="360.57" y2="100.97"/>
+<line class="minor" x1="364.15" y1="107.14" x2="365.92" y2="104.71"/>
+<line class="minor" x1="369.28" y1="111.01" x2="371.13" y2="108.64"/>
+<line class="medium" x1="372.34" y1="117.35" x2="376.84" y2="111.98"/>
+<line class="minor" x1="379.12" y1="119.26" x2="381.13" y2="117.03"/>
+<line class="minor" x1="383.82" y1="123.64" x2="385.90" y2="121.48"/>
+<line class="minor" x1="388.36" y1="128.18" x2="390.52" y2="126.10"/>
+<line class="minor" x1="392.74" y1="132.88" x2="394.97" y2="130.87"/>
+<line class="medium" x1="394.65" y1="139.66" x2="400.02" y2="135.16"/>
+<line class="minor" x1="400.99" y1="142.72" x2="403.36" y2="140.87"/>
+<line class="minor" x1="404.86" y1="147.85" x2="407.29" y2="146.08"/>
+<line class="minor" x1="408.54" y1="153.11" x2="411.03" y2="151.43"/>
+<line class="minor" x1="412.04" y1="158.49" x2="414.58" y2="156.91"/>
+<line class="major" x1="410.15" y1="167.00" x2="420.54" y2="161.00"/>
+<line class="minor" x1="418.46" y1="169.62" x2="421.11" y2="168.21"/>
+<line class="minor" x1="421.38" y1="175.34" x2="424.07" y2="174.02"/>
+<line class="minor" x1="424.09" y1="181.16" x2="426.83" y2="179.94"/>
+<line class="minor" x1="426.60" y1="187.07" x2="429.38" y2="185.95"/>
+<line class="medium" x1="426.08" y1="194.09" x2="432.66" y2="191.70"/>
+<line class="minor" x1="430.99" y1="199.14" x2="433.85" y2="198.21"/>
+<line class="minor" x1="432.87" y1="205.28" x2="435.76" y2="204.46"/>
+<line class="minor" x1="434.53" y1="211.49" x2="437.45" y2="210.76"/>
+<line class="minor" x1="435.98" y1="217.74" x2="438.91" y2="217.12"/>
+<line class="medium" x1="434.25" y1="224.57" x2="441.14" y2="223.35"/>
+<line class="minor" x1="438.21" y1="230.39" x2="441.18" y2="229.97"/>
+<line class="minor" x1="438.99" y1="236.77" x2="441.98" y2="236.45"/>
+<line class="minor" x1="439.55" y1="243.16" x2="442.54" y2="242.96"/>
+<line class="minor" x1="439.89" y1="249.58" x2="442.89" y2="249.47"/>
+<line class="major" x1="434.00" y1="256.00" x2="446.00" y2="256.00"/>
+<line class="minor" x1="439.89" y1="262.42" x2="442.89" y2="262.53"/>
+<line class="minor" x1="439.55" y1="268.84" x2="442.54" y2="269.04"/>
+<line class="minor" x1="438.99" y1="275.23" x2="441.98" y2="275.55"/>
+<line class="minor" x1="438.21" y1="281.61" x2="441.18" y2="282.03"/>
+<line class="medium" x1="434.25" y1="287.43" x2="441.14" y2="288.65"/>
+<line class="minor" x1="435.98" y1="294.26" x2="438.91" y2="294.88"/>
+<line class="minor" x1="434.53" y1="300.51" x2="437.45" y2="301.24"/>
+<line class="minor" x1="432.87" y1="306.72" x2="435.76" y2="307.54"/>
+<line class="minor" x1="430.99" y1="312.86" x2="433.85" y2="313.79"/>
+<line class="medium" x1="426.08" y1="317.91" x2="432.66" y2="320.30"/>
+<line class="minor" x1="426.60" y1="324.93" x2="429.38" y2="326.05"/>
+<line class="minor" x1="424.09" y1="330.84" x2="426.83" y2="332.06"/>
+<line class="minor" x1="421.38" y1="336.66" x2="424.07" y2="337.98"/>
+<line class="minor" x1="418.46" y1="342.38" x2="421.11" y2="343.79"/>
+<line class="major" x1="410.15" y1="345.00" x2="420.54" y2="351.00"/>
+<line class="minor" x1="412.04" y1="353.51" x2="414.58" y2="355.09"/>
+<line class="minor" x1="408.54" y1="358.89" x2="411.03" y2="360.57"/>
+<line class="minor" x1="404.86" y1="364.15" x2="407.29" y2="365.92"/>
+<line class="minor" x1="400.99" y1="369.28" x2="403.36" y2="371.13"/>
+<line class="medium" x1="394.65" y1="372.34" x2="400.02" y2="376.84"/>
+<line class="minor" x1="392.74" y1="379.12" x2="394.97" y2="381.13"/>
+<line class="minor" x1="388.36" y1="383.82" x2="390.52" y2="385.90"/>
+<line class="minor" x1="383.82" y1="388.36" x2="385.90" y2="390.52"/>
+<line class="minor" x1="379.12" y1="392.74" x2="381.13" y2="394.97"/>
+<line class="medium" x1="372.34" y1="394.65" x2="376.84" y2="400.02"/>
+<line class="minor" x1="369.28" y1="400.99" x2="371.13" y2="403.36"/>
+<line class="minor" x1="364.15" y1="404.86" x2="365.92" y2="407.29"/>
+<line class="minor" x1="358.89" y1="408.54" x2="360.57" y2="411.03"/>
+<line class="minor" x1="353.51" y1="412.04" x2="355.09" y2="414.58"/>
+<line class="major" x1="345.00" y1="410.15" x2="351.00" y2="420.54"/>
+<line class="minor" x1="342.38" y1="418.46" x2="343.79" y2="421.11"/>
+<line class="minor" x1="336.66" y1="421.38" x2="337.98" y2="424.07"/>
+<line class="minor" x1="330.84" y1="424.09" x2="332.06" y2="426.83"/>
+<line class="minor" x1="324.93" y1="426.60" x2="326.05" y2="429.38"/>
+<line class="medium" x1="317.91" y1="426.08" x2="320.30" y2="432.66"/>
+<line class="minor" x1="312.86" y1="430.99" x2="313.79" y2="433.85"/>
+<line class="minor" x1="306.72" y1="432.87" x2="307.54" y2="435.76"/>
+<line class="minor" x1="300.51" y1="434.53" x2="301.24" y2="437.45"/>
+<line class="minor" x1="294.26" y1="435.98" x2="294.88" y2="438.91"/>
+<line class="medium" x1="287.43" y1="434.25" x2="288.65" y2="441.14"/>
+<line class="minor" x1="281.61" y1="438.21" x2="282.03" y2="441.18"/>
+<line class="minor" x1="275.23" y1="438.99" x2="275.55" y2="441.98"/>
+<line class="minor" x1="268.84" y1="439.55" x2="269.04" y2="442.54"/>
+<line class="minor" x1="262.42" y1="439.89" x2="262.53" y2="442.89"/>
+<line class="major" x1="256.00" y1="434.00" x2="256.00" y2="446.00"/>
+<line class="minor" x1="249.58" y1="439.89" x2="249.47" y2="442.89"/>
+<line class="minor" x1="243.16" y1="439.55" x2="242.96" y2="442.54"/>
+<line class="minor" x1="236.77" y1="438.99" x2="236.45" y2="441.98"/>
+<line class="minor" x1="230.39" y1="438.21" x2="229.97" y2="441.18"/>
+<line class="medium" x1="224.57" y1="434.25" x2="223.35" y2="441.14"/>
+<line class="minor" x1="217.74" y1="435.98" x2="217.12" y2="438.91"/>
+<line class="minor" x1="211.49" y1="434.53" x2="210.76" y2="437.45"/>
+<line class="minor" x1="205.28" y1="432.87" x2="204.46" y2="435.76"/>
+<line class="minor" x1="199.14" y1="430.99" x2="198.21" y2="433.85"/>
+<line class="medium" x1="194.09" y1="426.08" x2="191.70" y2="432.66"/>
+<line class="minor" x1="187.07" y1="426.60" x2="185.95" y2="429.38"/>
+<line class="minor" x1="181.16" y1="424.09" x2="179.94" y2="426.83"/>
+<line class="minor" x1="175.34" y1="421.38" x2="174.02" y2="424.07"/>
+<line class="minor" x1="169.62" y1="418.46" x2="168.21" y2="421.11"/>
+<line class="major" x1="167.00" y1="410.15" x2="161.00" y2="420.54"/>
+<line class="minor" x1="158.49" y1="412.04" x2="156.91" y2="414.58"/>
+<line class="minor" x1="153.11" y1="408.54" x2="151.43" y2="411.03"/>
+<line class="minor" x1="147.85" y1="404.86" x2="146.08" y2="407.29"/>
+<line class="minor" x1="142.72" y1="400.99" x2="140.87" y2="403.36"/>
+<line class="medium" x1="139.66" y1="394.65" x2="135.16" y2="400.02"/>
+<line class="minor" x1="132.88" y1="392.74" x2="130.87" y2="394.97"/>
+<line class="minor" x1="128.18" y1="388.36" x2="126.10" y2="390.52"/>
+<line class="minor" x1="123.64" y1="383.82" x2="121.48" y2="385.90"/>
+<line class="minor" x1="119.26" y1="379.12" x2="117.03" y2="381.13"/>
+<line class="medium" x1="117.35" y1="372.34" x2="111.98" y2="376.84"/>
+<line class="minor" x1="111.01" y1="369.28" x2="108.64" y2="371.13"/>
+<line class="minor" x1="107.14" y1="364.15" x2="104.71" y2="365.92"/>
+<line class="minor" x1="103.46" y1="358.89" x2="100.97" y2="360.57"/>
+<line class="minor" x1="99.96" y1="353.51" x2="97.42" y2="355.09"/>
+<line class="major" x1="101.85" y1="345.00" x2="91.46" y2="351.00"/>
+<line class="minor" x1="93.54" y1="342.38" x2="90.89" y2="343.79"/>
+<line class="minor" x1="90.62" y1="336.66" x2="87.93" y2="337.98"/>
+<line class="minor" x1="87.91" y1="330.84" x2="85.17" y2="332.06"/>
+<line class="minor" x1="85.40" y1="324.93" x2="82.62" y2="326.05"/>
+<line class="medium" x1="85.92" y1="317.91" x2="79.34" y2="320.30"/>
+<line class="minor" x1="81.01" y1="312.86" x2="78.15" y2="313.79"/>
+<line class="minor" x1="79.13" y1="306.72" x2="76.24" y2="307.54"/>
+<line class="minor" x1="77.47" y1="300.51" x2="74.55" y2="301.24"/>
+<line class="minor" x1="76.02" y1="294.26" x2="73.09" y2="294.88"/>
+<line class="medium" x1="77.75" y1="287.43" x2="70.86" y2="288.65"/>
+<line class="minor" x1="73.79" y1="281.61" x2="70.82" y2="282.03"/>
+<line class="minor" x1="73.01" y1="275.23" x2="70.02" y2="275.55"/>
+<line class="minor" x1="72.45" y1="268.84" x2="69.46" y2="269.04"/>
+<line class="minor" x1="72.11" y1="262.42" x2="69.11" y2="262.53"/>
+<line class="major" x1="78.00" y1="256.00" x2="66.00" y2="256.00"/>
+<line class="minor" x1="72.11" y1="249.58" x2="69.11" y2="249.47"/>
+<line class="minor" x1="72.45" y1="243.16" x2="69.46" y2="242.96"/>
+<line class="minor" x1="73.01" y1="236.77" x2="70.02" y2="236.45"/>
+<line class="minor" x1="73.79" y1="230.39" x2="70.82" y2="229.97"/>
+<line class="medium" x1="77.75" y1="224.57" x2="70.86" y2="223.35"/>
+<line class="minor" x1="76.02" y1="217.74" x2="73.09" y2="217.12"/>
+<line class="minor" x1="77.47" y1="211.49" x2="74.55" y2="210.76"/>
+<line class="minor" x1="79.13" y1="205.28" x2="76.24" y2="204.46"/>
+<line class="minor" x1="81.01" y1="199.14" x2="78.15" y2="198.21"/>
+<line class="medium" x1="85.92" y1="194.09" x2="79.34" y2="191.70"/>
+<line class="minor" x1="85.40" y1="187.07" x2="82.62" y2="185.95"/>
+<line class="minor" x1="87.91" y1="181.16" x2="85.17" y2="179.94"/>
+<line class="minor" x1="90.62" y1="175.34" x2="87.93" y2="174.02"/>
+<line class="minor" x1="93.54" y1="169.62" x2="90.89" y2="168.21"/>
+<line class="major" x1="101.85" y1="167.00" x2="91.46" y2="161.00"/>
+<line class="minor" x1="99.96" y1="158.49" x2="97.42" y2="156.91"/>
+<line class="minor" x1="103.46" y1="153.11" x2="100.97" y2="151.43"/>
+<line class="minor" x1="107.14" y1="147.85" x2="104.71" y2="146.08"/>
+<line class="minor" x1="111.01" y1="142.72" x2="108.64" y2="140.87"/>
+<line class="medium" x1="117.35" y1="139.66" x2="111.98" y2="135.16"/>
+<line class="minor" x1="119.26" y1="132.88" x2="117.03" y2="130.87"/>
+<line class="minor" x1="123.64" y1="128.18" x2="121.48" y2="126.10"/>
+<line class="minor" x1="128.18" y1="123.64" x2="126.10" y2="121.48"/>
+<line class="minor" x1="132.88" y1="119.26" x2="130.87" y2="117.03"/>
+<line class="medium" x1="139.66" y1="117.35" x2="135.16" y2="111.98"/>
+<line class="minor" x1="142.72" y1="111.01" x2="140.87" y2="108.64"/>
+<line class="minor" x1="147.85" y1="107.14" x2="146.08" y2="104.71"/>
+<line class="minor" x1="153.11" y1="103.46" x2="151.43" y2="100.97"/>
+<line class="minor" x1="158.49" y1="99.96" x2="156.91" y2="97.42"/>
+<line class="major" x1="167.00" y1="101.85" x2="161.00" y2="91.46"/>
+<line class="minor" x1="169.62" y1="93.54" x2="168.21" y2="90.89"/>
+<line class="minor" x1="175.34" y1="90.62" x2="174.02" y2="87.93"/>
+<line class="minor" x1="181.16" y1="87.91" x2="179.94" y2="85.17"/>
+<line class="minor" x1="187.07" y1="85.40" x2="185.95" y2="82.62"/>
+<line class="medium" x1="194.09" y1="85.92" x2="191.70" y2="79.34"/>
+<line class="minor" x1="199.14" y1="81.01" x2="198.21" y2="78.15"/>
+<line class="minor" x1="205.28" y1="79.13" x2="204.46" y2="76.24"/>
+<line class="minor" x1="211.49" y1="77.47" x2="210.76" y2="74.55"/>
+<line class="minor" x1="217.74" y1="76.02" x2="217.12" y2="73.09"/>
+<line class="medium" x1="224.57" y1="77.75" x2="223.35" y2="70.86"/>
+<line class="minor" x1="230.39" y1="73.79" x2="229.97" y2="70.82"/>
+<line class="minor" x1="236.77" y1="73.01" x2="236.45" y2="70.02"/>
+<line class="minor" x1="243.16" y1="72.45" x2="242.96" y2="69.46"/>
+<line class="minor" x1="249.58" y1="72.11" x2="249.47" y2="69.11"/></g>
+          <g class="scale-dots"><circle cx="427.00" cy="256.00" r="1.25"/><circle cx="424.40" cy="285.69" r="0.65"/><circle cx="416.69" cy="314.49" r="0.65"/><circle cx="404.09" cy="341.50" r="1.25"/><circle cx="386.99" cy="365.92" r="0.65"/><circle cx="365.92" cy="386.99" r="0.65"/><circle cx="341.50" cy="404.09" r="1.25"/><circle cx="314.49" cy="416.69" r="0.65"/><circle cx="285.69" cy="424.40" r="0.65"/><circle cx="256.00" cy="427.00" r="1.25"/><circle cx="226.31" cy="424.40" r="0.65"/><circle cx="197.51" cy="416.69" r="0.65"/><circle cx="170.50" cy="404.09" r="1.25"/><circle cx="146.08" cy="386.99" r="0.65"/><circle cx="125.01" cy="365.92" r="0.65"/><circle cx="107.91" cy="341.50" r="1.25"/><circle cx="95.31" cy="314.49" r="0.65"/><circle cx="87.60" cy="285.69" r="0.65"/><circle cx="85.00" cy="256.00" r="1.25"/><circle cx="87.60" cy="226.31" r="0.65"/><circle cx="95.31" cy="197.51" r="0.65"/><circle cx="107.91" cy="170.50" r="1.25"/><circle cx="125.01" cy="146.08" r="0.65"/><circle cx="146.08" cy="125.01" r="0.65"/><circle cx="170.50" cy="107.91" r="1.25"/><circle cx="197.51" cy="95.31" r="0.65"/><circle cx="226.31" cy="87.60" r="0.65"/><circle cx="256.00" cy="85.00" r="1.25"/><circle cx="285.69" cy="87.60" r="0.65"/><circle cx="314.49" cy="95.31" r="0.65"/><circle cx="341.50" cy="107.91" r="1.25"/><circle cx="365.92" cy="125.01" r="0.65"/><circle cx="386.99" cy="146.08" r="0.65"/><circle cx="404.09" cy="170.50" r="1.25"/><circle cx="416.69" cy="197.51" r="0.65"/><circle cx="424.40" cy="226.31" r="0.65"/></g>
+        </svg>
+
+        <svg class="jarvis-core-svg clock-ring-ticks-major" viewBox="0 0 512 512" aria-hidden="true">
+          <g class="major-segments">
+            <circle cx="256" cy="256" r="176"/>
+            <circle cx="256" cy="256" r="169"/>
+          </g>
+          <g class="major-bars">
+            <path d="M256 77v15M328 91l-6 14M390 126l-11 10M434 180l-15 5M435 332l-15-5M390 386l-11-10M328 421l-6-14M256 435v-15M184 421l6-14M122 386l11-10M78 332l15-5M77 256h15M78 180l15 5M122 126l11 10M184 91l6 14"/>
+          </g>
+        </svg>
+
+        <svg class="jarvis-core-svg clock-ring-mid" viewBox="0 0 512 512" aria-hidden="true">
+          <g fill="none">
+            <circle cx="256" cy="256" r="166" class="mid-deep"/>
+            <circle cx="256" cy="256" r="158" class="mid-line"/>
+            <circle cx="256" cy="256" r="151" class="mid-bright"/>
+            <circle cx="256" cy="256" r="145" class="mid-fine"/>
+            <circle cx="256" cy="256" r="138" class="mid-dotted"/>
+            <circle cx="256" cy="256" r="129" class="mid-dash"/>
+            <circle cx="256" cy="256" r="121" class="mid-inner-dash"/>
+          </g>
+        </svg>
+
+        <svg class="jarvis-core-svg clock-accent-arc" viewBox="0 0 512 512" aria-hidden="true">
+          <g fill="none" stroke-linecap="round">
+            <path class="energy-cyan" d="M92 322A183 183 0 0 1 107 168A183 183 0 0 1 284 74"/>
+            <path class="energy-cyan-thin" d="M102 174A177 177 0 0 1 235 80"/>
+            <path class="energy-cyan" d="M336 91A183 183 0 0 1 441 209"/>
+            <path class="energy-cyan-thin" d="M450 231A183 183 0 0 1 407 351"/>
+            <path class="energy-yellow" d="M130 321A151 151 0 0 1 139 186"/>
+            <path class="energy-yellow-thin" d="M134 319A147 147 0 0 1 141 190"/>
+          </g>
+        </svg>
+
+        <div class="clock-notch-dots">
+          <span style="--a:260deg"></span><span style="--a:278deg"></span>
+          <span style="--a:296deg"></span><span style="--a:314deg"></span>
+        </div>
+
+        <div class="clock-center">
+          <div class="clock-center-texture"></div>
+          <div class="clock-second-hand" id="clockSecondHand"><div class="hand-tip"></div></div>
+          <div class="voice-wave" id="voiceWave"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+          <div class="clock-time" id="clockTime"></div>
+          <div class="clock-date" id="clockDate"></div>
+          <div class="clock-brand">J.A.R.V.I.S.<span class="clock-brand-sub">Just A Rather Very Intelligent System</span></div>
+        </div>
+      </div>
+
+      <svg class="mobile-radar" id="mobileRadar" viewBox="0 0 200 200" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+        <defs>
+          <radialGradient id="mobileRadarGlow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="var(--cyan)" stop-opacity=".18"/>
+            <stop offset="100%" stop-color="var(--cyan)" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+        <circle cx="100" cy="100" r="96" fill="url(#mobileRadarGlow)"/>
+        <circle class="mr-ring" cx="100" cy="100" r="90"/>
+        <circle class="mr-ring" cx="100" cy="100" r="70"/>
+        <circle class="mr-ring" cx="100" cy="100" r="48"/>
+        <g class="mr-fan">
+          <line x1="100" y1="100" x2="24" y2="60"/>
+          <line x1="100" y1="100" x2="18" y2="100"/>
+          <line x1="100" y1="100" x2="24" y2="140"/>
+          <line x1="100" y1="100" x2="176" y2="60"/>
+          <line x1="100" y1="100" x2="182" y2="100"/>
+          <line x1="100" y1="100" x2="176" y2="140"/>
+        </g>
+        <g class="mr-nodes">
+          <circle cx="46" cy="76" r="2.4"/>
+          <circle cx="66" cy="64" r="2.4"/>
+          <circle cx="92" cy="60" r="2.4"/>
+          <circle cx="122" cy="64" r="2.4"/>
+          <circle cx="148" cy="78" r="2.4"/>
+          <circle cx="60" cy="128" r="2.4"/>
+          <circle cx="140" cy="126" r="2.4"/>
+          <polyline points="46,76 66,64 92,60 122,64 148,78" fill="none"/>
+        </g>
+        <g class="mr-sweep-wrap">
+          <path class="mr-sweep" d="M100,100 L100,10 A90,90 0 0,1 163,37 Z"/>
+        </g>
+        <g class="mr-bearings">
+          <text x="100" y="16" text-anchor="middle">000</text>
+          <text x="184" y="103" text-anchor="middle">090</text>
+          <text x="100" y="192" text-anchor="middle">180</text>
+          <text x="16" y="103" text-anchor="middle">270</text>
+        </g>
+        <circle class="mr-center-dot" cx="100" cy="100" r="3"/>
+        <text class="mr-brand" x="100" y="182" text-anchor="middle">J.A.R.V.I.S.</text>
+      </svg>
+      <div class="mobile-core" aria-hidden="true">
+        <svg class="mc-svg" id="mobileCoreSvg" viewBox="-100 -100 200 200"></svg>
+        <div class="mc-leitura mc-tl"><span>LINK</span><b id="mcLink">offline</b></div>
+        <div class="mc-leitura mc-tr"><span>PERFIL</span><b id="mcPerfil">—</b></div>
+        <div class="mc-leitura mc-bl"><span>ESTADO</span><b id="mcEstado">—</b></div>
+        <div class="mc-leitura mc-br"><span>HORA</span><b id="mcHora">--:--</b></div>
+      </div>
+
+      <div class="clock-status-row" id="clockStatus"></div>
+      <div class="subsys-row" id="subsysRow">
+        
+      </div>
+    </div>
+
+    <div class="panel terminal-panel">
+      <div class="panel-title">
+        <div class="panel-title-main">
+          <svg
+            class="terminal-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.7"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            xmlns="http://www.w3.org/2000/svg"
+            aria-hidden="true"
+          >
+            <polyline points="4 17 10 11 4 5"></polyline>
+            <line x1="12" y1="19" x2="20" y2="19"></line>
+          </svg>
+          <span>Direct access</span>
+        </div>
+      </div>
+
+      <div class="terminal-body" id="terminalBody">
+        <div class="term-empty" id="terminalEmpty"></div>
+      </div>
+    </div>
+
+    <div class="panel logs-panel">
+      <div class="panel-title">
+        <div class="panel-title-main">
+          <svg
+            class="terminal-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.7"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+          </svg>
+          <span>SYSTEM LOGS</span>
+        </div>
+        <span class="panel-count" id="logsCount">0</span>
+      </div>
+      <div class="logs-toolbar" id="logsToolbar">
+        <button class="logs-filter-btn active" data-level="all">TODOS</button>
+        <button class="logs-filter-btn" data-level="info">INFO</button>
+        <button class="logs-filter-btn" data-level="warn">AVISO</button>
+        <button class="logs-filter-btn" data-level="error">ERRO</button>
+      </div>
+      <div class="logs-body" id="logsBody">
+        <div class="log-empty" id="logsEmpty">nenhum evento registrado</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="cmdbar">
+    <div class="cmd-autocomplete" id="cmdAutocomplete"></div>
+    <div class="mic-btn" id="micBtn" title="Ativar escuta">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+        <path d="M19 10v1a7 7 0 0 1-14 0v-1"></path>
+        <line x1="12" y1="19" x2="12" y2="22"></line>
+        <line x1="8" y1="22" x2="16" y2="22"></line>
+      </svg>
+    </div>
+  <textarea class="cmd-input" placeholder="Digite um comando" rows="1"></textarea>
+
+<button class="send-btn" id="sendBtn" aria-label="Enviar">
+  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="m22 2-7 20-4-9-9-4Z"/>
+    <path d="M22 2 11 13"/>
+  </svg>
+</button>
+  </div>
+
+</div>
+
+<div class="voz-overlay" id="vozOverlay" hidden role="dialog" aria-label="Conversa por voz">
+  <div class="voz-topo"><span class="voz-ativo">VOZ · ATIVO</span><span class="voz-dica">toque no anel para encerrar</span></div>
+  <div class="voz-centro"><svg class="voz-svg" id="vozSvg" viewBox="-110 -110 220 220"></svg></div>
+  <div class="voz-rodape">
+    <div class="voz-estado" id="vozEstado" aria-live="polite">CONECTANDO</div>
+    <div class="voz-fala" id="vozFala"></div>
+    <button type="button" class="voz-parar" id="vozParar" aria-label="Encerrar conversa por voz">
+      <svg viewBox="-25 -25 50 50" aria-hidden="true"><circle r="22" class="voz-parar-anel"/><rect x="-6" y="-6" width="12" height="12"/></svg>
+    </button>
+  </div>
+</div>
+
+<div class="login-overlay" id="loginOverlay" hidden>
+  <form class="login-box" id="loginForm">
+    <div class="boot-logo">J·A·R·V·I·S</div>
+    <label class="login-label" for="loginServidor">Servidor</label>
+    <input class="login-input" id="loginServidor" type="url" inputmode="url" autocomplete="url" placeholder="https://… (vazio = este endereço)">
+    <label class="login-label" for="loginToken">Token de acesso</label>
+    <input class="login-input" id="loginToken" type="password" autocomplete="current-password" required>
+    <div class="login-erro" id="loginErro" role="alert"></div>
+    <button class="login-btn" type="submit">Conectar</button>
+  </form>
+</div>
+
+<script type="module" src="/src/main.js"></script>
+</body>
+</html>

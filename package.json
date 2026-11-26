@@ -1,0 +1,13 @@
+{
+  "name": "jarvis",
+  "private": true,
+  "workspaces": ["packages/*", "apps/*"],
+  "scripts": {
+    "dev:server": "npm run dev -w @jarvis/server",
+    "dev:hud": "npm run dev -w @jarvis/hud",
+    "build": "npm run build -w @jarvis/protocol && npm run build -w @jarvis/server && npm run build -w @jarvis/hud",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "start": "npm run start -w @jarvis/server"
+  },
+  "engines": { "node": ">=22" }
+}
