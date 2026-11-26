@@ -1,4 +1,4 @@
-// Núcleo de anéis (estilo HUD holográfico): usado no celular (tela principal) e no modo voz.
+// Núcleo de anéis do modo voz no desktop (no celular quem desenha é o mobile.js).
 const NS = 'http://www.w3.org/2000/svg';
 
 function anel(r, largura, traco, cor, opacidade, giro) {

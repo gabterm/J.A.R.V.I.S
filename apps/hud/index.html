@@ -7,7 +7,7 @@
 <title>J.A.R.V.I.S.</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700;800&family=Share+Tech+Mono&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700;800&family=Share+Tech+Mono&family=JetBrains+Mono:wght@400;500&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/src/style.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
@@ -646,13 +646,6 @@
         <circle class="mr-center-dot" cx="100" cy="100" r="3"/>
         <text class="mr-brand" x="100" y="182" text-anchor="middle">J.A.R.V.I.S.</text>
       </svg>
-      <div class="mobile-core" aria-hidden="true">
-        <svg class="mc-svg" id="mobileCoreSvg" viewBox="-100 -100 200 200"></svg>
-        <div class="mc-leitura mc-tl"><span>LINK</span><b id="mcLink">offline</b></div>
-        <div class="mc-leitura mc-tr"><span>PERFIL</span><b id="mcPerfil">—</b></div>
-        <div class="mc-leitura mc-bl"><span>ESTADO</span><b id="mcEstado">—</b></div>
-        <div class="mc-leitura mc-br"><span>HORA</span><b id="mcHora">--:--</b></div>
-      </div>
 
       <div class="clock-status-row" id="clockStatus"></div>
       <div class="subsys-row" id="subsysRow">
@@ -738,6 +731,89 @@
 </button>
   </div>
 
+</div>
+
+<!-- Celular (até 640 px): interface no estilo do NEXUS; o HUD acima fica só no desktop -->
+<div class="m-app" id="mApp" data-tema="tron">
+  <div class="m-boot" id="mBoot"></div>
+
+  <section class="m-tela on" id="mPainel">
+    <div class="m-head"><span>Painel</span><span>JARVIS</span></div>
+    <div>
+      <div class="m-hero"><svg class="m-core" id="mCore" viewBox="-100 -100 200 200" aria-hidden="true"></svg></div>
+      <div class="m-clock" id="mClock">--:--:--</div>
+      <div class="m-info">
+        <div><span class="m-dim" id="mAno">2026</span><b id="mData">—</b></div>
+        <div><span class="m-dim">Link</span><b id="mLink">offline</b></div>
+        <div><span class="m-dim">Perfil</span><b id="mPerfilQtd">—</b></div>
+        <div><span class="m-dim">Estado</span><b id="mEstado">—</b></div>
+      </div>
+    </div>
+    <div class="m-term">
+      <div class="m-term-top"><span class="m-tab">conversa</span><span class="m-term-dir">texto</span></div>
+      <div class="m-frame">
+        <div class="m-msgs" id="mMsgs" aria-live="polite"><div class="m-vazio">Fale com o JARVIS por texto ou voz.</div></div>
+        <form class="m-prompt" id="mForm" autocomplete="off">
+          <div class="m-l1"><span class="m-p">╭─ gabterm</span><span class="m-dir">~/jarvis</span><span class="m-hr" id="mHora">--:--</span></div>
+          <div class="m-l2"><span class="m-p">╰›</span><input id="mInput" enterkeyhint="send" placeholder="fale com o JARVIS" aria-label="Mensagem para o JARVIS"></div>
+        </form>
+      </div>
+    </div>
+    <div class="m-foot">
+      <button type="button" class="m-btn" id="mBtnPerfil">Perfil</button>
+      <button type="button" class="m-btn" id="mBtnTema">Tema: Tron</button>
+      <button type="button" class="m-btn m-mic" id="mBtnVoz" aria-label="Conversar por voz">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>Voz</button>
+    </div>
+  </section>
+
+  <section class="m-tela" id="mVoz" aria-label="Conversa por voz">
+    <div class="m-head"><span>Voz</span><span>Realtime</span></div>
+    <div class="m-hero"><svg class="m-core m-core-voz" id="mCoreVoz" viewBox="-100 -100 200 200" aria-hidden="true"></svg></div>
+    <div class="m-block">
+      <div class="m-block-title"><span class="m-estado" id="mVozEstado" aria-live="polite">CONECTANDO</span><span class="m-pill">ao vivo</span></div>
+      <div class="m-info">
+        <div><span class="m-dim">Sessão</span><b id="mVozTempo">00:00</b></div>
+        <div><span class="m-dim">Modelo</span><b id="mVozModelo">—</b></div>
+        <div><span class="m-dim">Falas</span><b id="mVozFalas">0</b></div>
+        <div><span class="m-dim">Nível</span><b id="mVozNivel">0%</b></div>
+      </div>
+    </div>
+    <div class="m-block">
+      <div class="m-block-title">Nível de áudio <span class="m-dim m-num">últimos 10 s</span></div>
+      <canvas class="m-chart" id="mGrafico"></canvas>
+    </div>
+    <div class="m-term">
+      <div class="m-term-top"><span class="m-tab">transcrição</span><span class="m-term-dir">pt-BR</span></div>
+      <div class="m-frame"><div class="m-msgs" id="mVozFala"><div class="m-vazio">aguardando você falar…</div></div></div>
+    </div>
+    <div class="m-foot"><button type="button" class="m-btn m-on m-cheio" id="mBtnEncerrar">Encerrar voz</button></div>
+  </section>
+
+  <section class="m-tela" id="mPerfil" aria-label="O que o JARVIS sabe sobre você">
+    <div class="m-head"><span>Painel</span><span>Perfil</span></div>
+    <div class="m-block">
+      <div class="m-block-title">O que sei sobre você <span class="m-pill" id="mPerfilTotal">0</span></div>
+      <div>
+        <div class="m-kv"><span>Você disse</span><span id="mPerfilDisse">0</span></div>
+        <div class="m-kv"><span>Percebido</span><span id="mPerfilPercebido">0</span></div>
+        <div class="m-kv"><span>Incertos</span><span id="mPerfilIncertos">0</span></div>
+      </div>
+    </div>
+    <div class="m-block m-grow m-lista" id="mPerfilLista"></div>
+    <form class="m-add" id="mPerfilAdd" hidden>
+      <label class="m-sr" for="mAddCat">Categoria</label>
+      <select id="mAddCat">
+        <option value="estilo">Como falar comigo</option><option value="evitar">Evitar</option>
+        <option value="preferencia">Preferência</option><option value="traco">Personalidade</option>
+        <option value="rotina">Rotina</option><option value="objetivo">Objetivo</option><option value="fato">Fato</option>
+      </select>
+      <label class="m-sr" for="mAddTexto">O que o JARVIS deve saber</label>
+      <input id="mAddTexto" maxlength="500" placeholder="prefiro que…" required>
+      <button type="submit" class="m-btn">Salvar</button>
+    </form>
+    <div class="m-foot"><button type="button" class="m-btn" id="mBtnVoltar">Voltar</button><button type="button" class="m-btn m-dir-btn" id="mBtnAdicionar">+ Adicionar</button></div>
+  </section>
 </div>
 
 <div class="voz-overlay" id="vozOverlay" hidden role="dialog" aria-label="Conversa por voz">
