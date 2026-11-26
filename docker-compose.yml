@@ -1,0 +1,14 @@
+# Banco local para desenvolvimento (Postgres + pgvector).
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: jarvis
+      POSTGRES_PASSWORD: jarvis-local
+      POSTGRES_DB: jarvis
+    ports:
+      - "127.0.0.1:54329:5432"
+    volumes:
+      - jarvis-db:/var/lib/postgresql/data
+volumes:
+  jarvis-db:

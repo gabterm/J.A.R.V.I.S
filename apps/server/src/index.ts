@@ -6,12 +6,28 @@ import { mensagemDoCliente, type EventoDoServidor } from "@jarvis/protocol";
 import { lerConfig } from "./config.js";
 import { tokenValido } from "./auth.js";
 import { Conversa } from "./assistente.js";
+import { criarPool, migrar } from "./db.js";
+import { Memoria, nomeDoErro } from "./memoria/memoria.js";
+import { RepositorioMemoria } from "./memoria/repositorio.js";
 
 const PRAZO_AUTH_MS = 5_000;
 
 const config = lerConfig();
 const openai = new OpenAI({ apiKey: config.OPENAI_API_KEY });
 const app = Fastify({ logger: { level: "info" } });
+
+const pool = criarPool(config.DATABASE_URL);
+const aplicadas = await migrar(pool);
+if (aplicadas.length) app.log.info({ aplicadas }, "migrations aplicadas");
+const memoria = new Memoria(
+  new RepositorioMemoria(pool),
+  openai,
+  { modelo: config.OPENAI_MODEL, modeloEmbedding: config.OPENAI_EMBEDDING_MODEL, fuso: config.TZ_PESSOA },
+  app.log,
+);
+app.addHook("onClose", async () => {
+  await pool.end();
+});
 
 await app.register(websocket, { options: { maxPayload: 64 * 1024 } });
 
@@ -24,12 +40,18 @@ function enviar(socket: WebSocket, evento: EventoDoServidor): void {
 app.get("/ws", { websocket: true }, (socket, req) => {
   let autenticado = false;
   let ocupado = false;
-  const conversa = new Conversa(openai, config.OPENAI_MODEL);
+  const conversa = new Conversa(openai, config.OPENAI_MODEL, memoria);
+
+  const enviarPerfil = (): Promise<void> =>
+    memoria.perfil().then((itens) => enviar(socket, { type: "perfil", itens }));
 
   const prazo = setTimeout(() => {
     if (!autenticado) socket.close(4401, "não autenticado");
   }, PRAZO_AUTH_MS);
-  socket.on("close", () => clearTimeout(prazo));
+  socket.on("close", () => {
+    clearTimeout(prazo);
+    if (autenticado) memoria.refletirPendentes();
+  });
 
   socket.on("message", (bruto) => {
     let json: unknown;
@@ -71,14 +93,28 @@ app.get("/ws", { websocket: true }, (socket, req) => {
           .then((texto) => enviar(socket, { type: "log", role: "jarvis", text: texto }))
           .catch((erro: unknown) => {
             // Só status e código: a mensagem da OpenAI pode ecoar parte da chave.
-            const detalhe = erro instanceof OpenAI.APIError ? { status: erro.status, codigo: erro.code } : { tipo: erro instanceof Error ? erro.name : typeof erro };
-            req.log.error(detalhe, "falha ao responder");
+            req.log.error({ tipo: nomeDoErro(erro) }, "falha ao responder");
             enviar(socket, { type: "notification", level: "error", text: "Não consegui responder agora." });
           })
           .finally(() => {
             ocupado = false;
             enviar(socket, { type: "status", state: "idle" });
           });
+        return;
+      }
+      case "perfil_listar":
+      case "perfil_apagar":
+      case "perfil_corrigir":
+      case "perfil_adicionar": {
+        const acao =
+          msg.type === "perfil_apagar" ? memoria.apagar(msg.id)
+          : msg.type === "perfil_corrigir" ? memoria.corrigir(msg.id, msg.conteudo)
+          : msg.type === "perfil_adicionar" ? memoria.adicionar(msg.categoria, msg.conteudo)
+          : Promise.resolve();
+        acao.then(enviarPerfil).catch((erro: unknown) => {
+          req.log.error({ tipo: nomeDoErro(erro) }, "falha no perfil");
+          enviar(socket, { type: "notification", level: "error", text: "Não consegui mexer no perfil." });
+        });
         return;
       }
       case "mic_toggle":
