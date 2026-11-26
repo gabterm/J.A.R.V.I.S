@@ -1037,6 +1037,7 @@ function typewriter(el, texto) {
 }
 
 const TOOLS_META = {
+  perfil:              { params: [] },
   get_current_time:    { params: [{ n: 'timezone', req: false }] },
   get_current_date:    { params: [{ n: 'timezone', req: false }] },
   open_website:        { params: [{ n: 'url', req: true }] },
@@ -1122,6 +1123,11 @@ function tratarSlashCommand(texto) {
   // Ajuda
   if (nome === 'help' || nome === 'ajuda') {
     listarFerramentas();
+    return true;
+  }
+
+  if (nome === 'perfil') {
+    enviarPerfil({ type: 'perfil_listar' });
     return true;
   }
 
@@ -1734,6 +1740,9 @@ function conectar() {
       case 'play_audio':
         abrirPlayerMusica(evento);
         break;
+      case 'perfil':
+        abrirPerfil(evento.itens);
+        break;
       case 'music_recent':
         abrirRecentes(evento.recentes);
         break;
@@ -1875,5 +1884,81 @@ loginForm.addEventListener('submit', (ev) => {
   loginOverlay.hidden = true;
   conectar();
 });
+
+// Painel "o que sei sobre você": lista, corrige, esquece e adiciona itens do perfil.
+const perfilFrame = document.getElementById('perfilFrame');
+const perfilBody = document.getElementById('perfilBody');
+const perfilAdd = document.getElementById('perfilAdd');
+const perfilAddCategoria = document.getElementById('perfilAddCategoria');
+const perfilAddTexto = document.getElementById('perfilAddTexto');
+const TITULOS_PERFIL = {
+  estilo: 'Como falar comigo', evitar: 'Evitar', preferencia: 'Preferências', traco: 'Personalidade',
+  rotina: 'Rotina', objetivo: 'Objetivos', fato: 'Fatos',
+};
+const ORIGEM_PERFIL = { inferido: 'percebido', declarado: 'você disse', corrigido: 'você corrigiu' };
+
+function enviarPerfil(msg) {
+  if (!ws || ws.readyState !== WebSocket.OPEN) { setEstado('offline'); return; }
+  ws.send(JSON.stringify(msg));
+}
+
+function abrirPerfil(itens) {
+  const lista = itens || [];
+  perfilBody.innerHTML = Object.keys(TITULOS_PERFIL).map(cat => {
+    const daCat = lista.filter(i => i.categoria === cat);
+    if (!daCat.length) return '';
+    return `<section class="perfil-secao"><h3 class="perfil-titulo">${TITULOS_PERFIL[cat]}</h3>${daCat.map(i => `
+      <div class="perfil-item" data-id="${escapeXml(i.id)}">
+        <div class="perfil-texto">${escapeXml(i.conteudo)}</div>
+        <div class="perfil-meta">
+          <span class="perfil-barra" title="Confiança ${Math.round(i.confianca * 100)}%"><span style="width:${Math.round(i.confianca * 100)}%"></span></span>
+          <span>${ORIGEM_PERFIL[i.origem] || ''}</span>
+          <button type="button" class="perfil-acao" data-acao="corrigir">corrigir</button>
+          <button type="button" class="perfil-acao" data-acao="esquecer">esquecer</button>
+        </div>
+      </div>`).join('')}</section>`;
+  }).join('') || '<div class="term-empty">Ainda não sei nada sobre você. Converse comigo ou adicione algo abaixo.</div>';
+
+  if (!perfilFrame.classList.contains('open')) {
+    perfilFrame.style.position = ''; perfilFrame.style.left = ''; perfilFrame.style.top = ''; perfilFrame.style.margin = '';
+    perfilFrame.classList.add('open');
+    tocarSom('toggle');
+  }
+}
+
+perfilBody.addEventListener('click', (ev) => {
+  const botao = ev.target.closest('.perfil-acao');
+  if (!botao) return;
+  const itemEl = botao.closest('.perfil-item');
+  const id = itemEl.dataset.id;
+  if (botao.dataset.acao === 'esquecer') {
+    enviarPerfil({ type: 'perfil_apagar', id });
+    return;
+  }
+  const textoEl = itemEl.querySelector('.perfil-texto');
+  const input = document.createElement('input');
+  input.className = 'perfil-input'; input.maxLength = 500; input.value = textoEl.textContent;
+  input.setAttribute('aria-label', 'Texto corrigido');
+  textoEl.replaceWith(input);
+  input.focus();
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && input.value.trim()) enviarPerfil({ type: 'perfil_corrigir', id, conteudo: input.value.trim() });
+    if (e.key === 'Escape') { e.stopPropagation(); input.replaceWith(textoEl); }
+  });
+});
+
+perfilAdd.addEventListener('submit', (ev) => {
+  ev.preventDefault();
+  const conteudo = perfilAddTexto.value.trim();
+  if (!conteudo) return;
+  enviarPerfil({ type: 'perfil_adicionar', categoria: perfilAddCategoria.value, conteudo });
+  perfilAddTexto.value = '';
+});
+
+document.getElementById('perfilClose').addEventListener('click', () => perfilFrame.classList.remove('open'));
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && perfilFrame.classList.contains('open')) perfilFrame.classList.remove('open');
+});
+tornarPainelArrastavel(perfilFrame, document.getElementById('perfilTopbar'));
 
 conectar();

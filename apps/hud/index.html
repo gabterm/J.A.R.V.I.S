@@ -54,6 +54,31 @@
   <div class="news-body" id="newsBody"></div>
 </div>
 
+<div class="floating-panel perfil-frame" id="perfilFrame">
+  <div class="floating-panel-topbar" id="perfilTopbar">
+    <span class="floating-panel-title">O que sei sobre você</span>
+    <button class="panel-close" id="perfilClose" title="Fechar" aria-label="Fechar">
+      <svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+  <div class="perfil-body" id="perfilBody"></div>
+  <form class="perfil-add" id="perfilAdd">
+    <label class="sr-only" for="perfilAddCategoria">Categoria</label>
+    <select id="perfilAddCategoria" class="perfil-select">
+      <option value="estilo">Como falar comigo</option>
+      <option value="evitar">Evitar</option>
+      <option value="preferencia">Preferência</option>
+      <option value="traco">Personalidade</option>
+      <option value="rotina">Rotina</option>
+      <option value="objetivo">Objetivo</option>
+      <option value="fato">Fato</option>
+    </select>
+    <label class="sr-only" for="perfilAddTexto">O que o JARVIS deve saber</label>
+    <input id="perfilAddTexto" class="perfil-input" maxlength="500" placeholder="Ex.: prefiro respostas curtas" required>
+    <button type="submit" class="perfil-btn">Adicionar</button>
+  </form>
+</div>
+
 <div class="floating-panel recent-frame" id="recentFrame">
   <div class="floating-panel-topbar" id="recentTopbar">
     <span class="floating-panel-title" id="recentTitle">Recentes</span>
