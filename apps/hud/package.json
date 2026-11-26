@@ -8,7 +8,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "android:sync": "vite build && cap sync android",
-    "android:apk": "npm run android:sync && cd android && ./gradlew assembleDebug"
+    "android:apk": "npm run android:sync && cd android && ./gradlew assembleRelease",
+    "android:apk:debug": "npm run android:sync && cd android && ./gradlew assembleDebug"
   },
   "devDependencies": {
     "@capacitor/cli": "8.6.3",

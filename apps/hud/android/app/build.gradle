@@ -1,5 +1,13 @@
 apply plugin: 'com.android.application'
 
+// Chave de assinatura fora do repositório. Caminho padrão: ~/.config/jarvis-android/signing.properties
+// (storeFile, storePassword, keyAlias, keyPassword); outro caminho via JARVIS_SIGNING.
+def assinatura = new Properties()
+def arquivoAssinatura = file(System.getenv('JARVIS_SIGNING') ?: "${System.getProperty('user.home')}/.config/jarvis-android/signing.properties")
+if (arquivoAssinatura.exists()) {
+    arquivoAssinatura.withInputStream { assinatura.load(it) }
+}
+
 android {
     namespace = "io.github.gabterm.jarvis"
     compileSdk = rootProject.ext.compileSdkVersion
@@ -16,8 +24,21 @@ android {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    signingConfigs {
+        if (assinatura['storeFile']) {
+            release {
+                storeFile file(assinatura['storeFile'])
+                storePassword assinatura['storePassword']
+                keyAlias assinatura['keyAlias']
+                keyPassword assinatura['keyPassword']
+            }
+        }
+    }
     buildTypes {
         release {
+            if (assinatura['storeFile']) {
+                signingConfig signingConfigs.release
+            }
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }

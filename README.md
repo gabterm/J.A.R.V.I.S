@@ -29,9 +29,14 @@ Precisa de JDK 21 e Android SDK (platform 36, build-tools 36). Com eles em `JAVA
 
 ```bash
 npm run android:apk -w @jarvis/hud
-# APK em apps/hud/android/app/build/outputs/apk/debug/app-debug.apk
-adb install -r apps/hud/android/app/build/outputs/apk/debug/app-debug.apk
+# APK em apps/hud/android/app/build/outputs/apk/release/app-release.apk
+adb install -r apps/hud/android/app/build/outputs/apk/release/app-release.apk
 ```
+
+O release é assinado com a chave em `~/.config/jarvis-android/` (`jarvis-release.jks` + `signing.properties`,
+fora do repositório; outro caminho via `JARVIS_SIGNING`). Sem essa chave o release sai sem assinatura.
+Guarde um backup dela: atualização só instala por cima se vier assinada pela mesma chave.
+Build de debug: `npm run android:apk:debug -w @jarvis/hud`.
 
 Para conversar por voz, toque no microfone: o app pede permissão do microfone e fala direto com a OpenAI
 (Realtime API, WebRTC) usando uma chave temporária que o servidor gera; o que foi dito vai para a memória.
