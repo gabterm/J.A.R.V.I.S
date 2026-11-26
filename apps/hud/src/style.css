@@ -1025,3 +1025,58 @@ body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-i
 .app{height:100%;}
 @supports (height:100dvh){html,body{height:100dvh;}}
 .boot-logo{font-size:clamp(20px,8vw,34px);}
+
+/* Núcleo de anéis (celular e modo voz) */
+.nc-anel{fill:none;}
+.nc-anel.ciano,.nc-onda .ciano{stroke:var(--cyan);}
+.nc-anel.ambar,.nc-onda .ambar{stroke:var(--amber);}
+.nc-onda line{stroke-width:1.2;opacity:.85;}
+.nc-miolo{fill:rgba(var(--cyan-rgb),.1);stroke:var(--cyan);stroke-width:1;}
+.nc-rotulo{font-family:var(--display);font-size:8px;letter-spacing:2px;fill:var(--cyan);}
+.nc-gira,.nc-rev{transform-origin:0 0;animation:ncGiro 18s linear infinite;}
+.nc-rev{animation-duration:26s;animation-direction:reverse;}
+@keyframes ncGiro{to{transform:rotate(360deg);}}
+@media (prefers-reduced-motion:reduce){.nc-gira,.nc-rev{animation:none;}}
+
+.mobile-core{display:none;}
+@media (max-width:640px){
+  .mobile-radar{display:none;}
+  .mobile-core{display:flex;position:relative;justify-content:center;align-items:center;height:min(62vw,250px);}
+  .mc-svg{height:100%;aspect-ratio:1;}
+  .mc-leitura{position:absolute;font-size:11px;line-height:1.5;color:var(--cyan);}
+  .mc-leitura span{display:block;color:var(--text-dim);letter-spacing:.12em;font-size:10px;}
+  .mc-leitura b{font-weight:400;}
+  .mc-leitura b.alerta{color:var(--warn);}
+  .mc-tl{left:4px;top:4px;}
+  .mc-tr{right:4px;top:4px;text-align:right;}
+  .mc-bl{left:4px;bottom:4px;}
+  .mc-br{right:4px;bottom:4px;text-align:right;}
+  .mc-br b{color:var(--amber);}
+  .clock-panel{padding:6px 6px 4px;}
+
+  /* Conversa: linhas holográficas, letra maior, hora escondida */
+  .terminal-body .term-line{font-size:13px;line-height:1.5;padding:6px 0 6px 10px;border-left:1px solid var(--cyan);margin:4px 0;}
+  .terminal-body .term-line.role-user{border-left-color:var(--amber);}
+  .terminal-body .term-line .t-time,.terminal-body .term-line .t-prefix{display:none;}
+  .terminal-body .term-line.role-user .t-text{color:var(--amber);}
+}
+
+/* Modo voz em tela cheia */
+.voz-overlay{position:fixed;inset:0;z-index:250;display:flex;flex-direction:column;background:rgba(2,8,12,.97);
+  padding:calc(14px + env(safe-area-inset-top)) 16px calc(24px + env(safe-area-inset-bottom));}
+.voz-overlay[hidden]{display:none;}
+.voz-topo{display:flex;justify-content:space-between;font-size:11px;letter-spacing:.12em;}
+.voz-ativo{color:var(--amber);}
+.voz-dica{color:var(--text-dim);}
+.voz-centro{flex:1;display:flex;align-items:center;justify-content:center;min-height:0;}
+.voz-svg{width:min(88vw,62vh,420px);aspect-ratio:1;cursor:pointer;}
+.voz-overlay[data-estado="conectando"] .voz-svg{opacity:.55;}
+.voz-overlay[data-estado="pensando"] .nc-gira{animation-duration:4s;}
+.voz-rodape{text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px;}
+.voz-estado{font-family:var(--display);font-size:12px;letter-spacing:.3em;color:var(--cyan);}
+.voz-overlay[data-estado="falando"] .voz-estado{color:var(--amber);}
+.voz-fala{font-size:14px;line-height:1.5;max-width:520px;min-height:42px;max-height:6em;overflow:hidden;color:var(--text);}
+.voz-parar{width:64px;height:64px;padding:0;background:rgba(var(--cyan-rgb),.1);border:none;border-radius:50%;cursor:pointer;}
+.voz-parar svg{width:100%;height:100%;}
+.voz-parar-anel{fill:none;stroke:var(--cyan);stroke-width:1.5;stroke-dasharray:10 4;}
+.voz-parar rect{fill:var(--cyan);}

@@ -33,6 +33,9 @@ npm run android:apk -w @jarvis/hud
 adb install -r apps/hud/android/app/build/outputs/apk/debug/app-debug.apk
 ```
 
+Para conversar por voz, toque no microfone: o app pede permissão do microfone e fala direto com a OpenAI
+(Realtime API, WebRTC) usando uma chave temporária que o servidor gera; o que foi dito vai para a memória.
+
 No primeiro uso o app pede o **servidor** (ex.: `https://jarvis.exemplo.app`) e o **token**; os dois ficam
 salvos no aparelho. Se não conseguir conectar, ele volta para essa tela.
 

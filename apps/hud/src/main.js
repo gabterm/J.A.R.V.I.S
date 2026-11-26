@@ -1,4 +1,6 @@
 import { lerToken, salvarToken, apagarToken, lerServidor, salvarServidor, servidorValido, urlDoServidor, CODIGO_NAO_AUTENTICADO } from './conexao.js';
+import { desenharNucleo } from './nucleo.js';
+import { criarVoz } from './voz.js';
 
 const bootLines = ['INICIALIZANDO NÚCLEO...', 'CARREGANDO PROTOCOLOS DE VOZ...', 'ESTABELECENDO CANAL SEGURO...', 'SINCRONIZANDO TELEMETRIA...', 'J.A.R.V.I.S PRONTO.'];
 const bootTextEl = document.getElementById('bootText');
@@ -904,6 +906,7 @@ atualizarWaveformEstado('idle');
 
 function setEstado(estado) {
   const label = ESTADOS[estado] || estado.toUpperCase();
+  atualizarLeiturasNucleo(estado, label);
   clockStatus.textContent = label;
   micBtn.classList.toggle('active', estado === 'speaking' || estado === 'thinking' || estado === 'listening');
   clockStage.className = 'clock-stage mode-' + (estado === 'offline' ? 'alert' : estado);
@@ -1667,13 +1670,13 @@ function aplicarEstadoMicrofone(ativo) {
     ? 'Microfone ligado — clique para desligar'
     : 'Microfone desligado — clique para ligar';
 }
-aplicarEstadoMicrofone(true);
+aplicarEstadoMicrofone(false);
 
-micBtn.addEventListener('click', () => {
-  tocarSom('mic');
-  if (!ws || ws.readyState !== WebSocket.OPEN) { setEstado('offline'); return; }
-  ws.send(JSON.stringify({ type: 'mic_toggle', ativo: !microfoneAtivo }));
-});
+micBtn.setAttribute('role', 'button');
+micBtn.setAttribute('tabindex', '0');
+micBtn.setAttribute('aria-label', 'Conversar por voz');
+micBtn.addEventListener('click', () => abrirVoz());
+micBtn.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); abrirVoz(); } });
 
 let ws = null; let primeiraConexao = true;
 // Antes da primeira conexão boa, 3 falhas seguidas voltam para a tela de login (endereço errado, servidor fora).
@@ -1699,6 +1702,7 @@ function conectar() {
     switch (evento.type) {
       case 'auth_ok':
         jaAutenticou = true; falhasSeguidas = 0;
+        perfilSilencioso = true; ws.send(JSON.stringify({ type: 'perfil_listar' }));
         setEstado('idle'); setSubsystem('websocket', true, false);
         if (!primeiraConexao) tocarSom('online');
         primeiraConexao = false;
@@ -1747,7 +1751,16 @@ function conectar() {
         abrirPlayerMusica(evento);
         break;
       case 'perfil':
+        atualizarLeituraPerfil(evento.itens);
+        if (perfilSilencioso) { perfilSilencioso = false; break; }
         abrirPerfil(evento.itens);
+        break;
+      case 'voz_sessao':
+        iniciarVoz(evento);
+        break;
+      case 'voz_erro':
+        fecharVoz();
+        notify(evento.text, 'warning');
         break;
       case 'music_recent':
         abrirRecentes(evento.recentes);
@@ -1972,5 +1985,97 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && perfilFrame.classList.contains('open')) perfilFrame.classList.remove('open');
 });
 tornarPainelArrastavel(perfilFrame, document.getElementById('perfilTopbar'));
+
+// Celular: núcleo de anéis no topo, com leituras nos cantos.
+let perfilSilencioso = false;
+desenharNucleo(document.getElementById('mobileCoreSvg'));
+const mcPerfil = document.getElementById('mcPerfil');
+const mcHora = document.getElementById('mcHora');
+// Pode ser chamada antes deste trecho rodar (setEstado no início): busca os elementos na hora.
+function atualizarLeiturasNucleo(estado, label) {
+  const mcLink = document.getElementById('mcLink');
+  const mcEstado = document.getElementById('mcEstado');
+  if (!mcLink || !mcEstado) return;
+  mcLink.textContent = estado === 'offline' ? 'offline' : 'online';
+  mcLink.classList.toggle('alerta', estado === 'offline');
+  mcEstado.textContent = label.toLowerCase();
+}
+function atualizarLeituraPerfil(itens) {
+  const lista = itens || [];
+  const incertos = lista.filter(i => i.confianca < 0.5).length;
+  mcPerfil.textContent = `${lista.length} ${lista.length === 1 ? 'item' : 'itens'}${incertos ? ` · ${incertos} incerto${incertos === 1 ? '' : 's'}` : ''}`;
+}
+function atualizarHora() {
+  mcHora.textContent = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+}
+atualizarHora();
+setInterval(atualizarHora, 15000);
+
+// Modo voz: o servidor dá uma chave temporária e o app fala direto com a OpenAI.
+const vozOverlay = document.getElementById('vozOverlay');
+const vozEstado = document.getElementById('vozEstado');
+const vozFala = document.getElementById('vozFala');
+const atualizarOnda = desenharNucleo(document.getElementById('vozSvg'), { onda: true });
+atualizarOnda(0);
+const ROTULOS_VOZ = { conectando: 'CONECTANDO', ouvindo: 'OUVINDO', pensando: 'PENSANDO', falando: 'FALANDO' };
+let quadroVoz = 0;
+const voz = criarVoz({
+  aoEstado: (estado) => {
+    vozEstado.textContent = ROTULOS_VOZ[estado] || estado.toUpperCase();
+    vozOverlay.dataset.estado = estado;
+  },
+  aoParcial: (texto) => { vozFala.textContent = texto; },
+  aoFala: (papel, texto) => {
+    vozFala.textContent = papel === 'user' ? `"${texto}"` : texto;
+    addTermLine(papel, texto);
+    if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ type: 'voz_transcricao', papel, texto: texto.slice(0, 8000) }));
+  },
+  aoErro: (mensagem) => { notify(mensagem, 'warning'); addLogEvent('error', `Voz: ${mensagem}`); fecharVoz(); },
+});
+
+function animarVoz() {
+  atualizarOnda(voz.nivel());
+  quadroVoz = requestAnimationFrame(animarVoz);
+}
+
+function abrirVoz() {
+  if (!vozOverlay.hidden) return;
+  if (!ws || ws.readyState !== WebSocket.OPEN) { setEstado('offline'); return; }
+  if (!navigator.mediaDevices?.getUserMedia || !window.RTCPeerConnection) {
+    notify('Este navegador não deixa usar o microfone aqui.', 'warning');
+    return;
+  }
+  tocarSom('mic');
+  vozFala.textContent = '';
+  vozEstado.textContent = 'CONECTANDO';
+  vozOverlay.dataset.estado = 'conectando';
+  vozOverlay.hidden = false;
+  aplicarEstadoMicrofone(true);
+  cancelAnimationFrame(quadroVoz);
+  animarVoz();
+  ws.send(JSON.stringify({ type: 'voz_iniciar' }));
+}
+
+function iniciarVoz(sessao) {
+  if (vozOverlay.hidden) return;
+  voz.iniciar(sessao).catch((erro) => {
+    const msg = erro?.name === 'NotAllowedError' ? 'Sem permissão para usar o microfone.' : (erro?.message || 'Não consegui iniciar a voz.');
+    notify(msg, 'warning');
+    addLogEvent('error', `Voz: ${msg}`);
+    fecharVoz();
+  });
+}
+
+function fecharVoz() {
+  voz.parar();
+  cancelAnimationFrame(quadroVoz);
+  atualizarOnda(0);
+  vozOverlay.hidden = true;
+  aplicarEstadoMicrofone(false);
+}
+
+document.getElementById('vozParar').addEventListener('click', fecharVoz);
+document.getElementById('vozSvg').addEventListener('click', fecharVoz);
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !vozOverlay.hidden) fecharVoz(); });
 
 conectar();

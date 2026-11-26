@@ -646,6 +646,13 @@
         <circle class="mr-center-dot" cx="100" cy="100" r="3"/>
         <text class="mr-brand" x="100" y="182" text-anchor="middle">J.A.R.V.I.S.</text>
       </svg>
+      <div class="mobile-core" aria-hidden="true">
+        <svg class="mc-svg" id="mobileCoreSvg" viewBox="-100 -100 200 200"></svg>
+        <div class="mc-leitura mc-tl"><span>LINK</span><b id="mcLink">offline</b></div>
+        <div class="mc-leitura mc-tr"><span>PERFIL</span><b id="mcPerfil">—</b></div>
+        <div class="mc-leitura mc-bl"><span>ESTADO</span><b id="mcEstado">—</b></div>
+        <div class="mc-leitura mc-br"><span>HORA</span><b id="mcHora">--:--</b></div>
+      </div>
 
       <div class="clock-status-row" id="clockStatus"></div>
       <div class="subsys-row" id="subsysRow">
@@ -731,6 +738,18 @@
 </button>
   </div>
 
+</div>
+
+<div class="voz-overlay" id="vozOverlay" hidden role="dialog" aria-label="Conversa por voz">
+  <div class="voz-topo"><span class="voz-ativo">VOZ · ATIVO</span><span class="voz-dica">toque no anel para encerrar</span></div>
+  <div class="voz-centro"><svg class="voz-svg" id="vozSvg" viewBox="-110 -110 220 220"></svg></div>
+  <div class="voz-rodape">
+    <div class="voz-estado" id="vozEstado" aria-live="polite">CONECTANDO</div>
+    <div class="voz-fala" id="vozFala"></div>
+    <button type="button" class="voz-parar" id="vozParar" aria-label="Encerrar conversa por voz">
+      <svg viewBox="-25 -25 50 50" aria-hidden="true"><circle r="22" class="voz-parar-anel"/><rect x="-6" y="-6" width="12" height="12"/></svg>
+    </button>
+  </div>
 </div>
 
 <div class="login-overlay" id="loginOverlay" hidden>
