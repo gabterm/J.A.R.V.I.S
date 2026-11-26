@@ -1019,3 +1019,9 @@ body.offline .status-pill .dot{background:var(--warn);box-shadow:0 0 6px var(--w
 .perfil-select:focus,.perfil-input:focus{border-color:var(--line-bright);}
 .perfil-btn{background:transparent;border:1px solid var(--cyan);color:var(--cyan);font-family:var(--mono);font-size:12px;padding:6px 10px;cursor:pointer;}
 .perfil-btn:hover{background:rgba(var(--cyan-rgb),.12);}
+
+/* Celular: respeita notch/barra de gestos e encolhe com o teclado aberto */
+body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);}
+.app{height:100%;}
+@supports (height:100dvh){html,body{height:100dvh;}}
+.boot-logo{font-size:clamp(20px,8vw,34px);}
