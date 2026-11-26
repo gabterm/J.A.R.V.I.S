@@ -1,4 +1,4 @@
-import { lerToken, salvarToken, apagarToken, urlDoServidor, CODIGO_NAO_AUTENTICADO } from './conexao.js';
+import { lerToken, salvarToken, apagarToken, lerServidor, salvarServidor, servidorValido, urlDoServidor, CODIGO_NAO_AUTENTICADO } from './conexao.js';
 
 const bootLines = ['INICIALIZANDO NÚCLEO...', 'CARREGANDO PROTOCOLOS DE VOZ...', 'ESTABELECENDO CANAL SEGURO...', 'SINCRONIZANDO TELEMETRIA...', 'J.A.R.V.I.S PRONTO.'];
 const bootTextEl = document.getElementById('bootText');
@@ -1676,16 +1676,21 @@ micBtn.addEventListener('click', () => {
 });
 
 let ws = null; let primeiraConexao = true;
+// Antes da primeira conexão boa, 3 falhas seguidas voltam para a tela de login (endereço errado, servidor fora).
+let jaAutenticou = false; let falhasSeguidas = 0;
 function conectar() {
   const token = lerToken();
   if (!token) { pedirToken(); return; }
-  ws = new WebSocket(urlDoServidor());
+  const url = urlDoServidor();
+  try { ws = new WebSocket(url); } catch { pedirToken(`Endereço inválido: ${url}`); return; }
   ws.onopen = () => {
     ws.send(JSON.stringify({ type: 'auth', token }));
   };
   ws.onclose = (ev) => {
     setEstado('offline');
     if (ev.code === CODIGO_NAO_AUTENTICADO) { apagarToken(); pedirToken('Token recusado pelo servidor.'); return; }
+    falhasSeguidas++;
+    if (!jaAutenticou && falhasSeguidas >= 3) { pedirToken(`Não consegui conectar em ${url}.`); return; }
     setTimeout(conectar, 2000);
   };
   ws.onerror = () => ws.close();
@@ -1693,6 +1698,7 @@ function conectar() {
     let evento; try { evento = JSON.parse(msg.data); } catch { return; }
     switch (evento.type) {
       case 'auth_ok':
+        jaAutenticou = true; falhasSeguidas = 0;
         setEstado('idle'); setSubsystem('websocket', true, false);
         if (!primeiraConexao) tocarSom('online');
         primeiraConexao = false;
@@ -1865,22 +1871,28 @@ function startCoreMorph() {
 }
 
 startCoreMorph();
-// Tela de token: aparece quando não há token salvo ou o servidor recusou o atual.
+// Tela de login: aparece sem token salvo, com token recusado ou quando não dá para conectar.
 const loginOverlay = document.getElementById('loginOverlay');
 const loginForm = document.getElementById('loginForm');
+const loginServidor = document.getElementById('loginServidor');
 const loginToken = document.getElementById('loginToken');
 const loginErro = document.getElementById('loginErro');
 function pedirToken(erro = '') {
   loginErro.textContent = erro;
   loginOverlay.hidden = false;
-  loginToken.value = '';
-  loginToken.focus();
+  loginServidor.value = lerServidor();
+  loginToken.value = lerToken();
+  (loginToken.value ? loginServidor : loginToken).focus();
 }
 loginForm.addEventListener('submit', (ev) => {
   ev.preventDefault();
-  const valor = loginToken.value.trim();
-  if (!valor) return;
-  salvarToken(valor);
+  const servidor = loginServidor.value.trim().replace(/\/$/, '');
+  const token = loginToken.value.trim();
+  if (!token) return;
+  if (!servidorValido(servidor)) { loginErro.textContent = 'O servidor precisa começar com http:// ou https://'; return; }
+  salvarServidor(servidor);
+  salvarToken(token);
+  jaAutenticou = false; falhasSeguidas = 0;
   loginOverlay.hidden = true;
   conectar();
 });

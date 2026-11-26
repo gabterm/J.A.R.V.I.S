@@ -23,6 +23,22 @@ npm run dev:hud        # http://localhost:5173
 
 Na primeira abertura o HUD pede o token (`JARVIS_TOKEN`). As migrations rodam sozinhas quando o servidor sobe.
 
+## App Android
+
+Precisa de JDK 21 e Android SDK (platform 36, build-tools 36). Com eles em `JAVA_HOME` e `ANDROID_HOME`:
+
+```bash
+npm run android:apk -w @jarvis/hud
+# APK em apps/hud/android/app/build/outputs/apk/debug/app-debug.apk
+adb install -r apps/hud/android/app/build/outputs/apk/debug/app-debug.apk
+```
+
+No primeiro uso o app pede o **servidor** (ex.: `https://jarvis.exemplo.app`) e o **token**; os dois ficam
+salvos no aparelho. Se não conseguir conectar, ele volta para essa tela.
+
+Para testar com o servidor rodando no PC (mesma rede, sem HTTPS), gere com `JARVIS_LAN=1`, que libera `ws://`,
+e informe `http://<ip-do-pc>:8787`. Com servidor em HTTPS, gere sem a variável.
+
 ## Memória
 
 - **Perfil** (`perfil`): itens curtos sobre a pessoa, por categoria, com confiança e origem
