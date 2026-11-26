@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700;800&family=Share+Tech+Mono&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/static/css/style.css">
+<link rel="stylesheet" href="/src/style.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 </head>
@@ -218,7 +218,7 @@
       <span id="wordmark">JARVIS OS v1.0</span>
     </div>
     <div class="divider"></div>
-    <div class="tb-item"><span class="tb-label">USER:</span><span class="tb-value" id="operatorName">ARAUJO</span></div>
+    <div class="tb-item"><span class="tb-label">USER:</span><span class="tb-value" id="operatorName">GABTERM</span></div>
     <div class="tb-item"><span class="tb-label">STATUS:</span><span class="tb-value ok" id="secureLinkLabel">online</span><span class="tb-dot"></span></div>
     <div class="tb-item"><span class="tb-label">UPTIME:</span><span class="tb-value" id="uptime">00:00:00</span></div>
     <div class="divider"></div>
@@ -707,6 +707,16 @@
 
 </div>
 
-<script type="module" src="/static/js/main.js"></script>
+<div class="login-overlay" id="loginOverlay" hidden>
+  <form class="login-box" id="loginForm">
+    <div class="boot-logo">J·A·R·V·I·S</div>
+    <label class="login-label" for="loginToken">Token de acesso</label>
+    <input class="login-input" id="loginToken" type="password" autocomplete="current-password" required>
+    <div class="login-erro" id="loginErro" role="alert"></div>
+    <button class="login-btn" type="submit">Conectar</button>
+  </form>
+</div>
+
+<script type="module" src="/src/main.js"></script>
 </body>
 </html>

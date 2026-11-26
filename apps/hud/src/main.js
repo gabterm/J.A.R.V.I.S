@@ -1,3 +1,5 @@
+import { lerToken, salvarToken, apagarToken, urlDoServidor, CODIGO_NAO_AUTENTICADO } from './conexao.js';
+
 const bootLines = ['INICIALIZANDO NÚCLEO...', 'CARREGANDO PROTOCOLOS DE VOZ...', 'ESTABELECENDO CANAL SEGURO...', 'SINCRONIZANDO TELEMETRIA...', 'J.A.R.V.I.S PRONTO.'];
 const bootTextEl = document.getElementById('bootText');
 const bootBarFill = document.getElementById('bootBarFill');
@@ -1008,7 +1010,7 @@ function addTermLine(role, text, opts) {
   const cls = role === 'user' ? 'role-user' : (role === 'system' ? 'role-system' : 'role-jarvis');
   div.className = `term-line ${cls}`;
   const prefix = role === 'user'
-    ? 'araujo@jarvis:~$'
+    ? 'gabterm@jarvis:~$'
     : role === 'system'
       ? '[sistema]'
       : 'jarvis>';
@@ -1669,17 +1671,26 @@ micBtn.addEventListener('click', () => {
 
 let ws = null; let primeiraConexao = true;
 function conectar() {
-  ws = new WebSocket(`ws://${location.host}/ws`);
+  const token = lerToken();
+  if (!token) { pedirToken(); return; }
+  ws = new WebSocket(urlDoServidor());
   ws.onopen = () => {
-    setEstado('idle'); setSubsystem('websocket', true, false);
-    if (!primeiraConexao) tocarSom('online');
-    primeiraConexao = false;
+    ws.send(JSON.stringify({ type: 'auth', token }));
   };
-  ws.onclose = () => { setEstado('offline'); setTimeout(conectar, 2000); };
+  ws.onclose = (ev) => {
+    setEstado('offline');
+    if (ev.code === CODIGO_NAO_AUTENTICADO) { apagarToken(); pedirToken('Token recusado pelo servidor.'); return; }
+    setTimeout(conectar, 2000);
+  };
   ws.onerror = () => ws.close();
   ws.onmessage = (msg) => {
     let evento; try { evento = JSON.parse(msg.data); } catch { return; }
     switch (evento.type) {
+      case 'auth_ok':
+        setEstado('idle'); setSubsystem('websocket', true, false);
+        if (!primeiraConexao) tocarSom('online');
+        primeiraConexao = false;
+        break;
       case 'log': addTermLine(evento.role, evento.text); break;
       case 'status': setEstado(evento.state); if (evento.state === 'thinking') setSubsystem('processamento', true, true); break;
       case 'memory': setSubsystem('memoria', true, true); break;
@@ -1743,7 +1754,6 @@ function conectar() {
     }
   };
 }
-conectar();
 
 /* ==========================================================================
    TELEMETRIA DECORATIVA DAS RÉGUAS LATERAIS (estilo Rainmeter, ref. imgs 1-3)
@@ -1846,3 +1856,24 @@ function startCoreMorph() {
 }
 
 startCoreMorph();
+// Tela de token: aparece quando não há token salvo ou o servidor recusou o atual.
+const loginOverlay = document.getElementById('loginOverlay');
+const loginForm = document.getElementById('loginForm');
+const loginToken = document.getElementById('loginToken');
+const loginErro = document.getElementById('loginErro');
+function pedirToken(erro = '') {
+  loginErro.textContent = erro;
+  loginOverlay.hidden = false;
+  loginToken.value = '';
+  loginToken.focus();
+}
+loginForm.addEventListener('submit', (ev) => {
+  ev.preventDefault();
+  const valor = loginToken.value.trim();
+  if (!valor) return;
+  salvarToken(valor);
+  loginOverlay.hidden = true;
+  conectar();
+});
+
+conectar();
